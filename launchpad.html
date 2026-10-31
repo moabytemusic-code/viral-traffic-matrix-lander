@@ -323,6 +323,20 @@
               </div>
             </div>
 
+            <!-- ContentStudio Auto-Publish & First-Comment Affiliate Link -->
+            <div class="p-4 rounded-2xl bg-sky-500/10 border border-sky-400/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <label class="flex items-start gap-3 cursor-pointer">
+                <input id="autoContentStudio" type="checkbox" checked class="mt-1 accent-sky-400 w-4 h-4 rounded" />
+                <div>
+                  <div class="text-xs font-bold text-white flex items-center gap-2">
+                    <span>💬 ContentStudio Auto-Publish + First-Comment Affiliate Link</span>
+                    <span class="px-2 py-0.5 rounded-full text-[9px] font-mono-code bg-sky-400/20 text-sky-300 border border-sky-400/40">API Connected</span>
+                  </div>
+                  <div class="text-[11px] text-slate-300">Automatically dispatches completed video shorts to your connected ContentStudio channels (Market Ranger FB, AI Simple System YT, System &amp; Signal YT, Smart Hustler Marketing) and drops your affiliate/offer link in the <strong>First Comment</strong> for max reach.</div>
+                </div>
+              </label>
+            </div>
+
             <input type="hidden" id="selectedOutlierId" value="" />
 
             <button
@@ -578,6 +592,7 @@
           ctaButtonText: getVal('ctaButtonText', 'Unlock Free Access'),
           outlierId: getVal('selectedOutlierId'),
           autoRenderViralForge: document.getElementById('autoRenderViralForge')?.checked ?? true,
+          autoContentStudio: document.getElementById('autoContentStudio')?.checked ?? true,
           variantCount: Number(getVal('variantCount', '2'))
         };
 

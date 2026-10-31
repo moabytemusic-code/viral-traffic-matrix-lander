@@ -5,6 +5,7 @@ const { URL } = require('url');
 const nfbClient = require('./nfb-client');
 const vidiqClient = require('./vidiq-client');
 const vfClient = require('./viralforge-client');
+const csClient = require('./contentstudio-client');
 const { renderOfferLander } = require('./render-lander');
 
 // Load local .env if present
@@ -119,6 +120,37 @@ function startBackgroundJobMonitor(offerSlug, projectId) {
           } catch (schedErr) {
             console.error(`[ViralForge Auto-Schedule Error for Video #${v.videoId}]:`, schedErr.message);
             offer.viralForgeJob.videos[vidKey].scheduleError = schedErr.message;
+          }
+
+          // Optional ContentStudio Dispatch (Posts to ContentStudio + leaves first comment with affiliate link!)
+          if (v.videoUrl && offer.autoContentStudio !== false) {
+            try {
+              const csAccounts = await csClient.getConnectedAccounts();
+              const eligibleAccounts = csAccounts.filter((a) => {
+                const name = (a.account_name || a.name || '').toLowerCase();
+                if (name.includes('aurum')) return false;
+                if (name.includes('erica') || name.includes('storytime')) return false;
+                if (name.includes('brenda')) return false;
+                return true;
+              });
+              const eligibleAccountIds = eligibleAccounts.map((a) => a.id);
+
+              if (eligibleAccountIds.length > 0) {
+                const firstCommentText = `👉 Claim your free ${offer.name} access here: https://traffic.aisimplesystem.com/o/${offer.slug}`;
+                await csClient.schedulePostWithFirstComment({
+                  text: `${v.brief || offer.subheadline || offer.name}\n\n👉 Claim free access: https://traffic.aisimplesystem.com/o/${offer.slug}`,
+                  videoUrl: v.videoUrl,
+                  accountIds: eligibleAccountIds,
+                  scheduledAt: scheduleDate,
+                  firstCommentMessage: firstCommentText
+                });
+                console.log(`💬 [ContentStudio] Scheduled post with First-Comment link to ${eligibleAccountIds.length} accounts!`);
+                offer.viralForgeJob.videos[vidKey].contentStudioScheduled = true;
+              }
+            } catch (csErr) {
+              console.warn('[ContentStudio Dispatch Note]:', csErr.message);
+              offer.viralForgeJob.videos[vidKey].contentStudioError = csErr.message;
+            }
           }
         }
 
@@ -343,6 +375,18 @@ const server = http.createServer(async (req, res) => {
     return res.end(html);
   }
 
+  // GET /api/cs/accounts -> List all ContentStudio connected accounts
+  if (req.method === 'GET' && pathname === '/api/cs/accounts') {
+    try {
+      const accounts = await csClient.getConnectedAccounts();
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: true, accounts }));
+    } catch (err) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+  }
+
   // GET /api/vf/channels -> Dynamically fetch all live connected social channels from ViralForge
   if (req.method === 'GET' && pathname === '/api/vf/channels') {
     try {
@@ -482,6 +526,7 @@ const server = http.createServer(async (req, res) => {
         affiliateUrl: body.affiliateUrl,
         sponsorCode: body.sponsorCode || '144',
         channelPreset: body.channelPreset || 'Marketing & Traffic (9 Channels)',
+        autoContentStudio: body.autoContentStudio !== false,
         selectedAccountIds: Array.isArray(body.selectedAccountIds) ? body.selectedAccountIds : null,
         outlierId: body.outlierId || null,
         steps: [
