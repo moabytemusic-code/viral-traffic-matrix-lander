@@ -36,6 +36,9 @@ async function mintFreshTokenViaSessionCookie(clientId, sessionCookie) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
+      'Origin': 'https://9figurebuddy.com',
+      'Referer': 'https://9figurebuddy.com/app/connect',
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
       Cookie: sessionCookie.includes('=') ? sessionCookie : `nfb_s=${sessionCookie}`
     },
     body: authBody.toString(),
