@@ -92,6 +92,20 @@
           </p>
 
           <div class="space-y-3">
+            <!-- 1-Click Search Term Inspiration Tags -->
+            <div class="space-y-1.5">
+              <span class="text-[10px] font-mono-code text-slate-400 uppercase tracking-wider">💡 Proven Outlier Hooks (Click to Search):</span>
+              <div class="flex flex-wrap gap-1.5" id="hookInspirationPills">
+                <button type="button" class="hook-pill px-2 py-0.5 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-300 border border-white/10 text-[11px] text-slate-300 transition" data-query="secret website" data-niche="Tech & AI" data-tier="gold">🔓 Secret Website</button>
+                <button type="button" class="hook-pill px-2 py-0.5 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-300 border border-white/10 text-[11px] text-slate-300 transition" data-query="stop doing this" data-niche="" data-tier="gold">🛑 Stop Doing This</button>
+                <button type="button" class="hook-pill px-2 py-0.5 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-300 border border-white/10 text-[11px] text-slate-300 transition" data-query="free traffic" data-niche="Personal Finance" data-tier="gold">🚀 Free Traffic</button>
+                <button type="button" class="hook-pill px-2 py-0.5 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-300 border border-white/10 text-[11px] text-slate-300 transition" data-query="nobody talks about" data-niche="" data-tier="gold">🤫 Nobody Talks About</button>
+                <button type="button" class="hook-pill px-2 py-0.5 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-300 border border-white/10 text-[11px] text-slate-300 transition" data-query="in 5 minutes" data-niche="Tech & AI" data-tier="gold">⚡ In 5 Minutes</button>
+                <button type="button" class="hook-pill px-2 py-0.5 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-300 border border-white/10 text-[11px] text-slate-300 transition" data-query="passive income system" data-niche="Personal Finance" data-tier="gold">💰 Passive Income</button>
+                <button type="button" class="hook-pill px-2 py-0.5 rounded-lg bg-white/5 hover:bg-indigo-500/20 hover:text-indigo-300 border border-white/10 text-[11px] text-slate-300 transition" data-query="the terrifying line" data-niche="Science & Explainers" data-tier="gold">🧬 Cross-Niche Outlier</button>
+              </div>
+            </div>
+
             <input
               id="nfbQuery"
               type="text"
@@ -382,6 +396,15 @@
       pill.textContent = `Outlier Locked: ${id} (${title.slice(0, 28)}...)`;
       pill.classList.remove('hidden');
     };
+
+    document.querySelectorAll('.hook-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.getElementById('nfbQuery').value = btn.dataset.query || '';
+        document.getElementById('nfbNiche').value = btn.dataset.niche || '';
+        document.getElementById('nfbTier').value = btn.dataset.tier || '';
+        searchOutliers();
+      });
+    });
 
     document.getElementById('searchOutliersBtn').addEventListener('click', searchOutliers);
 
