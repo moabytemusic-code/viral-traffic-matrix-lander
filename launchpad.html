@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Offer Launchpad — 9FigureBuddy × ViralForge × Brevo Automation</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #05060a;
+      color: #f8fafc;
+      font-family: 'Inter', sans-serif;
+    }
+    h1, h2, h3, .font-display { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .font-mono-code { font-family: 'JetBrains Mono', monospace; }
+    .glass-surface {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.2), 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+    }
+    .cta-beam {
+      background: linear-gradient(135deg, #10b981 0%, #059669 45%, #4f46e5 100%);
+      box-shadow: 0 0 30px -5px rgba(16, 185, 129, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+      transition: all 0.2s ease;
+    }
+    .cta-beam:hover { transform: translateY(-1px); box-shadow: 0 0 40px -2px rgba(16, 185, 129, 0.7); }
+  </style>
+</head>
+<body class="min-h-screen pb-20">
+  <!-- Top Command Header -->
+  <header class="border-b border-white/10 bg-black/40 backdrop-blur-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-indigo-600 flex items-center justify-center font-display font-extrabold text-white shadow-lg shadow-emerald-500/20">
+          ⚡
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-display font-bold text-white text-base">Offer Launchpad OS</span>
+            <span class="text-[11px] font-mono-code px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+              9FigureBuddy MCP + Brevo + ViralForge
+            </span>
+          </div>
+          <p class="text-xs text-slate-400">1-Click Outlier Research → Glass Lander → Brevo 4-Day Drip → ViralForge Script Pack</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 text-xs">
+        <a href="/" target="_blank" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 transition">
+          View Flagship Lander ↗
+        </a>
+        <a href="https://viralforgeai.aisuites.io/dashboard" target="_blank" class="px-3.5 py-2 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-400/30 text-indigo-200 transition">
+          Open ViralForge AI ↗
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 pt-8 space-y-10">
+
+    <!-- Active Live Offers Bar -->
+    <section class="space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm font-mono-code uppercase tracking-wider text-emerald-400">Active Live Offer Funnels</h2>
+        <span id="offerCountBadge" class="text-xs font-mono-code text-slate-400">Loading...</span>
+      </div>
+      <div id="activeOffersGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </section>
+
+    <!-- Main 2-Column Workspace -->
+    <div class="grid lg:grid-cols-12 gap-8 items-start">
+
+      <!-- LEFT COLUMN (5 cols): 9 Figure Buddy Outlier Discovery Engine -->
+      <div class="lg:col-span-5 space-y-5">
+        <div class="glass-surface rounded-3xl p-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-[11px] font-mono-code uppercase text-amber-400">STEP 1 • RESEARCH BRAIN</span>
+              <h3 class="text-lg font-bold text-white">9 Figure Buddy Outlier Finder</h3>
+            </div>
+            <span id="nfbStatusBadge" class="px-2.5 py-1 rounded-full text-[11px] font-mono-code bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+              MCP Connected
+            </span>
+          </div>
+
+          <p class="text-xs text-slate-300">
+            Search 530+ viral YouTube outliers via <code class="text-emerald-300">9figurebuddy.com/mcp</code> and lock in a proven 16-point hook &amp; retention structure for your offer.
+          </p>
+
+          <div class="space-y-3">
+            <input
+              id="nfbQuery"
+              type="text"
+              value="secret money system"
+              placeholder="Search idea, vibe, or hook (e.g. passive income, bedtime story, secret tool)..."
+              class="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-emerald-400"
+            />
+            <div class="grid grid-cols-2 gap-2.5">
+              <select id="nfbNiche" class="px-3 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white">
+                <option value="">All 20 Niches</option>
+                <option value="Personal Finance">Personal Finance</option>
+                <option value="Tech & AI">Tech &amp; AI</option>
+                <option value="Education">Education</option>
+                <option value="Psychology & Self-Help">Psychology &amp; Self-Help</option>
+                <option value="Story & Drama">Story &amp; Drama</option>
+                <option value="Science & Explainers">Science &amp; Explainers</option>
+                <option value="Health & Nutrition">Health &amp; Nutrition</option>
+                <option value="Home Hacks & Cleaning">Home Hacks &amp; Cleaning</option>
+              </select>
+              <select id="nfbTier" class="px-3 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white">
+                <option value="">All Tiers (Gold/Silver/Bronze)</option>
+                <option value="gold">🥇 Gold Outliers Only</option>
+                <option value="silver">🥈 Silver Outliers</option>
+                <option value="bronze">🥉 Bronze Outliers</option>
+              </select>
+            </div>
+            <button
+              id="searchOutliersBtn"
+              type="button"
+              class="w-full py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-xs font-semibold text-white transition flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>🔍 Search Viral Outliers in 9FigureBuddy</span>
+            </button>
+          </div>
+
+          <!-- Outlier Results List -->
+          <div id="outlierResults" class="space-y-3 max-h-[500px] overflow-y-auto pr-1"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN (7 cols): 1-Click Offer Builder & Campaign Output -->
+      <div class="lg:col-span-7 space-y-6">
+        <div class="glass-surface rounded-3xl p-6 sm:p-8 space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-4">
+            <div>
+              <span class="text-[11px] font-mono-code uppercase text-emerald-400">STEP 2 • CONFIGURE &amp; DEPLOY</span>
+              <h3 class="text-xl font-bold text-white">Create New Offer Funnel + Brevo 4-Day Drip</h3>
+            </div>
+            <div id="selectedOutlierPill" class="hidden px-3 py-1 rounded-full text-[11px] font-mono-code bg-amber-500/20 text-amber-300 border border-amber-400/30">
+              Outlier Locked: None
+            </div>
+          </div>
+
+          <!-- Optional Auto-Scrape URL Bar -->
+          <div class="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col sm:flex-row gap-2.5">
+            <input
+              id="scrapeUrlInput"
+              type="url"
+              placeholder="Optional: Paste any sales/giveaway page URL to auto-fill fields..."
+              class="flex-1 px-3.5 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white placeholder-slate-400"
+            />
+            <button
+              id="scrapeBtn"
+              type="button"
+              class="px-4 py-2 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-400/30 text-xs font-semibold text-indigo-200 whitespace-nowrap cursor-pointer"
+            >
+              ✨ Auto-Extract Copy from URL
+            </button>
+          </div>
+
+          <form id="launchForm" class="space-y-4">
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs text-slate-300 mb-1">Offer Name *</label>
+                <input id="offerName" type="text" required placeholder="e.g. WalletWise Paycheck Reset" class="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-xs text-white" />
+              </div>
+              <div>
+                <label class="block text-xs text-slate-300 mb-1">URL Slug * (<code class="text-emerald-400">/o/your-slug</code>)</label>
+                <input id="offerSlug" type="text" required placeholder="e.g. walletwise-reset" class="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-xs text-white font-mono-code" />
+              </div>
+            </div>
+
+            <div class="grid sm:grid-cols-3 gap-4">
+              <div class="sm:col-span-2">
+                <label class="block text-xs text-slate-300 mb-1">Your Affiliate / Destination URL *</label>
+                <input id="affiliateUrl" type="url" required placeholder="https://5dfpartners.idevaffiliate.com/144-..." class="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-xs text-white" />
+              </div>
+              <div>
+                <label class="block text-xs text-slate-300 mb-1">Sponsor / Tracking Code</label>
+                <input id="sponsorCode" type="text" value="144" class="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-xs text-white font-mono-code" />
+              </div>
+            </div>
+
+            <div class="grid sm:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-xs text-slate-300 mb-1">Headline Prefix</label>
+                <input id="headlinePrefix" type="text" placeholder="e.g. Unlock Your Free" class="w-full px-3.5 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white" />
+              </div>
+              <div>
+                <label class="block text-xs text-slate-300 mb-1">Gradient Highlight *</label>
+                <input id="headlineGradient" type="text" required placeholder="e.g. 8x Viral Traffic System" class="w-full px-3.5 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white" />
+              </div>
+              <div>
+                <label class="block text-xs text-slate-300 mb-1">Headline Suffix</label>
+                <input id="headlineSuffix" type="text" placeholder="e.g. In Just 4 Minutes." class="w-full px-3.5 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs text-slate-300 mb-1">Subheadline / Core Value Promise *</label>
+              <textarea id="subheadline" rows="2" required placeholder="Explain who this is for, the big problem it solves, and why it takes only a few minutes to activate..." class="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-xs text-white"></textarea>
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs text-slate-300 mb-1">Designated ViralForge Channel Stack</label>
+                <select id="channelPreset" class="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-xs text-white">
+                  <option value="Marketing & Traffic (9 Channels: 5 FB Pages + YT AI Profit Lab + TikTok + X + Threads)">Marketing &amp; Traffic (9 Designated Channels)</option>
+                  <option value="Finance & Crypto (TikTok WalletWise + YT 60x Daily + X Marketranger)">Finance &amp; Crypto Stack</option>
+                  <option value="Parenting & Kids (YT Storytime With Ms. Erica + IG)">Parenting &amp; StoryTime Stack</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-slate-300 mb-1">CTA Button Text</label>
+                <input id="ctaButtonText" type="text" value="Unlock Free Access" class="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-xs text-white" />
+              </div>
+            </div>
+
+            <input type="hidden" id="selectedOutlierId" value="" />
+
+            <button
+              id="launchBtn"
+              type="submit"
+              class="cta-beam w-full py-4 px-6 rounded-2xl font-display font-bold text-sm text-white flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>🚀 Launch Live Lander + Create Brevo List &amp; 4-Day Drip + Generate ViralForge Scripts</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Output Card: Generated Campaign Pack -->
+        <div id="campaignOutput" class="hidden glass-surface rounded-3xl p-6 sm:p-8 border border-emerald-500/40 space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-mono-code bg-emerald-500/20 text-emerald-300">CAMPAIGN LIVE</span>
+              <h3 id="outputTitle" class="text-xl font-bold text-white mt-2">Offer Launched Successfully</h3>
+            </div>
+            <a id="outputLanderUrl" href="#" target="_blank" class="cta-beam px-4 py-2.5 rounded-xl text-xs font-bold text-white">
+              Open Live Lander ↗
+            </a>
+          </div>
+
+          <div id="outputBrevoSummary" class="p-4 rounded-2xl bg-white/[0.03] border border-white/10 text-xs text-slate-300 space-y-1 font-mono-code"></div>
+
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-mono-code uppercase text-indigo-300">Ready-to-Paste ViralForge AI SwapEngine Prompt (Powered by 9FigureBuddy DNA)</label>
+              <button id="copyPromptBtn" type="button" class="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs text-white cursor-pointer">
+                Copy Prompt
+              </button>
+            </div>
+            <textarea id="outputSwapPrompt" rows="10" readonly class="w-full p-4 rounded-2xl bg-black/60 border border-white/10 text-xs text-slate-200 font-mono-code"></textarea>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // 1. Load Active Offers
+    async function loadOffers() {
+      const res = await fetch('/api/offers');
+      const data = await res.json();
+      const offers = Object.values(data.offers || {});
+      document.getElementById('offerCountBadge').textContent = `${offers.length} Active Funnels`;
+
+      const grid = document.getElementById('activeOffersGrid');
+      grid.innerHTML = offers.map(o => {
+        const url = o.slug === 'viral-traffic-matrix' ? '/' : `/o/${o.slug}`;
+        return `
+          <div class="glass-surface rounded-2xl p-4 flex flex-col justify-between gap-3 border border-white/10">
+            <div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-display font-bold text-sm text-white">${o.name}</span>
+                <span class="text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300">List #${o.brevo?.listId || 80}</span>
+              </div>
+              <div class="text-[11px] font-mono-code text-slate-400 mt-1 truncate">${o.affiliateUrl}</div>
+            </div>
+            <div class="flex items-center justify-between pt-2 border-t border-white/10 text-xs">
+              <a href="${url}" target="_blank" class="text-emerald-400 hover:underline font-medium">Open ${url} ↗</a>
+              <span class="text-[10px] text-slate-500">4-Email Drip Active</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Auto-slugify Offer Name
+    document.getElementById('offerName').addEventListener('input', (e) => {
+      const slugInput = document.getElementById('offerSlug');
+      if (!slugInput.dataset.touched) {
+        slugInput.value = e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      }
+    });
+    document.getElementById('offerSlug').addEventListener('input', (e) => {
+      e.target.dataset.touched = '1';
+    });
+
+    // 2. Search 9FigureBuddy Outliers via MCP
+    async function searchOutliers() {
+      const query = document.getElementById('nfbQuery').value.trim() || 'viral';
+      const niche = document.getElementById('nfbNiche').value;
+      const tier = document.getElementById('nfbTier').value;
+      const container = document.getElementById('outlierResults');
+      container.innerHTML = `<div class="text-xs text-slate-400 py-4 text-center">Querying 9FigureBuddy MCP...</div>`;
+
+      try {
+        const params = new URLSearchParams({ query, niche, tier });
+        const res = await fetch(`/api/nfb/search?${params.toString()}`);
+        const data = await res.json();
+        if (!data.ok) {
+          container.innerHTML = `<div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-200">${data.error}</div>`;
+          return;
+        }
+
+        const results = data.results?.results || data.results?.items || data.results || [];
+        if (!Array.isArray(results) || results.length === 0) {
+          container.innerHTML = `<div class="p-3 rounded-xl bg-white/5 text-xs text-slate-300">No outliers matched. Try broader keywords or 'All 20 Niches'.</div>`;
+          return;
+        }
+
+        container.innerHTML = results.map(item => `
+          <div class="p-3.5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 space-y-2 transition">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-[10px] font-mono-code uppercase px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">${item.tier || 'Outlier'} • ${item.niche || ''}</span>
+              <span class="text-[11px] font-mono-code text-emerald-400">${(item.views || 0).toLocaleString()} views</span>
+            </div>
+            <div class="text-xs font-bold text-white leading-snug">${item.title || item.id}</div>
+            <div class="text-[11px] text-slate-400 line-clamp-2">${item.summary || item.format || ''}</div>
+            <div class="flex items-center justify-between pt-1">
+              <a href="https://www.youtube.com/watch?v=${item.id}" target="_blank" class="text-[11px] text-indigo-300 hover:underline">Watch on YouTube ↗</a>
+              <button
+                type="button"
+                onclick="selectOutlier('${item.id}', '${(item.title || '').replace(/'/g, "\\'")}')"
+                class="px-3 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 text-[11px] font-semibold cursor-pointer"
+              >
+                Use This Outlier DNA →
+              </button>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        container.innerHTML = `<div class="text-xs text-red-400">${err.message}</div>`;
+      }
+    }
+
+    window.selectOutlier = function(id, title) {
+      document.getElementById('selectedOutlierId').value = id;
+      const pill = document.getElementById('selectedOutlierPill');
+      pill.textContent = `Outlier Locked: ${id} (${title.slice(0, 28)}...)`;
+      pill.classList.remove('hidden');
+    };
+
+    document.getElementById('searchOutliersBtn').addEventListener('click', searchOutliers);
+
+    // 3. Auto-Scrape Offer URL
+    document.getElementById('scrapeBtn').addEventListener('click', async () => {
+      const url = document.getElementById('scrapeUrlInput').value.trim();
+      if (!url) return;
+      const btn = document.getElementById('scrapeBtn');
+      btn.textContent = 'Extracting...';
+      try {
+        const res = await fetch('/api/scrape-offer', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          if (data.title) {
+            document.getElementById('offerName').value = data.title.split(/[–|-]/)[0].trim().slice(0, 40);
+            document.getElementById('offerName').dispatchEvent(new Event('input'));
+          }
+          if (data.headline) {
+            document.getElementById('headlineGradient').value = data.headline.slice(0, 48);
+          }
+          if (data.subheadline) {
+            document.getElementById('subheadline').value = data.subheadline.slice(0, 260);
+          }
+          if (!document.getElementById('affiliateUrl').value) {
+            document.getElementById('affiliateUrl').value = url;
+          }
+        }
+      } catch (_) {}
+      btn.textContent = '✨ Auto-Extract Copy from URL';
+    });
+
+    // 4. Launch Full Offer Campaign
+    document.getElementById('launchForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('launchBtn');
+      const original = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span>⚡ Provisioning Brevo List, 4 Email Templates, Live Lander &amp; 9FigureBuddy Script Pack...</span>';
+
+      try {
+        const payload = {
+          name: document.getElementById('offerName').value.trim(),
+          slug: document.getElementById('offerSlug').value.trim(),
+          affiliateUrl: document.getElementById('affiliateUrl').value.trim(),
+          sponsorCode: document.getElementById('sponsorCode').value.trim() || '144',
+          headlinePrefix: document.getElementById('headlinePrefix').value.trim(),
+          headlineGradient: document.getElementById('headlineGradient').value.trim(),
+          headlineSuffix: document.getElementById('headlineSuffix').value.trim(),
+          subheadline: document.getElementById('subheadline').value.trim(),
+          channelPreset: document.getElementById('channelPreset').value,
+          ctaButtonText: document.getElementById('ctaButtonText').value.trim() || 'Unlock Free Access',
+          outlierId: document.getElementById('selectedOutlierId').value.trim()
+        };
+
+        const res = await fetch('/api/launch-offer', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!data.ok) {
+          alert('Error: ' + (data.error || 'Could not launch offer'));
+          return;
+        }
+
+        const out = document.getElementById('campaignOutput');
+        out.classList.remove('hidden');
+        document.getElementById('outputTitle').textContent = `${data.offer.name} — Live & Provisioned!`;
+        const landerLink = document.getElementById('outputLanderUrl');
+        landerLink.href = `/o/${data.offer.slug}`;
+        landerLink.textContent = `Open /o/${data.offer.slug} ↗`;
+
+        document.getElementById('outputBrevoSummary').innerHTML = `
+          <div>✓ Live Lander URL: <strong class="text-emerald-400">${window.location.origin}/o/${data.offer.slug}</strong></div>
+          <div>✓ Brevo Contact List ID: <strong class="text-white">#${data.offer.brevo.listId}</strong></div>
+          <div>✓ Brevo 4-Day Drip Templates Created: <strong class="text-white">#${data.offer.brevo.welcomeTemplateId}, #${data.offer.brevo.followUpTemplateIds.join(', #')}</strong></div>
+          <div>✓ Designated Channels: <strong class="text-indigo-300">${data.offer.channelPreset}</strong></div>
+        `;
+        document.getElementById('outputSwapPrompt').value = data.viralForgePrompt || '';
+        await loadOffers();
+        out.scrollIntoView({ behavior: 'smooth' });
+      } catch (err) {
+        alert('Launch failed: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = original;
+      }
+    });
+
+    document.getElementById('copyPromptBtn').addEventListener('click', () => {
+      const ta = document.getElementById('outputSwapPrompt');
+      ta.select();
+      navigator.clipboard.writeText(ta.value);
+      document.getElementById('copyPromptBtn').textContent = 'Copied! ✓';
+      setTimeout(() => { document.getElementById('copyPromptBtn').textContent = 'Copy Prompt'; }, 2000);
+    });
+
+    loadOffers();
+    searchOutliers();
+  </script>
+</body>
+</html>

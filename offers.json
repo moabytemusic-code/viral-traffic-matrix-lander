@@ -1,0 +1,70 @@
+{
+  "viral-traffic-matrix": {
+    "slug": "viral-traffic-matrix",
+    "name": "Viral Traffic Matrix",
+    "badge": "100% Free Tool • 4-Min Setup",
+    "eyebrow": "For Network Marketers, Affiliates & Side Hustlers",
+    "headlinePrefix": "Turn",
+    "headlineGradient": "1 Click Into 8+",
+    "headlineSuffix": "Viral Traffic Opportunities.",
+    "subheadline": "Stop begging friends, cold-DMing strangers, or paying for dead solo ads. Plug any affiliate, MLM, or business link you already promote into a referral-powered banner matrix—plus get done-for-you capture pages in 4 minutes flat.",
+    "ctaButtonText": "Claim Free Matrix",
+    "affiliateUrl": "https://5dfpartners.idevaffiliate.com/144-34-3-32.html",
+    "sponsorCode": "144",
+    "channelPreset": "Marketing & Traffic (9 Channels)",
+    "steps": [
+      {
+        "title": "Activate & Plug In Any Link",
+        "desc": "Unlock your ad slot in minutes by viewing featured network banners. Drop in your affiliate URL, MLM recruiting page, or business referral link."
+      },
+      {
+        "title": "Use Included Premium Capture Pages",
+        "desc": "Don't have a funnel builder? Your free account includes built-in lead capture pages so you build your own email list while sharing the matrix."
+      },
+      {
+        "title": "1 Click Cascades Into 8+ Views",
+        "desc": "Every person you invite who activates their ad spot pushes your banner across up to 8 tiers of growing member traffic automatically."
+      }
+    ],
+    "brevo": {
+      "listId": 80,
+      "welcomeTemplateId": 886,
+      "followUpTemplateIds": [887, 888, 889]
+    },
+    "createdAt": "2026-10-31T12:00:00.000Z"
+  },
+  "9-figure-buddy": {
+    "slug": "9-figure-buddy",
+    "name": "9 Figure Buddy",
+    "badge": "Free Early Access • No Card Needed",
+    "eyebrow": "The Infinite Idea Glitch for Creators & Advertisers",
+    "headlinePrefix": "Steal Proven",
+    "headlineGradient": "Viral Outlier DNA",
+    "headlineSuffix": "For Any Offer You Promote.",
+    "subheadline": "Stop asking AI for ideas from a blank page. 9 Figure Buddy hunts YouTube 24/7 for viral outliers pulling 100K to millions of views, decodes their 16-point retention formula, and writes scripts for your brand.",
+    "ctaButtonText": "Unlock Early Access",
+    "affiliateUrl": "https://9figurebuddy.com",
+    "sponsorCode": "NFB",
+    "channelPreset": "Marketing & Traffic (9 Channels)",
+    "steps": [
+      {
+        "title": "Hunt Proven Viral Outliers",
+        "desc": "Search 530+ Gold, Silver & Bronze YouTube outliers pulling 10x–50x their channel average across 20 niches."
+      },
+      {
+        "title": "Decode the 16-Point Retention Formula",
+        "desc": "See the exact verbatim opening hook, title pattern, stakes ladder, and 70% watch-time twist that forced viewers to stay."
+      },
+      {
+        "title": "Transplant Into Your Brand or Offer",
+        "desc": "Connect via MCP or copy the plug-and-play script skeleton directly into ViralForge AI to produce high-converting short & long videos."
+      }
+    ],
+    "brevo": {
+      "listId": 80,
+      "welcomeTemplateId": 886,
+      "followUpTemplateIds": [887, 888, 889]
+    },
+    "createdAt": "2026-10-31T15:00:00.000Z"
+  }
+}

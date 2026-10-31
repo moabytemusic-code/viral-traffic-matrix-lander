@@ -1,8 +1,11 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const { URL } = require('url');
+const nfbClient = require('./nfb-client');
+const { renderOfferLander } = require('./render-lander');
 
-// Load local .env if present (zero external dependencies)
+// Load local .env if present
 const envPath = path.join(__dirname, '.env');
 if (fs.existsSync(envPath)) {
   fs.readFileSync(envPath, 'utf8')
@@ -18,15 +21,37 @@ if (fs.existsSync(envPath)) {
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || '0.0.0.0';
 const BREVO_API_KEY = process.env.BREVO_API_KEY || '';
-const BREVO_LIST_ID = Number(process.env.BREVO_LIST_ID || 80); // List #80: Viral Traffic Matrix Giveaways
-const BREVO_WELCOME_TEMPLATE_ID = Number(process.env.BREVO_WELCOME_TEMPLATE_ID || 886); // Day 0 Instant Welcome
+const DEFAULT_BREVO_LIST_ID = Number(process.env.BREVO_LIST_ID || 80);
+const DEFAULT_WELCOME_TEMPLATE_ID = Number(process.env.BREVO_WELCOME_TEMPLATE_ID || 886);
+const OFFERS_PATH = path.join(__dirname, 'offers.json');
 
-// Automated 3-Day Follow-Up Sequence Template IDs in Brevo
-const FOLLOWUP_SEQUENCE = [
-  { templateId: 887, delayHours: 24, label: 'Day 1 - 4-Min Activation Check' },
-  { templateId: 888, delayHours: 48, label: 'Day 2 - Capture Page Leverage' },
-  { templateId: 889, delayHours: 70, label: 'Day 3 - Short-Form AI Traffic Bridge' }
-];
+function loadOffers() {
+  try {
+    return JSON.parse(fs.readFileSync(OFFERS_PATH, 'utf8'));
+  } catch (_) {
+    return {};
+  }
+}
+
+function saveOffers(offers) {
+  fs.writeFileSync(OFFERS_PATH, JSON.stringify(offers, null, 2), 'utf8');
+}
+
+function readJsonBody(req) {
+  return new Promise((resolve, reject) => {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk.toString();
+    });
+    req.on('end', () => {
+      try {
+        resolve(JSON.parse(body || '{}'));
+      } catch (err) {
+        reject(err);
+      }
+    });
+  });
+}
 
 async function sendOrScheduleBrevoEmail(email, templateId, scheduledAt = null) {
   const body = {
@@ -48,6 +73,140 @@ async function sendOrScheduleBrevoEmail(email, templateId, scheduledAt = null) {
   return res.json().catch(() => ({}));
 }
 
+async function provisionBrevoListAndTemplates(offer) {
+  if (!BREVO_API_KEY) {
+    return {
+      listId: DEFAULT_BREVO_LIST_ID,
+      welcomeTemplateId: DEFAULT_WELCOME_TEMPLATE_ID,
+      followUpTemplateIds: [887, 888, 889]
+    };
+  }
+
+  // 1. Create dedicated Brevo Contact List in Folder #3
+  let listId = DEFAULT_BREVO_LIST_ID;
+  try {
+    const listRes = await fetch('https://api.brevo.com/v3/contacts/lists', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'api-key': BREVO_API_KEY
+      },
+      body: JSON.stringify({
+        name: `${offer.name} Leads`.slice(0, 48),
+        folderId: 3
+      })
+    });
+    const listData = await listRes.json().catch(() => ({}));
+    if (listData.id) listId = listData.id;
+  } catch (_) {}
+
+  // 2. Create 4 active Brevo SMTP Email Templates (Day 0, Day 1, Day 2, Day 3)
+  const emailSpecs = [
+    {
+      name: `${offer.name} - Day 0 Instant Access`,
+      subject: `Here is your free ${offer.name} access link`,
+      heading: `Your ${offer.name} Access Link Is Ready`,
+      bodyHtml: `<p>Here is your direct link to activate <strong>${offer.name}</strong> right now:</p><p>${offer.subheadline}</p>`,
+      cta: `Activate ${offer.name} Now →`
+    },
+    {
+      name: `${offer.name} - Day 1 Quick Check-In`,
+      subject: `Did you activate your ${offer.name} access yet?`,
+      heading: `Quick 4-Minute Check-In`,
+      bodyHtml: `<p>Just checking in after you unlocked <strong>${offer.name}</strong> yesterday.</p><p>Don't let this sit in your bookmarks—it takes just a few minutes to activate and put to work:</p>`,
+      cta: `Complete Your ${offer.name} Setup →`
+    },
+    {
+      name: `${offer.name} - Day 2 Leverage Tip`,
+      subject: `How to get 8x more results with ${offer.name}...`,
+      heading: `The #1 Way to Maximize ${offer.name}`,
+      bodyHtml: `<p>Once you're inside <strong>${offer.name}</strong>, make sure you plug in your primary link and share your referral access so every click compounds over time.</p>`,
+      cta: `Open Your ${offer.name} Dashboard →`
+    },
+    {
+      name: `${offer.name} - Day 3 Automated Traffic Bridge`,
+      subject: `How we drive daily traffic into ${offer.name} on autopilot`,
+      heading: `Feeding Daily Eyeballs Into Your System`,
+      bodyHtml: `<p>Want to know how we feed consistent daily clicks into <strong>${offer.name}</strong> without cold-DMing strangers?</p><p>We pair it with short-form AI videos built from proven viral outliers. Make sure your account is active below, and reply <strong>"AI VIDEO"</strong> if you want the breakdown!</p>`,
+      cta: `Access ${offer.name} Here →`
+    }
+  ];
+
+  const createdIds = [];
+  for (const spec of emailSpecs) {
+    try {
+      const htmlContent = `<!DOCTYPE html>
+<html>
+<body style="margin:0; padding:24px; background-color:#f8fafc; font-family:Arial, sans-serif; color:#0f172a; line-height:1.6;">
+  <div style="max-width:580px; margin:0 auto; background:#ffffff; border-radius:16px; padding:32px; border:1px solid #e2e8f0;">
+    <div style="display:inline-block; background:#ecfdf5; color:#047857; font-size:12px; font-weight:bold; padding:6px 12px; border-radius:999px; margin-bottom:16px;">
+      ACCESS UNLOCKED
+    </div>
+    <h2 style="margin:0 0 12px; font-size:24px; color:#0f172a;">${spec.heading}</h2>
+    <div style="font-size:16px; color:#334155;">${spec.bodyHtml}</div>
+    <p style="margin:24px 0;">
+      <a href="${offer.affiliateUrl}" style="display:inline-block; background:#10b981; color:#ffffff; text-decoration:none; font-weight:bold; font-size:16px; padding:14px 26px; border-radius:10px;">
+        ${spec.cta}
+      </a>
+    </p>
+    <p style="font-size:14px; color:#64748b; margin-top:24px; border-top:1px solid #e2e8f0; padding-top:16px;">
+      Talk soon,<br><strong>Smart Hustler Marketing</strong>
+    </p>
+  </div>
+</body>
+</html>`;
+
+      const tRes = await fetch('https://api.brevo.com/v3/smtp/templates', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'api-key': BREVO_API_KEY
+        },
+        body: JSON.stringify({
+          templateName: spec.name.slice(0, 60),
+          subject: spec.subject,
+          htmlContent,
+          isActive: true,
+          sender: { name: 'Smart Hustler Marketing', email: 'ken@smarthustlermarketing.com' }
+        })
+      });
+      const tData = await tRes.json().catch(() => ({}));
+      if (tData.id) createdIds.push(tData.id);
+    } catch (_) {}
+  }
+
+  return {
+    listId,
+    welcomeTemplateId: createdIds[0] || DEFAULT_WELCOME_TEMPLATE_ID,
+    followUpTemplateIds: createdIds.slice(1).length === 3 ? createdIds.slice(1) : [887, 888, 889]
+  };
+}
+
+function buildViralForgeSwapPrompt(offer, outlierBreakdown) {
+  const rawBreakdown = outlierBreakdown?.rawText || JSON.stringify(outlierBreakdown || {}, null, 2);
+  const outlierExcerpt = rawBreakdown.slice(0, 1200);
+
+  return `# ${offer.name} — 3-Variation ViralForge AI SwapEngine Prompt
+# Designated Channels: ${offer.channelPreset}
+# Lander Bio-Link URL: https://traffic.aisimplesystem.com/o/${offer.slug}
+
+Create 3 distinct short-form vertical (9:16) video hook variations promoting ${offer.name}.
+Core Value Proposition: ${offer.headlinePrefix || ''} ${offer.headlineGradient} ${offer.headlineSuffix || ''} — ${offer.subheadline}
+
+## 3 Hook Variations to Generate:
+1. **Variation 1 (Curiosity / Open Loop Hook):** Open with a bold curiosity gap modeled after proven viral outlier DNA ("Here's a secret tool/system that feels illegal to know if you...").
+2. **Variation 2 (Pain / Problem Callout Hook):** Call out the #1 frustration the audience faces right in the first 3 seconds, then reveal ${offer.name} as the fast, friction-free fix.
+3. **Variation 3 (Contrarian / Cost-Saving Hook):** Challenge the old, expensive, or slow way of doing things and show how ${offer.name} gets them there in minutes.
+
+## Proven 9 Figure Buddy Outlier DNA Reference:
+${outlierExcerpt ? outlierExcerpt : 'Use a fast-paced talking-head explainer with 3 stacked curiosity markers in the first 10 seconds, a clear mechanism reveal in the middle, and a direct CTA at the end.'}
+
+## Call To Action (Final Beat):
+"Grab your free ${offer.name} access via the link in my bio (traffic.aisimplesystem.com/o/${offer.slug})."`;
+}
+
 const server = http.createServer(async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -58,107 +217,236 @@ const server = http.createServer(async (req, res) => {
     return res.end();
   }
 
+  const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+  const pathname = parsedUrl.pathname;
+
   // Healthcheck endpoint for Coolify
-  if (req.method === 'GET' && req.url === '/health') {
+  if (req.method === 'GET' && pathname === '/health') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify({ status: 'ok', uptime: process.uptime() }));
   }
 
-  // POST /api/subscribe -> Push lead into Brevo List #80 + Trigger Instant Welcome (#886) + Queue 3-Day Drip (#887, #888, #889)
-  if (req.method === 'POST' && req.url === '/api/subscribe') {
-    let body = '';
-    req.on('data', (chunk) => {
-      body += chunk.toString();
-    });
-    req.on('end', async () => {
-      try {
-        const { email, firstName, sponsorCode } = JSON.parse(body || '{}');
-        if (!email || !email.includes('@')) {
-          res.writeHead(400, { 'Content-Type': 'application/json' });
-          return res.end(JSON.stringify({ ok: false, error: 'Valid email is required' }));
-        }
-
-        if (!BREVO_API_KEY) {
-          console.warn('[Brevo Warning] BREVO_API_KEY is not set in environment variables');
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          return res.end(JSON.stringify({ ok: true, warning: 'BREVO_API_KEY not configured' }));
-        }
-
-        const cleanEmail = email.trim().toLowerCase();
-        const payload = {
-          email: cleanEmail,
-          updateEnabled: true,
-          listIds: [BREVO_LIST_ID],
-          attributes: {
-            FIRSTNAME: firstName || 'Partner',
-            LANDING_VARIANT: 'Viral_Traffic_Matrix_Giveaway',
-            SPONSOR_CODE: sponsorCode || '144'
-          }
-        };
-
-        const brevoRes = await fetch('https://api.brevo.com/v3/contacts', {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            'api-key': BREVO_API_KEY
-          },
-          body: JSON.stringify(payload)
-        });
-
-        let brevoData = {};
-        const text = await brevoRes.text();
-        if (text) {
-          try {
-            brevoData = JSON.parse(text);
-          } catch (_) {}
-        }
-
-        if (!brevoRes.ok) {
-          console.error('[Brevo Contact Error]', brevoRes.status, brevoData);
-          res.writeHead(brevoRes.status, { 'Content-Type': 'application/json' });
-          return res.end(JSON.stringify({ ok: false, error: brevoData.message || 'Brevo API error' }));
-        }
-
-        // 1. Send Instant Welcome Email (Template #886)
-        const welcomeResult = await sendOrScheduleBrevoEmail(cleanEmail, BREVO_WELCOME_TEMPLATE_ID);
-
-        // 2. Schedule 3-Day Automated Follow-Up Drip (#887, #888, #889)
-        const nowMs = Date.now();
-        const queuedFollowUps = await Promise.all(
-          FOLLOWUP_SEQUENCE.map(async (step) => {
-            const scheduledIso = new Date(nowMs + step.delayHours * 3600 * 1000).toISOString();
-            const result = await sendOrScheduleBrevoEmail(cleanEmail, step.templateId, scheduledIso);
-            return { templateId: step.templateId, scheduledAt: scheduledIso, result };
-          })
-        );
-
-        console.log(
-          `✅ Lead ${cleanEmail} added to List #${BREVO_LIST_ID} | Sent #${BREVO_WELCOME_TEMPLATE_ID} | Queued 3-day sequence:`,
-          queuedFollowUps.map((f) => `#${f.templateId} @ ${f.scheduledAt}`).join(', ')
-        );
-
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        return res.end(
-          JSON.stringify({
-            ok: true,
-            listId: BREVO_LIST_ID,
-            welcomeTemplateId: BREVO_WELCOME_TEMPLATE_ID,
-            welcomeResult,
-            queuedFollowUps
-          })
-        );
-      } catch (err) {
-        console.error('[Subscribe Handler Error]', err.message);
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify({ ok: false, error: err.message }));
+  // GET /launchpad -> Serve the Offer Launchpad OS Dashboard
+  if ((req.method === 'GET' || req.method === 'HEAD') && pathname === '/launchpad') {
+    const filePath = path.join(__dirname, 'launchpad.html');
+    fs.readFile(filePath, 'utf8', (err, content) => {
+      if (err) {
+        res.writeHead(500);
+        return res.end('Error loading launchpad.html');
       }
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(content);
     });
     return;
   }
 
-  // Serve index.html
-  if ((req.method === 'GET' || req.method === 'HEAD') && (req.url === '/' || req.url.startsWith('/?') || req.url.startsWith('/index.html'))) {
+  // GET /o/:slug -> Render dynamic 8-Pillar Glass Lander for any configured offer
+  if ((req.method === 'GET' || req.method === 'HEAD') && pathname.startsWith('/o/')) {
+    const slug = pathname.replace(/^\/o\//, '').replace(/\/$/, '');
+    const offers = loadOffers();
+    const offer = offers[slug];
+    if (!offer) {
+      res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
+      return res.end(`<h1>Offer "${slug}" not found</h1><p><a href="/launchpad">Open Offer Launchpad</a></p>`);
+    }
+    const html = renderOfferLander(offer);
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    return res.end(html);
+  }
+
+  // GET /api/offers -> List all active offers
+  if (req.method === 'GET' && pathname === '/api/offers') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ ok: true, offers: loadOffers() }));
+  }
+
+  // GET /api/nfb/search -> Search 9 Figure Buddy Outliers via MCP
+  if (req.method === 'GET' && pathname === '/api/nfb/search') {
+    try {
+      const query = parsedUrl.searchParams.get('query') || 'viral';
+      const niche = parsedUrl.searchParams.get('niche') || '';
+      const tier = parsedUrl.searchParams.get('tier') || '';
+      const results = await nfbClient.searchOutliers({ query, niche, tier });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: true, results }));
+    } catch (err) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+  }
+
+  // POST /api/scrape-offer -> Auto-extract title, headline, and description from any URL
+  if (req.method === 'POST' && pathname === '/api/scrape-offer') {
+    try {
+      const { url } = await readJsonBody(req);
+      const htmlRes = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+      const html = await htmlRes.text();
+      const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+      const h1Match = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+      const pMatch = html.match(/<p[^>]*>([\s\S]{40,300}?)<\/p>/i);
+      const clean = (s) => (s || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(
+        JSON.stringify({
+          ok: true,
+          title: clean(titleMatch && titleMatch[1]),
+          headline: clean(h1Match && h1Match[1]),
+          subheadline: clean(pMatch && pMatch[1])
+        })
+      );
+    } catch (err) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+  }
+
+  // POST /api/launch-offer -> Provision Brevo List + 4 Templates + Save Offer + Build ViralForge Prompt
+  if (req.method === 'POST' && pathname === '/api/launch-offer') {
+    try {
+      const body = await readJsonBody(req);
+      const slug = (body.slug || body.name || 'offer')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+
+      let outlierBreakdown = null;
+      if (body.outlierId) {
+        try {
+          outlierBreakdown = await nfbClient.fetchOutlierBreakdown(body.outlierId);
+        } catch (_) {}
+      }
+
+      const newOffer = {
+        slug,
+        name: body.name || 'Partner Offer',
+        badge: '100% Free Access • Instant Unlock',
+        eyebrow: 'Verified Partner Giveaway',
+        headlinePrefix: body.headlinePrefix || 'Unlock Your Free',
+        headlineGradient: body.headlineGradient || body.name || 'Viral System',
+        headlineSuffix: body.headlineSuffix || 'Today.',
+        subheadline: body.subheadline || 'Activate your free account and start scaling your traffic and leads in minutes.',
+        ctaButtonText: body.ctaButtonText || 'Unlock Free Access',
+        affiliateUrl: body.affiliateUrl,
+        sponsorCode: body.sponsorCode || '144',
+        channelPreset: body.channelPreset || 'Marketing & Traffic (9 Channels)',
+        outlierId: body.outlierId || null,
+        steps: [
+          {
+            title: `Activate Your ${body.name} Account`,
+            desc: 'Click through after unlocking to complete your quick registration in under 4 minutes.'
+          },
+          {
+            title: 'Plug In Your Primary Offer or Link',
+            desc: 'Connect the system to any existing product, affiliate link, or brand you want to grow.'
+          },
+          {
+            title: 'Scale With Automated Video & Email Follow-Up',
+            desc: 'Turn every click into compounding reach and automated email subscribers.'
+          }
+        ],
+        createdAt: new Date().toISOString()
+      };
+
+      newOffer.brevo = await provisionBrevoListAndTemplates(newOffer);
+
+      const offers = loadOffers();
+      offers[slug] = newOffer;
+      saveOffers(offers);
+
+      const viralForgePrompt = buildViralForgeSwapPrompt(newOffer, outlierBreakdown);
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: true, offer: newOffer, viralForgePrompt }));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+  }
+
+  // POST /api/subscribe -> Dynamic Multi-Offer Lead Capture + 4-Email Drip Queue
+  if (req.method === 'POST' && pathname === '/api/subscribe') {
+    try {
+      const { email, firstName, sponsorCode, offerSlug } = await readJsonBody(req);
+      if (!email || !email.includes('@')) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ ok: false, error: 'Valid email is required' }));
+      }
+
+      if (!BREVO_API_KEY) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ ok: true, warning: 'BREVO_API_KEY not configured' }));
+      }
+
+      const offers = loadOffers();
+      const offer = (offerSlug && offers[offerSlug]) || offers['viral-traffic-matrix'] || {};
+      const listId = Number(offer.brevo?.listId || DEFAULT_BREVO_LIST_ID);
+      const welcomeTemplateId = Number(offer.brevo?.welcomeTemplateId || DEFAULT_WELCOME_TEMPLATE_ID);
+      const followUpIds = offer.brevo?.followUpTemplateIds || [887, 888, 889];
+
+      const cleanEmail = email.trim().toLowerCase();
+      const payload = {
+        email: cleanEmail,
+        updateEnabled: true,
+        listIds: [listId],
+        attributes: {
+          FIRSTNAME: firstName || 'Partner',
+          LANDING_VARIANT: offerSlug || 'Viral_Traffic_Matrix_Giveaway',
+          SPONSOR_CODE: sponsorCode || offer.sponsorCode || '144'
+        }
+      };
+
+      const brevoRes = await fetch('https://api.brevo.com/v3/contacts', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'api-key': BREVO_API_KEY
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const text = await brevoRes.text();
+      let brevoData = {};
+      if (text) {
+        try {
+          brevoData = JSON.parse(text);
+        } catch (_) {}
+      }
+
+      if (!brevoRes.ok) {
+        res.writeHead(brevoRes.status, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ ok: false, error: brevoData.message || 'Brevo API error' }));
+      }
+
+      const welcomeResult = await sendOrScheduleBrevoEmail(cleanEmail, welcomeTemplateId);
+      const delays = [24, 48, 70];
+      const nowMs = Date.now();
+      const queuedFollowUps = await Promise.all(
+        followUpIds.slice(0, 3).map(async (tplId, idx) => {
+          const scheduledIso = new Date(nowMs + delays[idx] * 3600 * 1000).toISOString();
+          const result = await sendOrScheduleBrevoEmail(cleanEmail, Number(tplId), scheduledIso);
+          return { templateId: tplId, scheduledAt: scheduledIso, result };
+        })
+      );
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(
+        JSON.stringify({
+          ok: true,
+          listId,
+          welcomeTemplateId,
+          welcomeResult,
+          queuedFollowUps
+        })
+      );
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+  }
+
+  // Serve flagship index.html at root /
+  if ((req.method === 'GET' || req.method === 'HEAD') && (pathname === '/' || pathname === '/index.html')) {
     const filePath = path.join(__dirname, 'index.html');
     fs.readFile(filePath, 'utf8', (err, content) => {
       if (err) {
@@ -176,5 +464,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, HOST, () => {
-  console.log(`🚀 Viral Giveaway Lander running at http://${HOST}:${PORT}`);
+  console.log(`🚀 Offer Launchpad & Viral Giveaway Engine running at http://${HOST}:${PORT}`);
 });
