@@ -127,10 +127,12 @@ function startBackgroundJobMonitor(offerSlug, projectId) {
             try {
               const csAccounts = await csClient.getConnectedAccounts();
               const eligibleAccounts = csAccounts.filter((a) => {
+                if (a.validity !== 'valid') return false;
                 const name = (a.account_name || a.name || '').toLowerCase();
                 if (name.includes('aurum')) return false;
                 if (name.includes('erica') || name.includes('storytime')) return false;
                 if (name.includes('brenda')) return false;
+                if (name === 'ken davis') return false;
                 return true;
               });
               const eligibleAccountIds = eligibleAccounts.map((a) => a.id);
