@@ -132,7 +132,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   // Serve index.html
-  if (req.method === 'GET' && (req.url === '/' || req.url.startsWith('/?') || req.url.startsWith('/index.html'))) {
+  if ((req.method === 'GET' || req.method === 'HEAD') && (req.url === '/' || req.url.startsWith('/?') || req.url.startsWith('/index.html'))) {
     const filePath = path.join(__dirname, 'index.html');
     fs.readFile(filePath, 'utf8', (err, content) => {
       if (err) {
