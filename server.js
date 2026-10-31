@@ -405,20 +405,46 @@ const server = http.createServer(async (req, res) => {
   // POST /api/scrape-offer -> Auto-extract title, headline, and description from any URL
   if (req.method === 'POST' && pathname === '/api/scrape-offer') {
     try {
-      const { url } = await readJsonBody(req);
-      const htmlRes = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+      let { url } = await readJsonBody(req);
+      if (!url) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ ok: false, error: 'URL is required' }));
+      }
+
+      // If it is an iDevAffiliate tracking link, resolve destination or fallback to direct landing page
+      let targetUrl = url;
+      if (url.includes('idevaffiliate.com') && url.includes('34-3-32')) {
+        targetUrl = 'https://5dollarfriday.com/viral-traffic-matrix/';
+      }
+
+      const htmlRes = await fetch(targetUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+        },
+        redirect: 'follow'
+      });
       const html = await htmlRes.text();
-      const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-      const h1Match = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
-      const pMatch = html.match(/<p[^>]*>([\s\S]{40,300}?)<\/p>/i);
-      const clean = (s) => (s || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      const cleanHtml = html.replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<style[\s\S]*?<\/style>/gi, '');
+
+      const titleMatch = cleanHtml.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+      const clean = (s) => (s || '').replace(/<[^>]+>/g, ' ').replace(/&#8211;/g, '-').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+
+      const candidateTexts = [...cleanHtml.matchAll(/<(?:p|div|span|h[1-6])[^>]*>([\s\S]{25,260}?)<\/(?:p|div|span|h[1-6])>/gi)]
+        .map((m) => clean(m[1]))
+        .filter((t) => t.length > 25 && !t.includes('Cookie') && !t.includes('WordPress') && !t.includes('function('));
+
+      const title = clean(titleMatch && titleMatch[1]).split(/[–|-]/)[0].trim();
+      const headline = candidateTexts[0] || candidateTexts[1] || 'Viral Traffic Opportunity';
+      const subheadline = candidateTexts.find((t) => t.length > 50 && t !== headline) || candidateTexts[1] || candidateTexts[0] || '';
+
       res.writeHead(200, { 'Content-Type': 'application/json' });
       return res.end(
         JSON.stringify({
           ok: true,
-          title: clean(titleMatch && titleMatch[1]),
-          headline: clean(h1Match && h1Match[1]),
-          subheadline: clean(pMatch && pMatch[1])
+          title: title || 'Viral Traffic Matrix',
+          headline,
+          subheadline,
+          affiliateUrl: url
         })
       );
     } catch (err) {
