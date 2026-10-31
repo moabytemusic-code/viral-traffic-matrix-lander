@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const { URL } = require('url');
 const nfbClient = require('./nfb-client');
+const vidiqClient = require('./vidiq-client');
 const vfClient = require('./viralforge-client');
 const { renderOfferLander } = require('./render-lander');
 
@@ -371,6 +372,19 @@ const server = http.createServer(async (req, res) => {
     }
     res.writeHead(200, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify({ ok: true, job: offer.viralForgeJob }));
+  }
+
+  // GET /api/vidiq/research?keyword=... -> Live vidIQ Keyword Research
+  if (req.method === 'GET' && pathname === '/api/vidiq/research') {
+    try {
+      const keyword = parsedUrl.searchParams.get('keyword') || 'free traffic';
+      const data = await vidiqClient.researchKeyword(keyword);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: true, ...data }));
+    } catch (err) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
   }
 
   // GET /api/nfb/search -> Search 9 Figure Buddy Outliers via MCP
