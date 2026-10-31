@@ -82,9 +82,53 @@
               <span class="text-[11px] font-mono-code uppercase text-amber-400">STEP 1 • RESEARCH BRAIN</span>
               <h3 class="text-lg font-bold text-white">9 Figure Buddy Outlier Finder</h3>
             </div>
-            <span id="nfbStatusBadge" class="px-2.5 py-1 rounded-full text-[11px] font-mono-code bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-              MCP Connected
-            </span>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                id="toggleCheatSheetBtn"
+                class="px-2.5 py-1 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-400/30 text-[11px] font-mono-code text-indigo-300 transition"
+              >
+                📖 vidIQ Cheat Sheet
+              </button>
+              <span id="nfbStatusBadge" class="px-2.5 py-1 rounded-full text-[11px] font-mono-code bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                MCP Connected
+              </span>
+            </div>
+          </div>
+
+          <!-- Embedded vidIQ & Search Term Cheat Sheet (Collapsible) -->
+          <div id="vidiqCheatSheet" class="hidden p-4 rounded-2xl bg-black/60 border border-indigo-500/30 text-xs space-y-3">
+            <div class="flex items-center justify-between border-b border-white/10 pb-2">
+              <span class="font-bold text-indigo-300">🎯 How to Pick vidIQ &amp; 9 Figure Buddy Search Terms</span>
+              <button type="button" onclick="document.getElementById('vidiqCheatSheet').classList.add('hidden')" class="text-slate-400 hover:text-white text-xs">✕ Close</button>
+            </div>
+            
+            <p class="text-slate-300 text-[11px] leading-relaxed">
+              <strong>Rule #1:</strong> Never search the brand name! Search what the user is struggling with or the broad category they want to solve.
+            </p>
+
+            <div class="grid grid-cols-2 gap-2 text-[11px]">
+              <div class="p-2.5 rounded-xl bg-white/[0.04] border border-white/5 space-y-1">
+                <span class="font-bold text-amber-300">1. The Frustration / Pain:</span>
+                <p class="text-slate-400">"zero clicks on link", "stop cold DMing", "teacher burnout", "getting banned"</p>
+              </div>
+              <div class="p-2.5 rounded-xl bg-white/[0.04] border border-white/5 space-y-1">
+                <span class="font-bold text-emerald-300">2. The Desired Outcome:</span>
+                <p class="text-slate-400">"how to get free traffic", "how to write lesson plans fast", "passive income for beginners"</p>
+              </div>
+              <div class="p-2.5 rounded-xl bg-white/[0.04] border border-white/5 space-y-1">
+                <span class="font-bold text-teal-300">3. The Broad Vehicle:</span>
+                <p class="text-slate-400">"secret websites for marketers", "free traffic sources", "best ai tools for creators"</p>
+              </div>
+              <div class="p-2.5 rounded-xl bg-white/[0.04] border border-white/5 space-y-1">
+                <span class="font-bold text-purple-300">4. Expensive Alternative:</span>
+                <p class="text-slate-400">"clickfunnels alternative", "solo ads review", "chatgpt for teachers"</p>
+              </div>
+            </div>
+
+            <div class="pt-1 text-[11px] text-slate-400 border-t border-white/5">
+              💡 <em>Pro Tip:</em> Look for keywords in vidIQ with an <strong>Overall Score 60+ (Green Zone)</strong>, then click a matching pill below or paste into 9 Figure Buddy!
+            </div>
           </div>
 
           <p class="text-xs text-slate-300">
@@ -396,6 +440,10 @@
       pill.textContent = `Outlier Locked: ${id} (${title.slice(0, 28)}...)`;
       pill.classList.remove('hidden');
     };
+
+    document.getElementById('toggleCheatSheetBtn')?.addEventListener('click', () => {
+      document.getElementById('vidiqCheatSheet')?.classList.toggle('hidden');
+    });
 
     document.querySelectorAll('.hook-pill').forEach(btn => {
       btn.addEventListener('click', () => {
