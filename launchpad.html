@@ -299,6 +299,11 @@
               <div id="liveChannelsPills" class="mt-2 flex flex-wrap gap-1.5 text-[10px] font-mono-code text-slate-400"></div>
             </div>
 
+            <div>
+              <label class="block text-xs text-slate-300 mb-1">CTA Button Text</label>
+              <input id="ctaButtonText" type="text" value="Unlock Free Access" class="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-xs text-white" />
+            </div>
+
             <!-- ViralForge Auto-Render & Auto-Schedule Toggle -->
             <div class="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-400/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <label class="flex items-start gap-3 cursor-pointer">
@@ -555,20 +560,25 @@
       btn.innerHTML = '<span>⚡ Provisioning Brevo List, 4 Email Templates, Live Lander &amp; 9FigureBuddy Script Pack...</span>';
 
       try {
+        const getVal = (id, fallback = '') => {
+          const el = document.getElementById(id);
+          return el ? el.value.trim() : fallback;
+        };
+
         const payload = {
-          name: document.getElementById('offerName').value.trim(),
-          slug: document.getElementById('offerSlug').value.trim(),
-          affiliateUrl: document.getElementById('affiliateUrl').value.trim(),
-          sponsorCode: document.getElementById('sponsorCode').value.trim() || '144',
-          headlinePrefix: document.getElementById('headlinePrefix').value.trim(),
-          headlineGradient: document.getElementById('headlineGradient').value.trim(),
-          headlineSuffix: document.getElementById('headlineSuffix').value.trim(),
-          subheadline: document.getElementById('subheadline').value.trim(),
-          channelPreset: document.getElementById('channelPreset').value,
-          ctaButtonText: document.getElementById('ctaButtonText').value.trim() || 'Unlock Free Access',
-          outlierId: document.getElementById('selectedOutlierId').value.trim(),
-          autoRenderViralForge: document.getElementById('autoRenderViralForge').checked,
-          variantCount: Number(document.getElementById('variantCount').value || 2)
+          name: getVal('offerName'),
+          slug: getVal('offerSlug'),
+          affiliateUrl: getVal('affiliateUrl'),
+          sponsorCode: getVal('sponsorCode', '144'),
+          headlinePrefix: getVal('headlinePrefix'),
+          headlineGradient: getVal('headlineGradient'),
+          headlineSuffix: getVal('headlineSuffix'),
+          subheadline: getVal('subheadline'),
+          channelPreset: getVal('channelPreset'),
+          ctaButtonText: getVal('ctaButtonText', 'Unlock Free Access'),
+          outlierId: getVal('selectedOutlierId'),
+          autoRenderViralForge: document.getElementById('autoRenderViralForge')?.checked ?? true,
+          variantCount: Number(getVal('variantCount', '2'))
         };
 
         const res = await fetch('/api/launch-offer', {
