@@ -1,42 +1,24 @@
-// ViralForge AI Direct REST API Client + Background Render Monitor & Auto-Scheduler
+// ViralForge AI Direct REST API Client + Live Channel Discovery + Background Render Monitor & Auto-Scheduler
 
 const VF_API_BASE = 'https://backend.viralforgeai.io/api';
 
-// Designated Social Channel Presets (Verified from /api/fetch-social-accounts)
+// Fallback Channel Presets (used if custom channel IDs are not explicitly passed)
 const CHANNEL_PRESETS = {
-  marketing: [
-    { id: 139, name: 'Marketing Resource Network - Done For You Services', type: 'facebook', status: 1, username: null, platformName: 'Facebook' },
-    { id: 138, name: 'Marketing Insider Secrets', type: 'facebook', status: 1, username: null, platformName: 'Facebook' },
-    { id: 137, name: 'TrafficPros', type: 'facebook', status: 1, username: null, platformName: 'Facebook' },
-    { id: 136, name: 'The Freebie Channel', type: 'facebook', status: 1, username: null, platformName: 'Facebook' },
-    { id: 134, name: 'AI Profit Lab', type: 'facebook', status: 1, username: null, platformName: 'Facebook' },
-    { id: 143, name: 'AI Profit Lab ', type: 'youtube', status: 1, username: 'AI Profit Lab ', platformName: 'YouTube' },
-    { id: 147, name: 'marketranger', type: 'twitter', status: 1, username: 'marketranger', platformName: 'X / Twitter' },
-    { id: 149, name: 'WalletWise Crypto', type: 'tiktok', status: 1, username: 'WalletWise Crypto', platformName: 'TikTok' },
-    { id: 150, name: 'silverside107', type: 'threads', status: 1, username: 'silverside107', platformName: 'Threads' }
-  ],
-  finance: [
-    { id: 140, name: 'The 60x Daily', type: 'youtube', status: 1, username: 'The 60x Daily', platformName: 'YouTube' },
-    { id: 143, name: 'AI Profit Lab ', type: 'youtube', status: 1, username: 'AI Profit Lab ', platformName: 'YouTube' },
-    { id: 149, name: 'WalletWise Crypto', type: 'tiktok', status: 1, username: 'WalletWise Crypto', platformName: 'TikTok' },
-    { id: 147, name: 'marketranger', type: 'twitter', status: 1, username: 'marketranger', platformName: 'X / Twitter' },
-    { id: 150, name: 'silverside107', type: 'threads', status: 1, username: 'silverside107', platformName: 'Threads' },
-    { id: 134, name: 'AI Profit Lab', type: 'facebook', status: 1, username: null, platformName: 'Facebook' }
-  ],
-  parenting: [
-    { id: 141, name: 'Storytime with Ms. Erica', type: 'youtube', status: 1, username: 'Storytime with Ms. Erica', platformName: 'YouTube' },
-    { id: 135, name: 'Everyday Mind Explained', type: 'facebook', status: 1, username: null, platformName: 'Facebook' },
-    { id: 146, name: '@brendadixonthevessel1', type: 'instagram', status: 1, username: '@brendadixonthevessel1', platformName: 'Instagram' },
-    { id: 153, name: 'moabytemusic', type: 'pinterest', status: 1, username: 'moabytemusic', platformName: 'Pinterest' }
-  ]
+  marketing: [139, 138, 137, 136, 134, 143, 147, 149, 150],
+  finance: [140, 143, 149, 147, 150, 134],
+  parenting: [141, 135, 146, 153]
 };
 
-function resolvePresetAccounts(presetLabel = '') {
-  const lower = presetLabel.toLowerCase();
-  if (lower.includes('parenting') || lower.includes('storytime')) return CHANNEL_PRESETS.parenting;
-  if (lower.includes('finance') || lower.includes('crypto')) return CHANNEL_PRESETS.finance;
-  return CHANNEL_PRESETS.marketing;
-}
+const PLATFORM_LABELS = {
+  facebook: 'Facebook',
+  youtube: 'YouTube',
+  twitter: 'X / Twitter',
+  tiktok: 'TikTok',
+  threads: 'Threads',
+  instagram: 'Instagram',
+  pinterest: 'Pinterest',
+  linkedin: 'LinkedIn'
+};
 
 async function vfPost(endpoint, payload = {}) {
   const token = process.env.VIRALFORGE_TOKEN;
@@ -60,6 +42,58 @@ async function vfPost(endpoint, payload = {}) {
     throw new Error(data.message || `ViralForge API error (${res.status}) on ${endpoint}`);
   }
   return data.data !== undefined ? data.data : data;
+}
+
+// Dynamically fetch all connected social accounts from ViralForge AI (/api/fetch-social-accounts)
+async function fetchLiveSocialAccounts() {
+  const raw = await vfPost('fetch-social-accounts', {});
+  const grouped = raw?.data || raw || {};
+  const accounts = [];
+
+  for (const [platformKey, list] of Object.entries(grouped)) {
+    if (!Array.isArray(list)) continue;
+    for (const acc of list) {
+      if (!acc || !acc.id) continue;
+      accounts.push({
+        id: Number(acc.id),
+        name: acc.name || acc.username || `${platformKey} #${acc.id}`,
+        type: acc.type || platformKey,
+        status: acc.status ?? 1,
+        username: acc.username || null,
+        created: acc.created || new Date().toISOString(),
+        platformName: PLATFORM_LABELS[acc.type || platformKey] || platformKey
+      });
+    }
+  }
+
+  return {
+    accounts,
+    presets: CHANNEL_PRESETS
+  };
+}
+
+// Resolve full socialAccount objects from live ViralForge accounts (picking up any newly added channels!)
+async function resolveTargetSocialAccounts({ selectedAccountIds, channelPreset }) {
+  const { accounts } = await fetchLiveSocialAccounts();
+
+  if (Array.isArray(selectedAccountIds) && selectedAccountIds.length > 0) {
+    const idSet = new Set(selectedAccountIds.map(Number));
+    const matched = accounts.filter((a) => idSet.has(Number(a.id)));
+    if (matched.length > 0) return matched;
+  }
+
+  const lower = (channelPreset || '').toLowerCase();
+  let presetIds = CHANNEL_PRESETS.marketing;
+  if (lower.includes('parenting') || lower.includes('storytime')) {
+    presetIds = CHANNEL_PRESETS.parenting;
+  } else if (lower.includes('finance') || lower.includes('crypto')) {
+    presetIds = CHANNEL_PRESETS.finance;
+  } else if (lower.includes('all')) {
+    return accounts.filter((a) => !a.name.toLowerCase().includes('aurum'));
+  }
+
+  const presetSet = new Set(presetIds);
+  return accounts.filter((a) => presetSet.has(Number(a.id)));
 }
 
 // Build 3 distinct SwapEngine variant briefs for an offer + optional 9FigureBuddy Outlier DNA
@@ -118,8 +152,8 @@ function getScheduleDateString(offsetDays = 1) {
 }
 
 // Schedule a single rendered video across the offer's designated social channels
-async function scheduleRenderedVideo({ videoId, projectId, contentName, scheduleDate, channelPreset }) {
-  const socialAccount = resolvePresetAccounts(channelPreset);
+async function scheduleRenderedVideo({ videoId, projectId, contentName, scheduleDate, channelPreset, selectedAccountIds }) {
+  const socialAccount = await resolveTargetSocialAccounts({ selectedAccountIds, channelPreset });
   const result = await vfPost('schedule-individual-content', {
     contentId: Number(videoId),
     projectId: Number(projectId),
@@ -136,14 +170,16 @@ async function scheduleRenderedVideo({ videoId, projectId, contentName, schedule
     videoId,
     scheduleDate,
     channelCount: socialAccount.length,
+    channels: socialAccount.map((a) => `${a.platformName}: ${a.name}`),
     result
   };
 }
 
 module.exports = {
+  fetchLiveSocialAccounts,
+  resolveTargetSocialAccounts,
   startSwapEngineRun,
   getProjectRunStatus,
   scheduleRenderedVideo,
-  getScheduleDateString,
-  resolvePresetAccounts
+  getScheduleDateString
 };

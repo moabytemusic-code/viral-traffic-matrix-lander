@@ -205,19 +205,18 @@
               <textarea id="subheadline" rows="2" required placeholder="Explain who this is for, the big problem it solves, and why it takes only a few minutes to activate..." class="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-xs text-white"></textarea>
             </div>
 
-            <div class="grid sm:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs text-slate-300 mb-1">Designated ViralForge Channel Stack</label>
-                <select id="channelPreset" class="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-xs text-white">
-                  <option value="Marketing & Traffic (9 Channels: 5 FB Pages + YT AI Profit Lab + TikTok + X + Threads)">Marketing &amp; Traffic (9 Designated Channels)</option>
-                  <option value="Finance & Crypto (TikTok WalletWise + YT 60x Daily + X Marketranger)">Finance &amp; Crypto Stack</option>
-                  <option value="Parenting & Kids (YT Storytime With Ms. Erica + IG)">Parenting &amp; StoryTime Stack</option>
-                </select>
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="block text-xs text-slate-300">Designated ViralForge Channel Stack</label>
+                <button type="button" id="refreshChannelsBtn" class="text-[11px] text-indigo-400 hover:text-indigo-300">↻ Sync New Channels</button>
               </div>
-              <div>
-                <label class="block text-xs text-slate-300 mb-1">CTA Button Text</label>
-                <input id="ctaButtonText" type="text" value="Unlock Free Access" class="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-xs text-white" />
-              </div>
+              <select id="channelPreset" class="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-xs text-white">
+                <option value="Marketing & Traffic (9 Channels: 5 FB Pages + YT AI Profit Lab + TikTok + X + Threads)">Marketing &amp; Traffic (9 Designated Channels)</option>
+                <option value="Finance & Crypto (TikTok WalletWise + YT 60x Daily + X Marketranger)">Finance &amp; Crypto Stack</option>
+                <option value="Parenting & Kids (YT Storytime With Ms. Erica + IG)">Parenting &amp; StoryTime Stack</option>
+                <option value="All Connected Channels">All Connected Channels (Auto-Sync)</option>
+              </select>
+              <div id="liveChannelsPills" class="mt-2 flex flex-wrap gap-1.5 text-[10px] font-mono-code text-slate-400"></div>
             </div>
 
             <!-- ViralForge Auto-Render & Auto-Schedule Toggle -->
@@ -534,8 +533,25 @@
       }, 10000);
     }
 
+    // Fetch live channels from ViralForge
+    async function syncChannels() {
+      const container = document.getElementById('liveChannelsPills');
+      try {
+        const res = await fetch('/api/vf/channels');
+        const data = await res.json();
+        if (data.ok && Array.isArray(data.accounts)) {
+          container.innerHTML = `<span class="text-emerald-400 font-semibold">${data.accounts.length} Live Channels Connected:</span> ` +
+            data.accounts.map(a => `<span class="px-2 py-0.5 rounded bg-white/5 border border-white/10">${a.platformName}: ${a.name}</span>`).join(' ');
+        }
+      } catch (err) {
+        container.innerHTML = `<span class="text-slate-500">Live channel sync available</span>`;
+      }
+    }
+    document.getElementById('refreshChannelsBtn')?.addEventListener('click', syncChannels);
+
     loadOffers();
     searchOutliers();
+    syncChannels();
   </script>
 </body>
 </html>

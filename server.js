@@ -106,7 +106,8 @@ function startBackgroundJobMonitor(offerSlug, projectId) {
               projectId,
               contentName: v.name || `${offer.name} (Video ${i + 1})`,
               scheduleDate,
-              channelPreset: offer.channelPreset
+              channelPreset: offer.channelPreset,
+              selectedAccountIds: offer.selectedAccountIds
             });
             offer.viralForgeJob.videos[vidKey].scheduled = true;
             offer.viralForgeJob.videos[vidKey].scheduleDate = scheduleDate;
@@ -341,6 +342,18 @@ const server = http.createServer(async (req, res) => {
     return res.end(html);
   }
 
+  // GET /api/vf/channels -> Dynamically fetch all live connected social channels from ViralForge
+  if (req.method === 'GET' && pathname === '/api/vf/channels') {
+    try {
+      const data = await vfClient.fetchLiveSocialAccounts();
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: true, ...data }));
+    } catch (err) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+  }
+
   // GET /api/offers -> List all active offers
   if (req.method === 'GET' && pathname === '/api/offers') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -429,6 +442,7 @@ const server = http.createServer(async (req, res) => {
         affiliateUrl: body.affiliateUrl,
         sponsorCode: body.sponsorCode || '144',
         channelPreset: body.channelPreset || 'Marketing & Traffic (9 Channels)',
+        selectedAccountIds: Array.isArray(body.selectedAccountIds) ? body.selectedAccountIds : null,
         outlierId: body.outlierId || null,
         steps: [
           {
