@@ -1,0 +1,12 @@
+{
+  "name": "viral-traffic-matrix-lander",
+  "version": "1.0.0",
+  "description": "High-converting giveaway lander for Viral Traffic Matrix with Brevo API & SMTP integration",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
