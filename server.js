@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const { URL } = require('url');
 const nfbClient = require('./nfb-client');
+const vfClient = require('./viralforge-client');
 const { renderOfferLander } = require('./render-lander');
 
 // Load local .env if present
@@ -24,6 +25,9 @@ const BREVO_API_KEY = process.env.BREVO_API_KEY || '';
 const DEFAULT_BREVO_LIST_ID = Number(process.env.BREVO_LIST_ID || 80);
 const DEFAULT_WELCOME_TEMPLATE_ID = Number(process.env.BREVO_WELCOME_TEMPLATE_ID || 886);
 const OFFERS_PATH = path.join(__dirname, 'offers.json');
+
+// Active background monitors for ViralForge rendering -> auto-scheduling
+const activePollers = new Map();
 
 function loadOffers() {
   try {
@@ -51,6 +55,91 @@ function readJsonBody(req) {
       }
     });
   });
+}
+
+// Background Polling Loop: Watches ViralForge Project Run -> Auto-Schedules Completed Videos
+function startBackgroundJobMonitor(offerSlug, projectId) {
+  const key = `${offerSlug}:${projectId}`;
+  if (activePollers.has(key)) return;
+
+  console.log(`🔄 [ViralForge Monitor] Started watching Project #${projectId} for offer "${offerSlug}"`);
+
+  const timer = setInterval(async () => {
+    try {
+      const offers = loadOffers();
+      const offer = offers[offerSlug];
+      if (!offer || !offer.viralForgeJob) {
+        clearInterval(timer);
+        activePollers.delete(key);
+        return;
+      }
+
+      const statusData = await vfClient.getProjectRunStatus(projectId);
+      const videos = Array.isArray(statusData.videos) ? statusData.videos : [];
+      offer.viralForgeJob.status = statusData.status || 'running';
+      offer.viralForgeJob.lastCheckedAt = new Date().toISOString();
+      offer.viralForgeJob.videos = offer.viralForgeJob.videos || {};
+
+      let allFinishedAndScheduled = videos.length > 0;
+
+      for (let i = 0; i < videos.length; i++) {
+        const v = videos[i];
+        const vidKey = String(v.videoId || v.variant || i + 1);
+        const existing = offer.viralForgeJob.videos[vidKey] || {};
+
+        offer.viralForgeJob.videos[vidKey] = {
+          ...existing,
+          videoId: v.videoId,
+          variant: v.variant || i + 1,
+          name: v.name || `${offer.name} (Video ${i + 1})`,
+          status: v.status,
+          videoUrl: v.videoUrl || existing.videoUrl || null,
+          thumbnailUrl: v.thumbnailUrl || existing.thumbnailUrl || null
+        };
+
+        // As soon as a video finishes rendering, auto-schedule it for Day +(i+1) at 11:00 AM!
+        if (v.status === 'completed' && v.videoId && !offer.viralForgeJob.videos[vidKey].scheduled) {
+          const scheduleDate = vfClient.getScheduleDateString(i + 1);
+          try {
+            const schedRes = await vfClient.scheduleRenderedVideo({
+              videoId: v.videoId,
+              projectId,
+              contentName: v.name || `${offer.name} (Video ${i + 1})`,
+              scheduleDate,
+              channelPreset: offer.channelPreset
+            });
+            offer.viralForgeJob.videos[vidKey].scheduled = true;
+            offer.viralForgeJob.videos[vidKey].scheduleDate = scheduleDate;
+            offer.viralForgeJob.videos[vidKey].channelCount = schedRes.channelCount;
+            console.log(
+              `📅 [ViralForge Auto-Scheduler] Scheduled Video #${v.videoId} for ${scheduleDate} across ${schedRes.channelCount} channels!`
+            );
+          } catch (schedErr) {
+            console.error(`[ViralForge Auto-Schedule Error for Video #${v.videoId}]:`, schedErr.message);
+            offer.viralForgeJob.videos[vidKey].scheduleError = schedErr.message;
+          }
+        }
+
+        if (v.status !== 'completed' || !offer.viralForgeJob.videos[vidKey].scheduled) {
+          allFinishedAndScheduled = false;
+        }
+      }
+
+      saveOffers(offers);
+
+      if (allFinishedAndScheduled && statusData.status === 'completed') {
+        offer.viralForgeJob.status = 'completed_and_scheduled';
+        saveOffers(offers);
+        console.log(`🎉 [ViralForge Monitor] Project #${projectId} ("${offerSlug}") 100% rendered & scheduled!`);
+        clearInterval(timer);
+        activePollers.delete(key);
+      }
+    } catch (err) {
+      console.error(`[ViralForge Monitor Poll Error for Project #${projectId}]:`, err.message);
+    }
+  }, 20000); // Poll every 20 seconds
+
+  activePollers.set(key, timer);
 }
 
 async function sendOrScheduleBrevoEmail(email, templateId, scheduledAt = null) {
@@ -82,7 +171,6 @@ async function provisionBrevoListAndTemplates(offer) {
     };
   }
 
-  // 1. Create dedicated Brevo Contact List in Folder #3
   let listId = DEFAULT_BREVO_LIST_ID;
   try {
     const listRes = await fetch('https://api.brevo.com/v3/contacts/lists', {
@@ -101,7 +189,6 @@ async function provisionBrevoListAndTemplates(offer) {
     if (listData.id) listId = listData.id;
   } catch (_) {}
 
-  // 2. Create 4 active Brevo SMTP Email Templates (Day 0, Day 1, Day 2, Day 3)
   const emailSpecs = [
     {
       name: `${offer.name} - Day 0 Instant Access`,
@@ -260,6 +347,19 @@ const server = http.createServer(async (req, res) => {
     return res.end(JSON.stringify({ ok: true, offers: loadOffers() }));
   }
 
+  // GET /api/vf/job-status?slug=... -> Check live ViralForge render + auto-schedule state
+  if (req.method === 'GET' && pathname === '/api/vf/job-status') {
+    const slug = parsedUrl.searchParams.get('slug') || '';
+    const offers = loadOffers();
+    const offer = offers[slug];
+    if (!offer || !offer.viralForgeJob) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: 'No active ViralForge job for this offer' }));
+    }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ ok: true, job: offer.viralForgeJob }));
+  }
+
   // GET /api/nfb/search -> Search 9 Figure Buddy Outliers via MCP
   if (req.method === 'GET' && pathname === '/api/nfb/search') {
     try {
@@ -300,7 +400,7 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
-  // POST /api/launch-offer -> Provision Brevo List + 4 Templates + Save Offer + Build ViralForge Prompt
+  // POST /api/launch-offer -> Provision Brevo List + 4 Templates + Save Offer + Auto-Start ViralForge Render & Scheduler
   if (req.method === 'POST' && pathname === '/api/launch-offer') {
     try {
       const body = await readJsonBody(req);
@@ -349,9 +449,38 @@ const server = http.createServer(async (req, res) => {
 
       newOffer.brevo = await provisionBrevoListAndTemplates(newOffer);
 
+      // Optional Auto-Render & Auto-Schedule in ViralForge AI
+      if (body.autoRenderViralForge) {
+        try {
+          const runRes = await vfClient.startSwapEngineRun(
+            newOffer,
+            outlierBreakdown,
+            Number(body.variantCount || 2),
+            body.blueprintId || '464'
+          );
+          newOffer.viralForgeJob = {
+            projectId: runRes.projectId,
+            blueprintId: runRes.blueprintId,
+            variantsCount: runRes.variantsCount,
+            status: 'running',
+            startedAt: new Date().toISOString(),
+            videos: {}
+          };
+        } catch (vfErr) {
+          newOffer.viralForgeJob = {
+            status: 'error',
+            error: vfErr.message
+          };
+        }
+      }
+
       const offers = loadOffers();
       offers[slug] = newOffer;
       saveOffers(offers);
+
+      if (newOffer.viralForgeJob?.projectId) {
+        startBackgroundJobMonitor(slug, newOffer.viralForgeJob.projectId);
+      }
 
       const viralForgePrompt = buildViralForgeSwapPrompt(newOffer, outlierBreakdown);
 

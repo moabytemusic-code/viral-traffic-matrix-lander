@@ -220,6 +220,25 @@
               </div>
             </div>
 
+            <!-- ViralForge Auto-Render & Auto-Schedule Toggle -->
+            <div class="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-400/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <label class="flex items-start gap-3 cursor-pointer">
+                <input id="autoRenderViralForge" type="checkbox" checked class="mt-1 accent-emerald-400 w-4 h-4 rounded" />
+                <div>
+                  <div class="text-xs font-bold text-white">⚡ Auto-Render in ViralForge AI &amp; Auto-Schedule When Ready</div>
+                  <div class="text-[11px] text-slate-300">Submits directly to ViralForge SwapEngine (`Blueprint #464`), polls rendering every 20s in the background, and automatically schedules each finished video across Days 1–3 onto your selected Channel Stack.</div>
+                </div>
+              </label>
+              <div class="flex items-center gap-2 shrink-0">
+                <span class="text-[11px] font-mono-code text-indigo-200">Videos:</span>
+                <select id="variantCount" class="px-2.5 py-1.5 rounded-lg bg-black/60 border border-white/15 text-xs text-white font-mono-code">
+                  <option value="1">1 Video</option>
+                  <option value="2" selected>2 Videos</option>
+                  <option value="3">3 Videos</option>
+                </select>
+              </div>
+            </div>
+
             <input type="hidden" id="selectedOutlierId" value="" />
 
             <button
@@ -227,12 +246,12 @@
               type="submit"
               class="cta-beam w-full py-4 px-6 rounded-2xl font-display font-bold text-sm text-white flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>🚀 Launch Live Lander + Create Brevo List &amp; 4-Day Drip + Generate ViralForge Scripts</span>
+              <span>🚀 Launch Lander + Brevo 4-Day Drip + Auto-Render &amp; Schedule in ViralForge</span>
             </button>
           </form>
         </div>
 
-        <!-- Output Card: Generated Campaign Pack -->
+        <!-- Output Card: Generated Campaign Pack + Live ViralForge Render Monitor -->
         <div id="campaignOutput" class="hidden glass-surface rounded-3xl p-6 sm:p-8 border border-emerald-500/40 space-y-6">
           <div class="flex items-center justify-between">
             <div>
@@ -245,6 +264,15 @@
           </div>
 
           <div id="outputBrevoSummary" class="p-4 rounded-2xl bg-white/[0.03] border border-white/10 text-xs text-slate-300 space-y-1 font-mono-code"></div>
+
+          <!-- Live ViralForge Render & Auto-Schedule Monitor -->
+          <div id="vfLiveMonitorBox" class="hidden p-4 rounded-2xl bg-indigo-500/10 border border-indigo-400/30 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono-code uppercase text-indigo-300 font-semibold">🎬 Live ViralForge Render &amp; Auto-Schedule Monitor</span>
+              <span id="vfMonitorBadge" class="text-[11px] font-mono-code px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300">Polling every 10s...</span>
+            </div>
+            <div id="vfMonitorVideos" class="space-y-2 text-xs font-mono-code text-slate-200"></div>
+          </div>
 
           <div class="space-y-2">
             <div class="flex items-center justify-between">
@@ -410,7 +438,9 @@
           subheadline: document.getElementById('subheadline').value.trim(),
           channelPreset: document.getElementById('channelPreset').value,
           ctaButtonText: document.getElementById('ctaButtonText').value.trim() || 'Unlock Free Access',
-          outlierId: document.getElementById('selectedOutlierId').value.trim()
+          outlierId: document.getElementById('selectedOutlierId').value.trim(),
+          autoRenderViralForge: document.getElementById('autoRenderViralForge').checked,
+          variantCount: Number(document.getElementById('variantCount').value || 2)
         };
 
         const res = await fetch('/api/launch-offer', {
@@ -438,6 +468,11 @@
           <div>✓ Designated Channels: <strong class="text-indigo-300">${data.offer.channelPreset}</strong></div>
         `;
         document.getElementById('outputSwapPrompt').value = data.viralForgePrompt || '';
+
+        if (data.offer.viralForgeJob?.projectId) {
+          startVfMonitorUI(data.offer.slug, data.offer.viralForgeJob.projectId);
+        }
+
         await loadOffers();
         out.scrollIntoView({ behavior: 'smooth' });
       } catch (err) {
@@ -455,6 +490,49 @@
       document.getElementById('copyPromptBtn').textContent = 'Copied! ✓';
       setTimeout(() => { document.getElementById('copyPromptBtn').textContent = 'Copy Prompt'; }, 2000);
     });
+
+    let vfPollInterval = null;
+    function startVfMonitorUI(slug, projectId) {
+      const box = document.getElementById('vfLiveMonitorBox');
+      const badge = document.getElementById('vfMonitorBadge');
+      const list = document.getElementById('vfMonitorVideos');
+      box.classList.remove('hidden');
+      list.innerHTML = `<div class="text-slate-300">⏳ ViralForge Project #${projectId} started — waiting for video variants to render...</div>`;
+
+      if (vfPollInterval) clearInterval(vfPollInterval);
+      vfPollInterval = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/vf/job-status?slug=${encodeURIComponent(slug)}`);
+          const data = await res.json();
+          if (!data.ok || !data.job) return;
+          const job = data.job;
+          const vids = Object.values(job.videos || {});
+
+          if (job.status === 'completed_and_scheduled') {
+            badge.textContent = '✅ All Videos Rendered & Auto-Scheduled!';
+            badge.className = 'text-[11px] font-mono-code px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300';
+            clearInterval(vfPollInterval);
+          } else {
+            badge.textContent = `⏳ Status: ${job.status} (Project #${job.projectId})`;
+          }
+
+          if (vids.length > 0) {
+            list.innerHTML = vids.map(v => `
+              <div class="p-3 rounded-xl bg-black/40 border border-white/10 flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <span class="text-white font-semibold">${v.name || 'Video #' + v.videoId}</span>
+                  <span class="ml-2 text-[11px] px-2 py-0.5 rounded bg-white/10">${v.status}</span>
+                </div>
+                <div class="flex items-center gap-3 text-[11px]">
+                  ${v.videoUrl ? `<a href="${v.videoUrl}" target="_blank" class="text-emerald-400 hover:underline">Watch MP4 ↗</a>` : ''}
+                  ${v.scheduled ? `<span class="text-indigo-300">📅 Scheduled: ${v.scheduleDate} (${v.channelCount} channels)</span>` : `<span class="text-slate-400">Will auto-schedule on completion</span>`}
+                </div>
+              </div>
+            `).join('');
+          }
+        } catch (_) {}
+      }, 10000);
+    }
 
     loadOffers();
     searchOutliers();
