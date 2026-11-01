@@ -471,7 +471,7 @@ const server = http.createServer(async (req, res) => {
       } catch (_) {}
 
       // Specialized high-converting preset for Yu Sleep (Tart Cherry Sleep Trick)
-      if (url.includes('startyusleep.com') || url.includes('yusleepclub.com')) {
+      if (url.toLowerCase().includes('yusleep')) {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         return res.end(
           JSON.stringify({
@@ -484,7 +484,7 @@ const server = http.createServer(async (req, res) => {
             subheadline:
               'Restore deep, uninterrupted sleep on your very first night with the natural 10-ingredient nano-synergy formula backed by an ironclad 60-day guarantee.',
             affiliateUrl: url,
-            sponsorCode: sponsorCode || '144',
+            sponsorCode: sponsorCode || 'kmtwarrior',
             landerArchetype: 'split-video',
             landerTheme: 'cyan',
             channelPreset: 'Parenting & Kids (YT Storytime With Ms. Erica + IG)'
@@ -592,9 +592,8 @@ const server = http.createServer(async (req, res) => {
         .map((m) => clean(m[1]))
         .filter((t) => t.length > 25 && !t.includes('Cookie') && !t.includes('WordPress') && !t.includes('function('));
 
-      const title = clean((metaTitleMatch && metaTitleMatch[1]) || (titleMatch && titleMatch[1]))
-        .split(/[–|-]/)[0]
-        .trim();
+      const fullTitle = clean((metaTitleMatch && metaTitleMatch[1]) || (titleMatch && titleMatch[1]));
+      const title = (fullTitle.split(/\s+[–—|]\s+|\s+-\s+/)[0] || fullTitle).trim();
       const headline = candidateTexts[0] || candidateTexts[1] || 'Viral Opportunity';
       const subheadline =
         clean(metaDescMatch && metaDescMatch[1]) ||
@@ -603,12 +602,26 @@ const server = http.createServer(async (req, res) => {
         candidateTexts[0] ||
         '';
 
+      // Smart headline breakdown into Prefix, Gradient, Suffix if not already formatted
+      let headlinePrefix = 'Unlock';
+      let headlineGradient = headline;
+      let headlineSuffix = 'Today.';
+      const words = headline.split(' ');
+      if (words.length >= 6) {
+        headlinePrefix = words.slice(0, 2).join(' ');
+        headlineGradient = words.slice(2, Math.min(words.length - 2, 8)).join(' ');
+        headlineSuffix = words.slice(Math.min(words.length - 2, 8)).join(' ');
+      }
+
       res.writeHead(200, { 'Content-Type': 'application/json' });
       return res.end(
         JSON.stringify({
           ok: true,
-          title: title || 'Viral Traffic Matrix',
+          title: title || 'Partner Offer',
           headline,
+          headlinePrefix,
+          headlineGradient,
+          headlineSuffix,
           subheadline,
           affiliateUrl: url,
           sponsorCode
