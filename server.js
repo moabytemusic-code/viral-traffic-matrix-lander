@@ -462,12 +462,35 @@ const server = http.createServer(async (req, res) => {
       try {
         const u = new URL(url);
         sponsorCode =
+          u.searchParams.get('affiliate') ||
           u.searchParams.get('ref') ||
           u.searchParams.get('sponsor') ||
           u.searchParams.get('aid') ||
           u.searchParams.get('aff') ||
           '144';
       } catch (_) {}
+
+      // Specialized high-converting preset for Yu Sleep (Tart Cherry Sleep Trick)
+      if (url.includes('startyusleep.com') || url.includes('yusleepclub.com')) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(
+          JSON.stringify({
+            ok: true,
+            title: 'Yu Sleep 30-Second Cherry Trick',
+            slug: 'yu-sleep',
+            headlinePrefix: 'Discover the 30-Second',
+            headlineGradient: 'Tart Cherry Deep Sleep Trick',
+            headlineSuffix: 'That Stops 3 AM Wakeups.',
+            subheadline:
+              'Restore deep, uninterrupted sleep on your very first night with the natural 10-ingredient nano-synergy formula backed by an ironclad 60-day guarantee.',
+            affiliateUrl: url,
+            sponsorCode: sponsorCode || '144',
+            landerArchetype: 'split-video',
+            landerTheme: 'cyan',
+            channelPreset: 'Parenting & Kids (YT Storytime With Ms. Erica + IG)'
+          })
+        );
+      }
 
       // Specialized high-converting preset for The Santa Circle
       if (url.includes('thesantacircle.com')) {
@@ -524,8 +547,31 @@ const server = http.createServer(async (req, res) => {
         },
         redirect: 'follow'
       });
-      const html = await htmlRes.text();
-      const cleanHtml = html.replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<style[\s\S]*?<\/style>/gi, '');
+      let html = await htmlRes.text();
+      let cleanHtml = html.replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<style[\s\S]*?<\/style>/gi, '');
+
+      // Follow client-side / OpenGraph canonical redirect if present on cloaked bridge pages
+      const ogUrlMatch =
+        html.match(/<meta\s+property=["']og:url["']\s+content=["'](.*?)["']/i) ||
+        html.match(/<link\s+rel=["']canonical["']\s+href=["'](.*?)["']/i) ||
+        html.match(/<meta\s+http-equiv=["']refresh["']\s+content=["'].*?url=(.*?)["']/i);
+
+      if (ogUrlMatch && ogUrlMatch[1]) {
+        try {
+          const dest = new URL(ogUrlMatch[1], targetUrl).href;
+          if (new URL(dest).hostname !== new URL(targetUrl).hostname) {
+            targetUrl = dest;
+            const destRes = await fetch(targetUrl, {
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+              },
+              redirect: 'follow'
+            });
+            html = await destRes.text();
+            cleanHtml = html.replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<style[\s\S]*?<\/style>/gi, '');
+          }
+        } catch (_) {}
+      }
 
       const titleMatch = cleanHtml.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
       const metaDescMatch =
