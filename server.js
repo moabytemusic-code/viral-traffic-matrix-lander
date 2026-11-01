@@ -529,6 +529,8 @@ const server = http.createServer(async (req, res) => {
         sponsorCode: body.sponsorCode || '144',
         channelPreset: body.channelPreset || 'Marketing & Traffic (9 Channels)',
         autoContentStudio: body.autoContentStudio !== false,
+        landerArchetype: body.landerArchetype || 'matrix',
+        landerTheme: body.landerTheme || 'emerald',
         selectedAccountIds: Array.isArray(body.selectedAccountIds) ? body.selectedAccountIds : null,
         outlierId: body.outlierId || null,
         steps: [
