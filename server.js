@@ -457,8 +457,41 @@ const server = http.createServer(async (req, res) => {
         return res.end(JSON.stringify({ ok: false, error: 'URL is required' }));
       }
 
-      // If it is an iDevAffiliate tracking link, resolve destination or fallback to direct landing page
       let targetUrl = url;
+      let sponsorCode = '144';
+      try {
+        const u = new URL(url);
+        sponsorCode =
+          u.searchParams.get('ref') ||
+          u.searchParams.get('sponsor') ||
+          u.searchParams.get('aid') ||
+          u.searchParams.get('aff') ||
+          '144';
+      } catch (_) {}
+
+      // Specialized high-converting preset for Bellver Card
+      if (url.includes('bellvercards.com')) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(
+          JSON.stringify({
+            ok: true,
+            title: 'Bellver Card Global Freedom',
+            slug: 'bellver-card',
+            headlinePrefix: 'Unlock Your High-Limit',
+            headlineGradient: 'Bellver Global Visa Card',
+            headlineSuffix: 'With Up to $250k Daily Spend.',
+            subheadline:
+              'Protect your privacy, pay your bills worldwide, and unlock physical or instant virtual cards with up to $250,000 daily limits.',
+            affiliateUrl: url,
+            sponsorCode: sponsorCode || 'kmtwarrior',
+            landerArchetype: 'voucher',
+            landerTheme: 'gold',
+            channelPreset: 'Finance & Crypto (TikTok WalletWise + YT 60x Daily + X Marketranger)'
+          })
+        );
+      }
+
+      // If it is an iDevAffiliate tracking link, resolve destination or fallback to direct landing page
       if (url.includes('idevaffiliate.com') && url.includes('34-3-32')) {
         targetUrl = 'https://5dollarfriday.com/viral-traffic-matrix/';
       }
@@ -490,7 +523,8 @@ const server = http.createServer(async (req, res) => {
           title: title || 'Viral Traffic Matrix',
           headline,
           subheadline,
-          affiliateUrl: url
+          affiliateUrl: url,
+          sponsorCode
         })
       );
     } catch (err) {

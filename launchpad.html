@@ -583,18 +583,40 @@
         const data = await res.json();
         if (data.ok) {
           if (data.title) {
-            document.getElementById('offerName').value = data.title.split(/[–|-]/)[0].trim().slice(0, 40);
+            document.getElementById('offerName').value = data.title;
             document.getElementById('offerName').dispatchEvent(new Event('input'));
           }
-          if (data.headline) {
+          if (data.slug) {
+            document.getElementById('offerSlug').value = data.slug;
+            document.getElementById('offerSlug').dataset.touched = '1';
+          }
+          if (data.headlinePrefix !== undefined) {
+            document.getElementById('headlinePrefix').value = data.headlinePrefix;
+          }
+          if (data.headlineGradient) {
+            document.getElementById('headlineGradient').value = data.headlineGradient;
+          } else if (data.headline) {
             document.getElementById('headlineGradient').value = data.headline.slice(0, 48);
           }
+          if (data.headlineSuffix !== undefined) {
+            document.getElementById('headlineSuffix').value = data.headlineSuffix;
+          }
           if (data.subheadline) {
-            document.getElementById('subheadline').value = data.subheadline.slice(0, 260);
+            document.getElementById('subheadline').value = data.subheadline;
           }
-          if (!document.getElementById('affiliateUrl').value) {
-            document.getElementById('affiliateUrl').value = url;
+          if (data.sponsorCode) {
+            document.getElementById('sponsorCode').value = data.sponsorCode;
           }
+          if (data.landerArchetype) {
+            document.getElementById('landerArchetype').value = data.landerArchetype;
+          }
+          if (data.landerTheme) {
+            document.getElementById('landerTheme').value = data.landerTheme;
+          }
+          if (data.channelPreset) {
+            document.getElementById('channelPreset').value = data.channelPreset;
+          }
+          document.getElementById('affiliateUrl').value = data.affiliateUrl || url;
         }
       } catch (_) {}
       btn.textContent = '✨ Auto-Extract Copy from URL';
