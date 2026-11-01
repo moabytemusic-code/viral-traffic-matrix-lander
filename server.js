@@ -487,7 +487,10 @@ const server = http.createServer(async (req, res) => {
             sponsorCode: sponsorCode || 'kmtwarrior',
             landerArchetype: 'split-video',
             landerTheme: 'cyan',
-            channelPreset: 'Parenting & Kids (YT Storytime With Ms. Erica + IG)'
+            channelPreset: 'Parenting & Kids (YT Storytime With Ms. Erica + IG)',
+            searchKeyword: 'sleep',
+            searchNiche: 'Health & Nutrition',
+            searchTier: 'gold'
           })
         );
       }
@@ -509,7 +512,10 @@ const server = http.createServer(async (req, res) => {
             sponsorCode: sponsorCode || '144',
             landerArchetype: 'voucher',
             landerTheme: 'emerald',
-            channelPreset: 'Parenting & Kids (YT Storytime With Ms. Erica + IG)'
+            channelPreset: 'Parenting & Kids (YT Storytime With Ms. Erica + IG)',
+            searchKeyword: 'secret santa',
+            searchNiche: '',
+            searchTier: 'gold'
           })
         );
       }
@@ -531,7 +537,10 @@ const server = http.createServer(async (req, res) => {
             sponsorCode: sponsorCode || 'kmtwarrior',
             landerArchetype: 'voucher',
             landerTheme: 'gold',
-            channelPreset: 'Finance & Crypto (TikTok WalletWise + YT 60x Daily + X Marketranger)'
+            channelPreset: 'Finance & Crypto (TikTok WalletWise + YT 60x Daily + X Marketranger)',
+            searchKeyword: 'credit card',
+            searchNiche: 'Personal Finance',
+            searchTier: 'gold'
           })
         );
       }
@@ -613,6 +622,24 @@ const server = http.createServer(async (req, res) => {
         headlineSuffix = words.slice(Math.min(words.length - 2, 8)).join(' ');
       }
 
+      // Derive smart searchKeyword & searchNiche for 9 Figure Buddy & vidIQ
+      const combinedText = `${title} ${headline} ${subheadline}`.toLowerCase();
+      let searchNiche = '';
+      if (/finance|money|crypto|invest|trade|card|bank|loan|wealth/i.test(combinedText)) {
+        searchNiche = 'Personal Finance';
+      } else if (/health|sleep|diet|supplement|weight|fitness|wellness|doctor/i.test(combinedText)) {
+        searchNiche = 'Health & Nutrition';
+      } else if (/tech|ai|software|traffic|automation|marketing|code|lead/i.test(combinedText)) {
+        searchNiche = 'Tech & AI';
+      } else if (/mind|habit|psychology|discipline|success|focus/i.test(combinedText)) {
+        searchNiche = 'Psychology & Self-Help';
+      }
+
+      // Extract 1-2 prominent non-stop words as search keyword
+      const stopWords = new Set(['the', 'and', 'for', 'with', 'this', 'that', 'from', 'your', 'you', 'get', 'how', 'why', 'what', 'free', 'best', 'more', 'all']);
+      const titleWords = title.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter((w) => w.length > 2 && !stopWords.has(w));
+      const searchKeyword = titleWords.slice(0, 2).join(' ') || 'viral';
+
       res.writeHead(200, { 'Content-Type': 'application/json' });
       return res.end(
         JSON.stringify({
@@ -624,7 +651,10 @@ const server = http.createServer(async (req, res) => {
           headlineSuffix,
           subheadline,
           affiliateUrl: url,
-          sponsorCode
+          sponsorCode,
+          searchKeyword,
+          searchNiche,
+          searchTier: 'gold'
         })
       );
     } catch (err) {

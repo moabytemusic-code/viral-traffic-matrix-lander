@@ -617,6 +617,22 @@
             document.getElementById('channelPreset').value = data.channelPreset;
           }
           document.getElementById('affiliateUrl').value = data.affiliateUrl || url;
+
+          // Dictate & Populate vidIQ + 9 Figure Buddy search term & niche!
+          if (data.searchKeyword) {
+            document.getElementById('nfbQuery').value = data.searchKeyword;
+            if (data.searchNiche !== undefined) {
+              document.getElementById('nfbNiche').value = data.searchNiche;
+            }
+            if (data.searchTier) {
+              document.getElementById('nfbTier').value = data.searchTier;
+            }
+            // Auto-trigger 9 Figure Buddy outlier search and vidIQ research
+            searchOutliers();
+            setTimeout(() => {
+              document.getElementById('vidiqResearchBtn')?.click();
+            }, 300);
+          }
         }
       } catch (_) {}
       btn.textContent = '✨ Auto-Extract Copy from URL';
