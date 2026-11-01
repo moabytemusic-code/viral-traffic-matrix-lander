@@ -469,6 +469,28 @@ const server = http.createServer(async (req, res) => {
           '144';
       } catch (_) {}
 
+      // Specialized high-converting preset for The Santa Circle
+      if (url.includes('thesantacircle.com')) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(
+          JSON.stringify({
+            ok: true,
+            title: 'The Santa Circle Modern Gift Exchange',
+            slug: 'santa-circle',
+            headlinePrefix: 'Host the Ultimate',
+            headlineGradient: 'Modern Secret Santa Gift Exchange',
+            headlineSuffix: 'For Families & Teams.',
+            subheadline:
+              'The sleek, 100% ad-free Secret Santa platform with smart pair exclusions, Amazon wishlist integration, and instant private recipient reveals.',
+            affiliateUrl: url,
+            sponsorCode: sponsorCode || '144',
+            landerArchetype: 'voucher',
+            landerTheme: 'emerald',
+            channelPreset: 'Parenting & Kids (YT Storytime With Ms. Erica + IG)'
+          })
+        );
+      }
+
       // Specialized high-converting preset for Bellver Card
       if (url.includes('bellvercards.com')) {
         res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -506,15 +528,34 @@ const server = http.createServer(async (req, res) => {
       const cleanHtml = html.replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<style[\s\S]*?<\/style>/gi, '');
 
       const titleMatch = cleanHtml.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-      const clean = (s) => (s || '').replace(/<[^>]+>/g, ' ').replace(/&#8211;/g, '-').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+      const metaDescMatch =
+        html.match(/<meta\s+name=["']description["']\s+content=["'](.*?)["']/i) ||
+        html.match(/<meta\s+property=["']og:description["']\s+content=["'](.*?)["']/i);
+      const metaTitleMatch = html.match(/<meta\s+property=["']og:title["']\s+content=["'](.*?)["']/i);
+
+      const clean = (s) =>
+        (s || '')
+          .replace(/<[^>]+>/g, ' ')
+          .replace(/&#8211;/g, '-')
+          .replace(/&amp;/g, '&')
+          .replace(/&nbsp;/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
 
       const candidateTexts = [...cleanHtml.matchAll(/<(?:p|div|span|h[1-6])[^>]*>([\s\S]{25,260}?)<\/(?:p|div|span|h[1-6])>/gi)]
         .map((m) => clean(m[1]))
         .filter((t) => t.length > 25 && !t.includes('Cookie') && !t.includes('WordPress') && !t.includes('function('));
 
-      const title = clean(titleMatch && titleMatch[1]).split(/[–|-]/)[0].trim();
-      const headline = candidateTexts[0] || candidateTexts[1] || 'Viral Traffic Opportunity';
-      const subheadline = candidateTexts.find((t) => t.length > 50 && t !== headline) || candidateTexts[1] || candidateTexts[0] || '';
+      const title = clean((metaTitleMatch && metaTitleMatch[1]) || (titleMatch && titleMatch[1]))
+        .split(/[–|-]/)[0]
+        .trim();
+      const headline = candidateTexts[0] || candidateTexts[1] || 'Viral Opportunity';
+      const subheadline =
+        clean(metaDescMatch && metaDescMatch[1]) ||
+        candidateTexts.find((t) => t.length > 50 && t !== headline) ||
+        candidateTexts[1] ||
+        candidateTexts[0] ||
+        '';
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
       return res.end(
