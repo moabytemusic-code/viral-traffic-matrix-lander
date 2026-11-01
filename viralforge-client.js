@@ -103,12 +103,12 @@ function buildThreeVariantBriefs(offer, outlierBreakdown) {
     ? `Mirror this proven viral outlier hook rhythm: ${rawDna.slice(0, 320).replace(/\s+/g, ' ')}...`
     : 'Use a high-retention pattern-interrupt hook in the first 3 seconds.';
 
-  const baseFacts = `Promote ${offer.name}: ${offer.headlinePrefix || ''} ${offer.headlineGradient || ''} ${offer.headlineSuffix || ''}. ${offer.subheadline || ''}. End with clear spoken and on-screen CTA: Grab your free access via the link in my bio (traffic.aisimplesystem.com/o/${offer.slug}).`;
+  const baseFacts = `Promote ${offer.name}: ${offer.headlinePrefix || ''} ${offer.headlineGradient || ''} ${offer.headlineSuffix || ''}. ${offer.subheadline || ''}. Maintain the exact same single presenter throughout; omit raw URL typography from on-screen text and use spoken 'link in bio' CTA.`;
 
   return [
-    `Open with a 'Secret Free Website / Tool That Feels Illegal to Know' curiosity hook. ${hookHint} ${baseFacts}`,
-    `Open by calling out the #1 frustration people face before discovering ${offer.name}, then reveal the 4-minute free setup. ${baseFacts}`,
-    `Open with a contrarian 'Stop Wasting Time & Money the Old Way' hook and demonstrate how ${offer.name} works automatically. ${baseFacts}`
+    `Variation 1: Open with a 'Secret Free Website / Tool That Feels Illegal to Know' curiosity hook. ${hookHint} ${baseFacts}`,
+    `Variation 2: Open by calling out the #1 frustration people face before discovering ${offer.name}, then reveal the fast setup. ${baseFacts}`,
+    `Variation 3: Open with a contrarian 'Stop Wasting Time & Money the Old Way' hook and demonstrate how ${offer.name} works automatically. ${baseFacts}`
   ];
 }
 

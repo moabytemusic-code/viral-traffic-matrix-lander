@@ -311,23 +311,29 @@ function buildViralForgeSwapPrompt(offer, outlierBreakdown) {
   const rawBreakdown = outlierBreakdown?.rawText || JSON.stringify(outlierBreakdown || {}, null, 2);
   const outlierExcerpt = rawBreakdown.slice(0, 1200);
 
-  return `# ${offer.name} — 3-Variation ViralForge AI SwapEngine Prompt
-# Designated Channels: ${offer.channelPreset}
-# Lander Bio-Link URL: https://traffic.aisimplesystem.com/o/${offer.slug}
+  return `# ${offer.name} — SwapEngine Prompt
 
-Create 3 distinct short-form vertical (9:16) video hook variations promoting ${offer.name}.
-Core Value Proposition: ${offer.headlinePrefix || ''} ${offer.headlineGradient} ${offer.headlineSuffix || ''} — ${offer.subheadline}
+Create this in the same format, pacing, and style as the reference video. Keep the reference’s structure and beat pattern, but change the content so it promotes ${offer.name}.
 
-## 3 Hook Variations to Generate:
-1. **Variation 1 (Curiosity / Open Loop Hook):** Open with a bold curiosity gap modeled after proven viral outlier DNA ("Here's a secret tool/system that feels illegal to know if you...").
-2. **Variation 2 (Pain / Problem Callout Hook):** Call out the #1 frustration the audience faces right in the first 3 seconds, then reveal ${offer.name} as the fast, friction-free fix.
-3. **Variation 3 (Contrarian / Cost-Saving Hook):** Challenge the old, expensive, or slow way of doing things and show how ${offer.name} gets them there in minutes.
+Promote ${offer.name}: ${offer.headlinePrefix || ''} ${offer.headlineGradient} ${offer.headlineSuffix || ''}. ${offer.subheadline}
 
-## Proven 9 Figure Buddy Outlier DNA Reference:
-${outlierExcerpt ? outlierExcerpt : 'Use a fast-paced talking-head explainer with 3 stacked curiosity markers in the first 10 seconds, a clear mechanism reveal in the middle, and a direct CTA at the end.'}
+## Visual & Presenter Direction
+- Cast a single adult creator who fits the reference’s presentation style. Maintain the exact same single presenter throughout all variations (do not invent new identities or require replacement presenter images).
+- Wardrobe should match the reference’s vibe. Clean everyday clothes suitable for social video content.
+- Setting: A tidy home office, creator desk setup with laptop or phone visible, or neutral creator studio consistent with the reference.
+- Lighting & Performance: Bright, clean, and flattering lighting. Keep all motion, punch-ins, pauses, and gestures aligned to the reference video's beats.
 
-## Call To Action (Final Beat):
-"Grab your free ${offer.name} access via the link in my bio (traffic.aisimplesystem.com/o/${offer.slug})."`;
+## Beat-by-Beat Direction
+- Beat 1 (Pattern-Interrupt Hook): Open in the first 3 seconds with a high-retention callout addressing the audience's core problem or curiosity gap.
+- Beat 2 (Mechanism Reveal): Introduce ${offer.name} as the fast, friction-free solution.
+- Beat 3 (Value & Setup): Visually reinforce that setup takes just a few minutes and delivers immediate results.
+- Beat 4 (Call to Action): End on the same CTA-style beat as the reference, directing viewers to the link in bio.
+
+## On-Screen Text Guidance & Guardrails
+- Use short, high-impact text overlays matching the reference style: "Tired of this?", "Quick Fix", "100% Free", "Link in bio".
+- Explicitly omit raw URL text overlays (keep the destination link spoken: "Click the link in my bio").
+- Maintain the same presenter across all video variations without demanding replacement images.
+- Aspect ratio: 9:16.`;
 }
 
 const server = http.createServer(async (req, res) => {
