@@ -156,6 +156,30 @@ async function schedulePostWithFirstComment({
     mediaObj.video_thumbnail = finalThumbUrl;
   }
 
+  const allAccounts = await getConnectedAccounts();
+  const tiktokAccountIds = new Set(
+    allAccounts.filter((a) => a.platform === 'tiktok').map((a) => a.id)
+  );
+
+  // Generate platform_overrides for TikTok accounts so raw links are formatted natively as "Link in bio"
+  const platformOverrides = [];
+  const targetTiktokIds = accountIds.filter((id) => tiktokAccountIds.has(id));
+  if (targetTiktokIds.length > 0 && text) {
+    const cleanTiktokText = text
+      .replace(/https?:\/\//gi, '')
+      .replace(
+        /👉\s*(?:Funded Account Pass|Free Link|Claim free access|Access Link|Link):\s*([^\s]+)/gi,
+        '👉 Link in bio: $1'
+      );
+    for (const tkId of targetTiktokIds) {
+      platformOverrides.push({
+        platform: 'tiktok',
+        account_id: tkId,
+        content: { text: cleanTiktokText }
+      });
+    }
+  }
+
   const payload = {
     content: {
       text: text || '',
@@ -167,6 +191,7 @@ async function schedulePostWithFirstComment({
     youtube_options: {
       title: (title || text || 'Featured Commercial').slice(0, 95)
     },
+    platform_overrides: platformOverrides,
     scheduling:
       scheduledAt === 'now'
         ? { publish_type: 'now' }
@@ -180,12 +205,17 @@ async function schedulePostWithFirstComment({
           }
   };
 
-  // If firstCommentMessage is provided, attach it
+  // If firstCommentMessage is provided, attach it (excluding TikTok accounts which reject link comments)
   if (firstCommentMessage) {
-    payload.first_comment = {
-      message: firstCommentMessage,
-      accounts: firstCommentAccountIds || accountIds
-    };
+    const eligibleCommentAccounts = (firstCommentAccountIds || accountIds).filter(
+      (id) => !tiktokAccountIds.has(id)
+    );
+    if (eligibleCommentAccounts.length > 0) {
+      payload.first_comment = {
+        message: firstCommentMessage,
+        accounts: eligibleCommentAccounts
+      };
+    }
   }
 
   const result = await csFetch(`/workspaces/${wsId}/posts`, 'POST', payload);
