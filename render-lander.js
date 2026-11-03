@@ -528,6 +528,354 @@ function renderOfferLander(offer) {
         </div>
       </main>
     `;
+  } else if (archetype === 'glp-hybrid') {
+    // ARCHETYPE 5: YU SLEEP OFFICIAL GUIDED LANDING PAGE (GLP) & HYBRID VSL
+    mainContentHtml = `
+      <main class="relative z-10 pt-28 pb-20 px-4 sm:px-6 max-w-5xl mx-auto space-y-16">
+        
+        <!-- GLP Hero Section -->
+        <div class="text-center max-w-4xl mx-auto space-y-6">
+          <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-900/40 border border-purple-500/40 text-xs font-bold text-purple-200">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>VIDEO REVEALS: CLINICAL 30-SECOND TART CHERRY TRICK</span>
+          </div>
+
+          <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black leading-[1.12] tracking-tight text-white">
+            Video Reveals: <span class="text-emerald-400">30-Second Cherry Trick</span> That <span class="text-emerald-400">STOPS 3 AM Wakeups</span> & Restores Deep, Restful Sleep
+          </h1>
+
+          <p class="text-lg sm:text-xl text-slate-200 font-medium max-w-2xl mx-auto">
+            Most people sleep 6–7 hours straight <span class="text-emerald-400 font-bold">the very first night</span> they try it.
+          </p>
+        </div>
+
+        <!-- High-Impact 16:9 Video Player Arena -->
+        <div class="max-w-3xl mx-auto rounded-3xl overflow-hidden bg-black/90 border-2 border-purple-500/40 shadow-2xl shadow-purple-900/30 relative">
+          <div class="relative w-full aspect-video bg-black flex items-center justify-center">
+            <video id="glpVideoPlayer" autoplay loop muted playsinline class="w-full h-full object-cover">
+              <source src="/videos/yusleep-commercial.mp4" type="video/mp4" />
+            </video>
+            
+            <!-- Sound / Unmute Overlay Pill -->
+            <button
+              type="button"
+              onclick="const v=document.getElementById('glpVideoPlayer'); if(v){ v.muted=!v.muted; this.querySelector('span').textContent=v.muted?'🔇 Tap for Sound':'🔊 Playing Sound'; }"
+              class="absolute top-4 right-4 z-30 px-3.5 py-1.5 rounded-full bg-black/80 hover:bg-black/95 backdrop-blur-md border border-white/20 text-xs font-mono-code text-white flex items-center gap-1.5 cursor-pointer transition shadow-xl"
+            >
+              <span>🔇 Tap for Sound</span>
+            </button>
+          </div>
+          <div class="p-4 bg-gradient-to-r from-purple-950/80 via-slate-900/80 to-purple-950/80 border-t border-white/10 flex flex-wrap items-center justify-between text-xs text-slate-300 gap-2">
+            <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Live Broadcast • Doctor Recommended Formula</span>
+            <span class="font-bold text-emerald-400">⭐ 4.9/5 (36,000+ Verified Reviews)</span>
+          </div>
+        </div>
+
+        <!-- HYBRID VIP LEAD MAGNET: INSTANT $10 COUPON + SLEEP GUIDE -->
+        <div id="claim-box" class="max-w-3xl mx-auto rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-purple-900/30 via-slate-900/50 to-emerald-950/30 border border-emerald-500/40 shadow-xl space-y-4">
+          <div class="text-center space-y-1">
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold font-mono-code">
+              🎁 VIP DISCOUNT CODE UNLOCK
+            </div>
+            <h3 class="text-xl sm:text-2xl font-bold text-white">Claim An Instant Extra $10 OFF + Free Sleep Guide</h3>
+            <p class="text-xs sm:text-sm text-slate-300">Enter your email below to unlock your direct checkout coupon code & Dr. Collins' 7-Day Sleep Checklist:</p>
+          </div>
+          
+          <form id="giveawayForm" class="flex flex-col sm:flex-row gap-3 pt-2">
+            <input
+              type="email"
+              id="leadEmail"
+              required
+              placeholder="Enter your email for instant $10 coupon..."
+              class="flex-1 h-13 px-4 py-3.5 rounded-xl bg-black/60 border border-white/15 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-emerald-400"
+            />
+            <button
+              type="submit"
+              class="px-6 py-3.5 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer transition"
+            >
+              <span>Unlock $10 Coupon</span>
+              <span>→</span>
+            </button>
+          </form>
+
+          <!-- Hidden Coupon Reveal after opt-in -->
+          <div id="couponRevealed" class="hidden p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center text-xs text-emerald-200 space-y-1">
+            <div>🎉 <strong>Coupon Active:</strong> Use code <code class="px-2 py-0.5 rounded bg-black/50 text-emerald-400 font-mono-code font-bold">YUSLEEP10</code> at checkout for extra savings!</div>
+            <div class="text-[11px] text-slate-300">Check your inbox for Dr. Collins' 7-Day Deep Sleep Blueprint.</div>
+          </div>
+        </div>
+
+        <!-- 3-TIER PRICING TABLE (DIRECT CLICKBANK HOPLINKS) -->
+        <div class="space-y-8">
+          <div class="text-center space-y-2">
+            <div class="text-xs font-bold text-purple-300 uppercase tracking-widest font-mono-code">OFFICIAL PACKAGES & SPECIAL DISCOUNTS</div>
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Choose Your Yu Sleep Package Below</h2>
+            <p class="text-sm text-slate-300">100% Risk-Free 60-Day "Sleep Like A Baby" Money-Back Guarantee</p>
+          </div>
+
+          <div class="grid md:grid-cols-3 gap-6 items-stretch">
+            
+            <!-- TIER 1: 1 MONTH SUPPLY -->
+            <div class="rounded-3xl p-6 bg-slate-900/60 border border-white/10 flex flex-col justify-between space-y-6 hover:border-purple-500/40 transition">
+              <div class="space-y-4 text-center">
+                <div class="text-xs font-bold text-slate-400 uppercase font-mono-code">SAMPLE PACKAGE</div>
+                <h3 class="text-2xl font-bold text-white">1 MONTH SUPPLY</h3>
+                <div class="text-xs font-bold text-emerald-400">30% OFF • SAVE $30</div>
+                
+                <div class="py-4 border-y border-white/10">
+                  <div class="text-4xl font-black text-white">$69<span class="text-base text-slate-400 font-normal"> / bottle</span></div>
+                  <div class="text-xs text-slate-400 line-through mt-1">Regular Price: $99</div>
+                </div>
+
+                <ul class="text-xs text-slate-300 space-y-2.5 text-left">
+                  <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> 1 Bottle (30 Day Supply)</li>
+                  <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Natural Tart Cherry Formula</li>
+                  <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> 60-Day Money-Back Guarantee</li>
+                  <li class="flex items-center gap-2 text-slate-500"><span class="text-slate-600">✕</span> Free Shipping</li>
+                  <li class="flex items-center gap-2 text-slate-500"><span class="text-slate-600">✕</span> Dr. Collins Bonuses</li>
+                </ul>
+              </div>
+
+              <a
+                href="https://yusleep.pay.clickbank.net/?cbitems=1&template=1yun&exitoffer=exy1&cbfid=63843&vtid=glp&affiliate=kmtwarrior"
+                target="_blank"
+                class="w-full py-4 rounded-xl font-bold text-sm text-center text-white bg-slate-800 hover:bg-slate-700 border border-white/20 transition shadow-md block"
+              >
+                Buy 1 Bottle ($69) →
+              </a>
+            </div>
+
+            <!-- TIER 2: 6 MONTH SUPPLY (CENTER / BEST VALUE / MOST POPULAR) -->
+            <div class="rounded-3xl p-7 bg-gradient-to-b from-purple-950/80 via-slate-900/90 to-purple-950/80 border-2 border-emerald-400 shadow-2xl shadow-emerald-500/20 flex flex-col justify-between space-y-6 relative transform md:-translate-y-3">
+              
+              <!-- Ribbon Badge -->
+              <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-emerald-400 to-teal-400 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg">
+                👑 MOST POPULAR • BEST VALUE
+              </div>
+
+              <div class="space-y-4 text-center pt-2">
+                <div class="text-xs font-bold text-emerald-400 uppercase font-mono-code">TOTAL SLEEP OVERHAUL</div>
+                <h3 class="text-3xl font-black text-white">6 MONTH SUPPLY</h3>
+                <div class="inline-block px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-extrabold">
+                  60% OFF • SAVE $360
+                </div>
+
+                <div class="py-4 border-y border-purple-500/30">
+                  <div class="text-5xl font-black text-white">$39<span class="text-lg text-emerald-400 font-bold"> / bottle</span></div>
+                  <div class="text-xs text-slate-400 line-through mt-1">Regular Price: $594</div>
+                  <div class="text-xs text-emerald-300 font-bold mt-1">Total: $234 (Only $1.30/Night)</div>
+                </div>
+
+                <ul class="text-xs text-slate-200 space-y-2.5 text-left font-medium">
+                  <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> <strong>6 Bottles</strong> (180 Day Supply)</li>
+                  <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> <strong>FREE US Shipping</strong> Included</li>
+                  <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> <strong>2 Free Dr. Collins Bonuses ($150 Value)</strong></li>
+                  <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Deep REM Circadian Reset</li>
+                  <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> 60-Day 100% Money-Back Guarantee</li>
+                </ul>
+              </div>
+
+              <a
+                href="https://yusleep.pay.clickbank.net/?cbitems=3&template=6yun&exitoffer=exy1&cbfid=63843&vtid=glp&affiliate=kmtwarrior"
+                target="_blank"
+                class="w-full py-4 rounded-xl font-black text-base text-center text-slate-950 bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 hover:from-emerald-300 hover:to-teal-200 transition shadow-xl shadow-emerald-500/30 block animate-pulse"
+              >
+                Claim 6 Months ($39/ea) →
+              </a>
+            </div>
+
+            <!-- TIER 3: 3 MONTH SUPPLY -->
+            <div class="rounded-3xl p-6 bg-slate-900/60 border border-white/10 flex flex-col justify-between space-y-6 hover:border-purple-500/40 transition">
+              <div class="space-y-4 text-center">
+                <div class="text-xs font-bold text-slate-400 uppercase font-mono-code">POPULAR PACKAGE</div>
+                <h3 class="text-2xl font-bold text-white">3 MONTH SUPPLY</h3>
+                <div class="text-xs font-bold text-emerald-400">40% OFF • SAVE $120</div>
+
+                <div class="py-4 border-y border-white/10">
+                  <div class="text-4xl font-black text-white">$59<span class="text-base text-slate-400 font-normal"> / bottle</span></div>
+                  <div class="text-xs text-slate-400 line-through mt-1">Regular Price: $297</div>
+                </div>
+
+                <ul class="text-xs text-slate-300 space-y-2.5 text-left">
+                  <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> 3 Bottles (90 Day Supply)</li>
+                  <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> <strong>2 Free Dr. Collins Bonuses</strong></li>
+                  <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Calms Night Cortisol Spikes</li>
+                  <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> 60-Day Money-Back Guarantee</li>
+                  <li class="flex items-center gap-2 text-slate-500"><span class="text-slate-600">✕</span> Free Shipping</li>
+                </ul>
+              </div>
+
+              <a
+                href="https://yusleep.pay.clickbank.net/?cbitems=2&template=3yun&exitoffer=exy1&cbfid=63843&vtid=glp&affiliate=kmtwarrior"
+                target="_blank"
+                class="w-full py-4 rounded-xl font-bold text-sm text-center text-white bg-purple-900/80 hover:bg-purple-800 border border-purple-500/30 transition shadow-md block"
+              >
+                Buy 3 Bottles ($59/ea) →
+              </a>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- DR. COLLINS 2 FREE BONUSES ($150 VALUE) -->
+        <div class="rounded-3xl p-8 bg-purple-950/40 border border-purple-500/30 space-y-8">
+          <div class="text-center space-y-2">
+            <span class="text-xs font-bold text-emerald-400 font-mono-code uppercase">INCLUDED 100% FREE WITH 3 & 6 MONTH PACKAGES</span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Get Dr. Collins' Amazing Bonuses ($150 Value Free)</h2>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="p-6 rounded-2xl bg-black/40 border border-white/10 space-y-3">
+              <div class="text-2xl font-bold text-purple-300">📖 Bonus #1: 11 Soothing Bedtime Stories</div>
+              <div class="text-xs font-mono-code text-emerald-400 font-bold">$79 VALUE • FREE TODAY</div>
+              <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                Soothing narrations specifically written to quiet racing thoughts and ease your nervous system into restorative stage-4 sleep. Just press play, close your eyes, and let the stress of the day fade away.
+              </p>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-black/40 border border-white/10 space-y-3">
+              <div class="text-2xl font-bold text-purple-300">🧠 Bonus #2: Younger & Happier While You Sleep</div>
+              <div class="text-xs font-mono-code text-emerald-400 font-bold">$79 VALUE • FREE TODAY</div>
+              <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                Science-backed nightly rituals that reprogram your subconscious mind while resting. Gently releases emotional tension, balances morning hormones, and helps you wake up refreshed and smiling.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- THE 10-INGREDIENT NANO-SYNERGY SCIENCE -->
+        <div class="space-y-6">
+          <div class="text-center space-y-2">
+            <div class="text-xs font-bold text-emerald-400 font-mono-code uppercase">CLINICALLY STUDIED INGREDIENTS</div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Inside Each Serving of Yu Sleep</h2>
+            <p class="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto">Non-GMO • Gluten-Free • Doctor Formulated • Zero Habit-Forming Additives</p>
+          </div>
+
+          <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="p-5 rounded-2xl bg-slate-900/50 border border-white/10 space-y-2">
+              <div class="text-base font-bold text-emerald-400">🍒 Montmorency Tart Cherry</div>
+              <p class="text-xs text-slate-300 leading-relaxed">Rich in natural phytomelatonin. Clinically proven to regulate your sleep-wake cycle and extend total restorative sleep time without morning grogginess.</p>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-slate-900/50 border border-white/10 space-y-2">
+              <div class="text-base font-bold text-emerald-400">🛡️ GABA (Cortisol Reducer)</div>
+              <p class="text-xs text-slate-300 leading-relaxed">Known as nature's gentle sedative. Lowers nighttime cortisol spikes that jolt you awake at 3 AM with racing thoughts.</p>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-slate-900/50 border border-white/10 space-y-2">
+              <div class="text-base font-bold text-emerald-400">✨ 5-HTP (Serotonin Precursor)</div>
+              <p class="text-xs text-slate-300 leading-relaxed">Crosses the blood-brain barrier to produce serotonin, elevating mood, reducing nighttime anxiety, and supporting deep REM sleep.</p>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-slate-900/50 border border-white/10 space-y-2">
+              <div class="text-base font-bold text-emerald-400">🌿 L-Theanine</div>
+              <p class="text-xs text-slate-300 leading-relaxed">Stimulates calming alpha brain waves to quiet overactive mental chatter and smooth the transition into delta sleep.</p>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-slate-900/50 border border-white/10 space-y-2">
+              <div class="text-base font-bold text-emerald-400">⚡ Vitamin B6 & B2 Complex</div>
+              <p class="text-xs text-slate-300 leading-relaxed">Essential enzymatic co-factors that help your body synthesize natural melatonin and maintain steady neurological calm.</p>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-slate-900/50 border border-white/10 space-y-2">
+              <div class="text-base font-bold text-emerald-400">🔬 Nano-Synergy Delivery</div>
+              <p class="text-xs text-slate-300 leading-relaxed">Micronized formulation ensures maximum cellular absorption within 20 minutes of your evening ritual.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- VERIFIED SOCIAL PROOF / FACEBOOK-STYLE FEED (36,000+ REVIEWS) -->
+        <div class="space-y-6">
+          <div class="text-center space-y-2">
+            <div class="text-xs font-bold text-emerald-400 font-mono-code uppercase">REAL RESULTS FROM REAL SLEEPERS</div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Based On 36,000+ Verified Customer Reviews</h2>
+          </div>
+
+          <div class="space-y-4 max-w-3xl mx-auto">
+            
+            <div class="p-4 sm:p-5 rounded-2xl bg-slate-900/60 border border-white/10 space-y-2">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center font-bold text-white">BW</div>
+                  <div>
+                    <div class="text-sm font-bold text-white">Brenda Wilson</div>
+                    <div class="text-[11px] text-slate-400">Verified Buyer • 6-Month Supply</div>
+                  </div>
+                </div>
+                <div class="text-amber-400 text-xs">★★★★★</div>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">
+                "I haven't slept through the night in over 4 years. Every single night around 3:15 AM I would snap wide awake. The very first night I drank Yu Sleep, I slept all the way until my 6:30 AM alarm. No grogginess at all. This stuff is a miracle."
+              </p>
+            </div>
+
+            <div class="p-4 sm:p-5 rounded-2xl bg-slate-900/60 border border-white/10 space-y-2">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-teal-600 flex items-center justify-center font-bold text-white">DC</div>
+                  <div>
+                    <div class="text-sm font-bold text-white">Darlene Cooper</div>
+                    <div class="text-[11px] text-slate-400">Verified Buyer • 3-Month Supply</div>
+                  </div>
+                </div>
+                <div class="text-amber-400 text-xs">★★★★★</div>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">
+                "Synthetic melatonin always gave me weird dreams and made me feel like a zombie the next morning. Tart Cherry + GABA is on a whole different level. My brain just turns off peacefully."
+              </p>
+            </div>
+
+            <div class="p-4 sm:p-5 rounded-2xl bg-slate-900/60 border border-white/10 space-y-2">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-white">RH</div>
+                  <div>
+                    <div class="text-sm font-bold text-white">Robert Harris</div>
+                    <div class="text-[11px] text-slate-400">Verified Buyer • 6-Month Supply</div>
+                  </div>
+                </div>
+                <div class="text-amber-400 text-xs">★★★★★</div>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">
+                "Got the 6-bottle bundle to save the $360. Best purchase of the year. My wife says I don't toss and turn anymore, and my afternoon energy crash is completely gone."
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 60-DAY MONEY-BACK GUARANTEE -->
+        <div class="rounded-3xl p-8 bg-gradient-to-r from-emerald-950/40 via-slate-900/80 to-purple-950/40 border border-emerald-500/30 flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
+          <div class="w-24 h-24 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-4xl shrink-0">
+            🛡️
+          </div>
+          <div class="space-y-2">
+            <h3 class="text-xl sm:text-2xl font-bold text-white">100% "Sleep Like A Baby" 60-Day Money-Back Guarantee</h3>
+            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              If you don't sleep deeply through the night, wake up refreshed with zero brain fog, and love your results, simply send the bottles back at any time in the next 60 days for a prompt, 100% refund. No questions asked.
+            </p>
+          </div>
+        </div>
+
+        <!-- FINAL BOTTOM CTA BAR -->
+        <div class="text-center space-y-4 pt-6">
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Ready For Deep, Restful Sleep Tonight?</h2>
+          <div class="flex flex-wrap justify-center gap-4">
+            <a
+              href="https://yusleep.pay.clickbank.net/?cbitems=3&template=6yun&exitoffer=exy1&cbfid=63843&vtid=glp&affiliate=kmtwarrior"
+              target="_blank"
+              class="px-8 py-4 rounded-xl font-black text-base text-slate-950 bg-gradient-to-r from-emerald-400 to-teal-300 hover:from-emerald-300 hover:to-teal-200 shadow-xl shadow-emerald-500/30 cursor-pointer transition"
+            >
+              Claim Best Value Package ($39/ea) →
+            </a>
+          </div>
+          <div class="text-[11px] text-slate-400">
+            ClickBank is the retailer of products on this site. 60-Day Unconditional Guarantee.
+          </div>
+        </div>
+
+      </main>
+    `;
   } else {
     // DEFAULT ARCHETYPE 1: SPECULAR CYBER GRID (Hero + Multiplier + 3-Step Bento)
     mainContentHtml = `

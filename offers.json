@@ -135,7 +135,7 @@
     "affiliateUrl": "https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=yusleep&op=glp&tid=tracking",
     "sponsorCode": "kmtwarrior",
     "channelPreset": "Everyday Mind & Wellness (Freebie Channel + FB)",
-    "landerArchetype": "split-video",
+    "landerArchetype": "glp-hybrid",
     "landerTheme": "cyan",
     "steps": [
       {
