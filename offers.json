@@ -203,5 +203,46 @@
       ]
     },
     "createdAt": "2026-11-03T03:25:00.000Z"
+  },
+  "ai-vault": {
+    "slug": "ai-vault",
+    "name": "The 1,000+ AI Automation Vault",
+    "badge": "100% Free Instant Download • 1,000+ Prompts",
+    "eyebrow": "Autonomous AI Workflows & Copy-Paste Systems",
+    "headlinePrefix": "Unlock the 1,000+",
+    "headlineGradient": "AI Automation & Prompt Vault",
+    "headlineSuffix": "That Replaces a $5,000/Mo Agency.",
+    "subheadline": "Stop typing basic prompts into ChatGPT. Get copy-and-paste autonomous workflows, marketing blueprints, and secret AI tool stacks for free.",
+    "ctaButtonText": "Claim Free AI Vault",
+    "affiliateUrl": "https://5dfpartners.idevaffiliate.com/144.html",
+    "sponsorCode": "144",
+    "channelPreset": "Tech & AI Hustle (AI Profit Lab + System & Signal)",
+    "landerArchetype": "split-video",
+    "landerTheme": "cyan",
+    "videoUrl": "/videos/ai-vault-commercial.mp4",
+    "steps": [
+      {
+        "title": "Copy-Paste Autonomous Workflows",
+        "desc": "Deploy battle-tested multi-agent pipelines for sales copywriting, content generation, and SEO in 60 seconds."
+      },
+      {
+        "title": "1,000+ System-Engineered Prompts",
+        "desc": "Plug directly into Claude, ChatGPT, and Gemini with chain-of-thought frameworks that bypass robotic answers."
+      },
+      {
+        "title": "Secret AI Tool Stacks & API Kits",
+        "desc": "Discover 250+ under-the-radar AI tools that replace expensive SaaS subscriptions and agency retainers."
+      }
+    ],
+    "brevo": {
+      "listId": 80,
+      "welcomeTemplateId": 886,
+      "followUpTemplateIds": [
+        887,
+        888,
+        889
+      ]
+    },
+    "createdAt": "2026-11-03T03:50:00.000Z"
   }
 }

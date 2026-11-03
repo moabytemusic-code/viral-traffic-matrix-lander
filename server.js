@@ -50,6 +50,10 @@ const VANITY_ALIASES = {
   dog: 'dog-enrichment',
   puppy: 'dog-enrichment',
   braintraining: 'dog-enrichment',
+  ai: 'ai-vault',
+  vault: 'ai-vault',
+  prompts: 'ai-vault',
+  tools: 'ai-vault',
   matrix: 'viral-traffic-matrix',
   viral: 'viral-traffic-matrix',
   traffic: 'viral-traffic-matrix',
@@ -895,6 +899,13 @@ const server = http.createServer(async (req, res) => {
             name.includes('dog') ||
             name.includes('enrichment') ||
             name.includes('freebie')
+          );
+        } else if (offer.slug === 'ai-vault') {
+          return (
+            name.includes('ai profit') ||
+            name.includes('system & signal') ||
+            name.includes('trafficpros') ||
+            name.includes('lead generation')
           );
         }
         return false;
