@@ -46,6 +46,10 @@ const VANITY_ALIASES = {
   sleep: 'yu-sleep',
   yusleep: 'yu-sleep',
   cherry: 'yu-sleep',
+  dogs: 'dog-enrichment',
+  dog: 'dog-enrichment',
+  puppy: 'dog-enrichment',
+  braintraining: 'dog-enrichment',
   matrix: 'viral-traffic-matrix',
   viral: 'viral-traffic-matrix',
   traffic: 'viral-traffic-matrix',
@@ -885,6 +889,12 @@ const server = http.createServer(async (req, res) => {
             name.includes('lead generation') ||
             name.includes('insider secrets') ||
             name.includes('system & signal')
+          );
+        } else if (offer.slug === 'dog-enrichment') {
+          return (
+            name.includes('dog') ||
+            name.includes('enrichment') ||
+            name.includes('freebie')
           );
         }
         return false;

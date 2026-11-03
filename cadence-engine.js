@@ -123,6 +123,7 @@ function renderAngleVideo(slug, angleId) {
   let compId = 'BellverCommercial';
   if (slug === 'santa-circle') compId = 'SantaCircleCommercial';
   if (slug === 'yu-sleep') compId = 'YuSleepCommercial';
+  if (slug === 'dog-enrichment') compId = 'DogCommercial';
 
   // Temporarily swap active voiceover & captions for rendering
   let activeAudioName = 'voiceover.mp3';
@@ -133,6 +134,9 @@ function renderAngleVideo(slug, angleId) {
   } else if (slug === 'yu-sleep') {
     activeAudioName = 'yusleep-voiceover.mp3';
     activeCaptionsName = 'yusleep-captions.json';
+  } else if (slug === 'dog-enrichment') {
+    activeAudioName = 'dogs-voiceover.mp3';
+    activeCaptionsName = 'dogs-captions.json';
   }
 
   const backupAudio = path.join(REMOTION_DIR, 'public', `${activeAudioName}.bak`);
@@ -216,6 +220,12 @@ async function advanceAndSchedule(slug) {
         name.includes('everyday mind') ||
         name.includes('freebie') ||
         name.includes('marketing resource')
+      );
+    } else if (slug === 'dog-enrichment') {
+      return (
+        name.includes('dog') ||
+        name.includes('enrichment') ||
+        name.includes('freebie')
       );
     }
     return false;

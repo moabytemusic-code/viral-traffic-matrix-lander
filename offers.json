@@ -162,5 +162,46 @@
     },
     "createdAt": "2026-11-01T17:00:00.000Z",
     "videoUrl": "/videos/yusleep-commercial.mp4"
+  },
+  "dog-enrichment": {
+    "slug": "dog-enrichment",
+    "name": "Brain Training for Dogs (Enrichment Games)",
+    "badge": "Certified CPDT-KA • 60-Day Guarantee",
+    "eyebrow": "Force-Free Canine Mental Stimulation",
+    "headlinePrefix": "Discover the 15-Minute",
+    "headlineGradient": "Canine Brain Training Game",
+    "headlineSuffix": "That Calms Hyperactive Dogs Fast.",
+    "subheadline": "Eliminate barking, chewing, and hyperactivity without harsh corrections. Simple, gentle games that tire out your dog faster than a 2-hour walk.",
+    "ctaButtonText": "Try 1st Brain Game Free",
+    "affiliateUrl": "https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=bt4dogs&tid=ytshorts",
+    "sponsorCode": "kmtwarrior",
+    "channelPreset": "Pets & Dogs (Practical Dog Enrichment YT)",
+    "landerArchetype": "split-video",
+    "landerTheme": "amber",
+    "videoUrl": "/videos/dogs-commercial.mp4",
+    "steps": [
+      {
+        "title": "15-Minute Mental Workout",
+        "desc": "Engage your dog natural problem-solving instincts to release built-up mental stress and anxiety."
+      },
+      {
+        "title": "Calm Unwanted Behaviors",
+        "desc": "Target the hidden root cause of frantic barking, destructive chewing, and jumping without harsh corrections."
+      },
+      {
+        "title": "A Peaceful, Happy Companion",
+        "desc": "Wake up to an obedient, relaxed dog who sleeps soundly and listens to your very first command."
+      }
+    ],
+    "brevo": {
+      "listId": 80,
+      "welcomeTemplateId": 886,
+      "followUpTemplateIds": [
+        887,
+        888,
+        889
+      ]
+    },
+    "createdAt": "2026-11-03T03:25:00.000Z"
   }
 }
