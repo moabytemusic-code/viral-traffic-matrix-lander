@@ -1,0 +1,19 @@
+{
+  "santa-circle": {
+    "currentAngleId": 2,
+    "cycle": 1,
+    "lastScheduledAt": "2026-11-06 12:30:00",
+    "lastPostId": "6ae948e211bb3cafc90f544e",
+    "lastPostUrl": "https://app.contentstudio.io/kendavismarketing/publisher/planner/list-view?plan_ids=6ae948e211bb3cafc90f544e"
+  },
+  "bellver-card": {
+    "currentAngleId": 1,
+    "cycle": 1,
+    "lastScheduledAt": "2026-11-03 17:30:00"
+  },
+  "yu-sleep": {
+    "currentAngleId": 1,
+    "cycle": 1,
+    "lastScheduledAt": "2026-11-04 12:30:00"
+  }
+}
