@@ -54,6 +54,10 @@ const VANITY_ALIASES = {
   vault: 'ai-vault',
   prompts: 'ai-vault',
   tools: 'ai-vault',
+  trade: 'prop-trading',
+  trading: 'prop-trading',
+  prop: 'prop-trading',
+  funded: 'prop-trading',
   matrix: 'viral-traffic-matrix',
   viral: 'viral-traffic-matrix',
   traffic: 'viral-traffic-matrix',
@@ -906,6 +910,15 @@ const server = http.createServer(async (req, res) => {
             name.includes('system & signal') ||
             name.includes('trafficpros') ||
             name.includes('lead generation')
+          );
+        } else if (offer.slug === 'prop-trading') {
+          return (
+            name.includes('chainradar') ||
+            name.includes('chain radar') ||
+            name.includes('walletwise') ||
+            name.includes('market ranger') ||
+            name.includes('marketranger') ||
+            name.includes('investing')
           );
         }
         return false;

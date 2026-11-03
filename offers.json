@@ -244,5 +244,46 @@
       ]
     },
     "createdAt": "2026-11-03T03:50:00.000Z"
+  },
+  "prop-trading": {
+    "slug": "prop-trading",
+    "name": "Funded Prop Trading Pass ($50K–$150K)",
+    "badge": "Zero Personal Risk • Keep Up To 90% Profits",
+    "eyebrow": "Institutional Capital Allocation Protocol",
+    "headlinePrefix": "Trade With Up To",
+    "headlineGradient": "$150,000 In Funded Capital",
+    "headlineSuffix": "Without Risking Your Life Savings.",
+    "subheadline": "Stop gambling your paycheck or blowing personal accounts. Pass a simple evaluation, trade institutional buying power, and keep up to 90% of every winning trade with $0 personal loss liability.",
+    "ctaButtonText": "Claim Funded Trading Pass",
+    "affiliateUrl": "https://apextraderfunding.com/",
+    "sponsorCode": "144",
+    "channelPreset": "Finance & Trading (ChainRadar + WalletWise + MarketRanger)",
+    "landerArchetype": "split-video",
+    "landerTheme": "gold",
+    "videoUrl": "/videos/trade-commercial.mp4",
+    "steps": [
+      {
+        "title": "Choose Your Account Size",
+        "desc": "Select between $50,000, $100,000, or $150,000 in simulated buying power with 80% discounted evaluation fees."
+      },
+      {
+        "title": "Hit Simple Profit Targets",
+        "desc": "Trade futures, forex, or crypto under clear risk management rules with zero time limits or restrictions."
+      },
+      {
+        "title": "Receive 80% to 90% Profit Payouts",
+        "desc": "Request direct bank wire or crypto payouts on your winning trades with zero personal loss liability."
+      }
+    ],
+    "brevo": {
+      "listId": 80,
+      "welcomeTemplateId": 886,
+      "followUpTemplateIds": [
+        887,
+        888,
+        889
+      ]
+    },
+    "createdAt": "2026-11-03T04:15:00.000Z"
   }
 }
