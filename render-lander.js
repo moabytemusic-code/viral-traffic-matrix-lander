@@ -83,9 +83,22 @@ function renderOfferLander(offer) {
     { title: 'Scale Traffic & Leads Automatically', desc: 'Turn every visitor into compounding viral reach and automated email subscribers.' }
   ];
 
-  // Try to find a rendered video MP4 if available from ViralForge job
-  let videoPreviewUrl = null;
-  if (offer.viralForgeJob?.videos) {
+  // Try to find video: 1) explicit offer.videoUrl, 2) local Remotion commercial, 3) viralForgeJob
+  let videoPreviewUrl = offer.videoUrl || null;
+  if (!videoPreviewUrl) {
+    const candidateFiles = [
+      `/videos/${offer.slug}-commercial.mp4`,
+      `/videos/${offer.slug.replace(/-/g, '')}-commercial.mp4`,
+      `/videos/yusleep-commercial.mp4`
+    ];
+    for (const c of candidateFiles) {
+      if (fs.existsSync(path.join(__dirname, 'public', c))) {
+        videoPreviewUrl = c;
+        break;
+      }
+    }
+  }
+  if (!videoPreviewUrl && offer.viralForgeJob?.videos) {
     const vids = Object.values(offer.viralForgeJob.videos);
     const completedVid = vids.find((v) => v.videoUrl);
     if (completedVid) videoPreviewUrl = completedVid.videoUrl;
