@@ -877,7 +877,9 @@ const server = http.createServer(async (req, res) => {
 
       const schedRes = await csClient.schedulePostWithFirstComment({
         text: postText,
+        videoFilePath: fs.existsSync(videoFile) ? videoFile : null,
         videoUrl,
+        title: `${offer.name} Commercial`,
         accountIds: eligibleIds,
         scheduledAt: scheduledAt || null,
         firstCommentMessage: firstCommentText
