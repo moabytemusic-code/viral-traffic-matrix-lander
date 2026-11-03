@@ -871,10 +871,11 @@ const server = http.createServer(async (req, res) => {
       ];
       const thumbnailFile = candidateThumbnails.find((f) => fs.existsSync(f)) || null;
 
-      // Multi-Platform Audience Routing (Pinterest, TikTok, Twitter/X, YouTube, Facebook)
+      // Multi-Platform Audience Routing (Pinterest, TikTok, YouTube, Facebook - excluding Twitter by default to avoid $0.24 X API wallet fees)
       const csAccounts = await csClient.getConnectedAccounts();
       const eligibleAccounts = csAccounts.filter((a) => {
         if (a.validity !== 'valid') return false;
+        if (a.platform === 'twitter' || a.account_type === 'twitter') return false;
         const name = (a.account_name || a.name || '').toLowerCase();
         if (name.includes('aurum')) return false;
         if (name === 'ken davis') return false;
