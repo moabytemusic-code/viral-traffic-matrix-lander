@@ -844,13 +844,14 @@ const server = http.createServer(async (req, res) => {
 
       const videoUrl = `https://traffic.aisimplesystem.com/videos/${path.basename(videoFile)}`;
 
-      // Filter eligible accounts based on campaign category
+      // Multi-Platform Audience Routing (Pinterest, TikTok, Twitter/X, YouTube, Facebook)
       const csAccounts = await csClient.getConnectedAccounts();
       const eligibleAccounts = csAccounts.filter((a) => {
         if (a.validity !== 'valid') return false;
         const name = (a.account_name || a.name || '').toLowerCase();
         if (name.includes('aurum')) return false;
         if (name === 'ken davis') return false;
+
         if (offer.slug === 'santa-circle') {
           return (
             name.includes('storytime') ||
@@ -858,10 +859,28 @@ const server = http.createServer(async (req, res) => {
             name.includes('freebie') ||
             name.includes('everyday')
           );
-        } else {
-          if (name.includes('storytime') || name.includes('erica')) return false;
+        } else if (offer.slug === 'bellver-card') {
+          return (
+            name.includes('walletwise') ||
+            name.includes('market ranger') ||
+            name.includes('marketranger')
+          );
+        } else if (offer.slug === 'yu-sleep') {
+          return (
+            name.includes('everyday mind') ||
+            name.includes('freebie') ||
+            name.includes('marketing resource')
+          );
+        } else if (offer.slug === 'viral-traffic-matrix') {
+          return (
+            name.includes('profit') ||
+            name.includes('traffic') ||
+            name.includes('lead generation') ||
+            name.includes('insider secrets') ||
+            name.includes('system & signal')
+          );
         }
-        return true;
+        return false;
       });
 
       const eligibleIds = eligibleAccounts.map((a) => a.id);
