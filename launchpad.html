@@ -428,9 +428,10 @@
 
       const grid = document.getElementById('activeOffersGrid');
       grid.innerHTML = offers.map(o => {
-        const url = o.slug === 'viral-traffic-matrix' ? '/' : `/o/${o.slug}`;
+        const shortAlias = (o.slug === 'santa-circle' ? 'santa' : o.slug === 'bellver-card' ? 'card' : o.slug === 'yu-sleep' ? 'sleep' : o.slug === 'viral-traffic-matrix' ? 'matrix' : o.slug);
+        const friendlyUrl = `/${shortAlias}`;
         return `
-          <div class="glass-surface rounded-2xl p-4 flex flex-col justify-between gap-3 border border-white/10">
+          <div class="glass-surface rounded-2xl p-4 flex flex-col justify-between gap-3 border border-white/10 hover:border-emerald-500/30 transition">
             <div>
               <div class="flex items-center justify-between gap-2">
                 <span class="font-display font-bold text-sm text-white">${o.name}</span>
@@ -439,12 +440,22 @@
               <div class="flex items-center gap-1.5 mt-1">
                 <span class="text-[9px] font-mono-code uppercase px-1.5 py-0.5 rounded bg-white/10 text-slate-300">${o.landerArchetype || 'matrix'}</span>
                 <span class="text-[9px] font-mono-code uppercase px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300">${o.landerTheme || 'emerald'}</span>
+                <span class="text-[9px] font-mono-code uppercase px-1.5 py-0.5 rounded bg-emerald-400/20 text-emerald-300 font-bold">✨ Friendly: ${friendlyUrl}</span>
               </div>
               <div class="text-[11px] font-mono-code text-slate-400 mt-1 truncate">${o.affiliateUrl}</div>
             </div>
-            <div class="flex items-center justify-between pt-2 border-t border-white/10 text-xs">
-              <a href="${url}" target="_blank" class="text-emerald-400 hover:underline font-medium">Open ${url} ↗</a>
-              <span class="text-[10px] text-slate-500">4-Email Drip Active</span>
+            <div class="flex flex-col gap-2 pt-2 border-t border-white/10 text-xs">
+              <div class="flex items-center justify-between">
+                <a href="${friendlyUrl}" target="_blank" class="text-emerald-400 hover:underline font-bold">Open traffic.aisimplesystem.com${friendlyUrl} ↗</a>
+                <span class="text-[10px] text-slate-400">Drip Active</span>
+              </div>
+              <button
+                type="button"
+                onclick="scheduleCommercial('${o.slug}')"
+                class="w-full mt-1 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 hover:from-emerald-500/30 hover:to-teal-500/30 border border-emerald-400/40 text-[11px] font-bold text-emerald-200 flex items-center justify-center gap-2 cursor-pointer transition shadow-sm"
+              >
+                <span>🎬 Schedule Remotion Commercial to ContentStudio</span>
+              </button>
             </div>
           </div>
         `;
@@ -545,6 +556,25 @@
         container.innerHTML = `<div class="text-xs text-red-400">${err.message}</div>`;
       }
     }
+
+    window.scheduleCommercial = async function(slug) {
+      if (!confirm(`Schedule Remotion commercial for "${slug}" to connected ContentStudio channels with friendly first-comment link?`)) return;
+      try {
+        const res = await fetch('/api/schedule-commercial', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          alert(`✅ Successfully Scheduled Commercial!\n\nChannels (${data.channelCount}):\n• ${data.channels.join('\n• ')}\n\nFirst Comment Dropped:\n👉 ${data.friendlyLink}`);
+        } else {
+          alert('Error scheduling: ' + (data.error || 'Unknown error'));
+        }
+      } catch (err) {
+        alert('Request failed: ' + err.message);
+      }
+    };
 
     window.selectOutlier = function(id, title) {
       document.getElementById('selectedOutlierId').value = id;

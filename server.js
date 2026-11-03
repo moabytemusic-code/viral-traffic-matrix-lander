@@ -28,6 +28,30 @@ const DEFAULT_BREVO_LIST_ID = Number(process.env.BREVO_LIST_ID || 80);
 const DEFAULT_WELCOME_TEMPLATE_ID = Number(process.env.BREVO_WELCOME_TEMPLATE_ID || 886);
 const OFFERS_PATH = path.join(__dirname, 'offers.json');
 
+// Friendly vanity root aliases mapping directly to offer slugs
+const VANITY_ALIASES = {
+  santa: 'santa-circle',
+  circle: 'santa-circle',
+  thesantacircle: 'santa-circle',
+  card: 'bellver-card',
+  cards: 'bellver-card',
+  bellver: 'bellver-card',
+  visa: 'bellver-card',
+  sleep: 'yu-sleep',
+  yusleep: 'yu-sleep',
+  cherry: 'yu-sleep',
+  matrix: 'viral-traffic-matrix',
+  viral: 'viral-traffic-matrix',
+  traffic: 'viral-traffic-matrix',
+  free: 'viral-traffic-matrix'
+};
+
+function resolveOfferSlug(raw) {
+  if (!raw) return null;
+  const clean = raw.toLowerCase().replace(/^\/o\//, '').replace(/^\//, '').replace(/\/$/, '');
+  return VANITY_ALIASES[clean] || clean;
+}
+
 // Active background monitors for ViralForge rendering -> auto-scheduling
 const activePollers = new Map();
 
@@ -138,15 +162,17 @@ function startBackgroundJobMonitor(offerSlug, projectId) {
               const eligibleAccountIds = eligibleAccounts.map((a) => a.id);
 
               if (eligibleAccountIds.length > 0) {
-                const firstCommentText = `👉 Claim your free ${offer.name} access here: https://traffic.aisimplesystem.com/o/${offer.slug}`;
+                const shortAlias = Object.keys(VANITY_ALIASES).find((k) => VANITY_ALIASES[k] === offer.slug) || offer.slug;
+                const friendlyLink = `https://traffic.aisimplesystem.com/${shortAlias}`;
+                const firstCommentText = `👉 Claim your free ${offer.name} access here: ${friendlyLink}`;
                 await csClient.schedulePostWithFirstComment({
-                  text: `${v.brief || offer.subheadline || offer.name}\n\n👉 Claim free access: https://traffic.aisimplesystem.com/o/${offer.slug}`,
+                  text: `${v.brief || offer.subheadline || offer.name}\n\n👉 Claim free access: ${friendlyLink}`,
                   videoUrl: v.videoUrl,
                   accountIds: eligibleAccountIds,
                   scheduledAt: scheduleDate,
                   firstCommentMessage: firstCommentText
                 });
-                console.log(`💬 [ContentStudio] Scheduled post with First-Comment link to ${eligibleAccountIds.length} accounts!`);
+                console.log(`💬 [ContentStudio] Scheduled post with First-Comment link (${friendlyLink}) to ${eligibleAccountIds.length} accounts!`);
                 offer.viralForgeJob.videos[vidKey].contentStudioScheduled = true;
               }
             } catch (csErr) {
@@ -369,18 +395,46 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // GET /o/:slug -> Render dynamic 8-Pillar Glass Lander for any configured offer
-  if ((req.method === 'GET' || req.method === 'HEAD') && pathname.startsWith('/o/')) {
-    const slug = pathname.replace(/^\/o\//, '').replace(/\/$/, '');
-    const offers = loadOffers();
-    const offer = offers[slug];
-    if (!offer) {
-      res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
-      return res.end(`<h1>Offer "${slug}" not found</h1><p><a href="/launchpad">Open Offer Launchpad</a></p>`);
+  // GET /videos/:file -> Stream high-production Remotion commercial MP4s directly
+  if ((req.method === 'GET' || req.method === 'HEAD') && pathname.startsWith('/videos/')) {
+    const videoName = path.basename(pathname);
+    const videoFile = path.join(__dirname, 'public', 'videos', videoName);
+    if (fs.existsSync(videoFile)) {
+      const stat = fs.statSync(videoFile);
+      res.writeHead(200, {
+        'Content-Type': 'video/mp4',
+        'Content-Length': stat.size,
+        'Accept-Ranges': 'bytes'
+      });
+      return fs.createReadStream(videoFile).pipe(res);
     }
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    return res.end('Video not found');
+  }
+
+  // GET /o/:slug or Friendly Short Root (e.g. /santa, /card, /sleep, /matrix) -> Render dynamic lander
+  const resolvedSlug = resolveOfferSlug(pathname);
+  const offersList = loadOffers();
+  if (
+    (req.method === 'GET' || req.method === 'HEAD') &&
+    resolvedSlug &&
+    offersList[resolvedSlug] &&
+    !pathname.startsWith('/api/') &&
+    pathname !== '/health' &&
+    pathname !== '/launchpad' &&
+    pathname !== '/'
+  ) {
+    const offer = offersList[resolvedSlug];
     const html = renderOfferLander(offer);
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     return res.end(html);
+  }
+
+  // Fallback GET /o/:slug 404 message
+  if ((req.method === 'GET' || req.method === 'HEAD') && pathname.startsWith('/o/')) {
+    const rawSlug = pathname.replace(/^\/o\//, '').replace(/\/$/, '');
+    res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
+    return res.end(`<h1>Offer "${rawSlug}" not found</h1><p><a href="/launchpad">Open Offer Launchpad</a></p>`);
   }
 
   // GET /api/cs/accounts -> List all ContentStudio connected accounts
@@ -759,6 +813,90 @@ const server = http.createServer(async (req, res) => {
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify({ ok: true, offer: newOffer, viralForgePrompt }));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+  }
+
+  // POST /api/schedule-commercial -> Immediately dispatch Remotion commercial to ContentStudio with friendly first-comment link
+  if (req.method === 'POST' && pathname === '/api/schedule-commercial') {
+    try {
+      const { slug, scheduledAt } = await readJsonBody(req);
+      const offers = loadOffers();
+      const resolved = resolveOfferSlug(slug);
+      const offer = offers[resolved];
+      if (!offer) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ ok: false, error: `Offer "${slug}" not found` }));
+      }
+
+      const shortAlias = Object.keys(VANITY_ALIASES).find((k) => VANITY_ALIASES[k] === offer.slug) || offer.slug;
+      const friendlyLink = `https://traffic.aisimplesystem.com/${shortAlias}`;
+
+      // Check for available commercial video file
+      const candidateFiles = [
+        path.join(__dirname, 'public', 'videos', `${shortAlias}-commercial.mp4`),
+        path.join(__dirname, 'public', 'videos', `${offer.slug}-commercial.mp4`),
+        path.join(__dirname, 'public', 'videos', `${offer.slug}-remotion-commercial.mp4`)
+      ];
+      const videoFile = candidateFiles.find((f) => fs.existsSync(f)) || candidateFiles[0];
+
+      const videoUrl = `https://traffic.aisimplesystem.com/videos/${path.basename(videoFile)}`;
+
+      // Filter eligible accounts based on campaign category
+      const csAccounts = await csClient.getConnectedAccounts();
+      const eligibleAccounts = csAccounts.filter((a) => {
+        if (a.validity !== 'valid') return false;
+        const name = (a.account_name || a.name || '').toLowerCase();
+        if (name.includes('aurum')) return false;
+        if (name === 'ken davis') return false;
+        if (offer.slug === 'santa-circle') {
+          return (
+            name.includes('storytime') ||
+            name.includes('erica') ||
+            name.includes('freebie') ||
+            name.includes('everyday')
+          );
+        } else {
+          if (name.includes('storytime') || name.includes('erica')) return false;
+        }
+        return true;
+      });
+
+      const eligibleIds = eligibleAccounts.map((a) => a.id);
+      if (eligibleIds.length === 0) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        return res.end(
+          JSON.stringify({ ok: false, error: 'No eligible ContentStudio channels found' })
+        );
+      }
+
+      const firstCommentText = `👉 Claim your free ${offer.name} access here: ${friendlyLink}`;
+      const postText = `${offer.headlinePrefix || ''} ${offer.headlineGradient} ${offer.headlineSuffix || ''}\n\n👉 Free Link: ${friendlyLink}`;
+
+      const schedRes = await csClient.schedulePostWithFirstComment({
+        text: postText,
+        videoUrl,
+        accountIds: eligibleIds,
+        scheduledAt: scheduledAt || null,
+        firstCommentMessage: firstCommentText
+      });
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(
+        JSON.stringify({
+          ok: true,
+          friendlyLink,
+          videoUrl,
+          channelCount: eligibleIds.length,
+          channels: eligibleAccounts.map(
+            (a) => `${a.account_name || a.name} (${a.account_type || a.type})`
+          ),
+          scheduledAt: scheduledAt || 'Published Immediately',
+          result: schedRes
+        })
+      );
     } catch (err) {
       res.writeHead(500, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify({ ok: false, error: err.message }));

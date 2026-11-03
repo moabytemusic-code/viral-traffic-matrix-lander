@@ -1,6 +1,7 @@
 node_modules/
 .env
 *.mp4
+!public/videos/*.mp4
 .DS_Store
 .vercel/
 api/

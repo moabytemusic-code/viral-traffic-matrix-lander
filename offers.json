@@ -12,6 +12,8 @@
     "affiliateUrl": "https://5dfpartners.idevaffiliate.com/144-34-3-32.html",
     "sponsorCode": "144",
     "channelPreset": "Marketing & Traffic (9 Channels)",
+    "landerArchetype": "matrix",
+    "landerTheme": "emerald",
     "steps": [
       {
         "title": "Activate & Plug In Any Link",
@@ -33,31 +35,33 @@
     },
     "createdAt": "2026-10-31T12:00:00.000Z"
   },
-  "9-figure-buddy": {
-    "slug": "9-figure-buddy",
-    "name": "9 Figure Buddy",
-    "badge": "Free Early Access • No Card Needed",
-    "eyebrow": "The Infinite Idea Glitch for Creators & Advertisers",
-    "headlinePrefix": "Steal Proven",
-    "headlineGradient": "Viral Outlier DNA",
-    "headlineSuffix": "For Any Offer You Promote.",
-    "subheadline": "Stop asking AI for ideas from a blank page. 9 Figure Buddy hunts YouTube 24/7 for viral outliers pulling 100K to millions of views, decodes their 16-point retention formula, and writes scripts for your brand.",
-    "ctaButtonText": "Unlock Early Access",
-    "affiliateUrl": "https://9figurebuddy.com",
-    "sponsorCode": "NFB",
-    "channelPreset": "Marketing & Traffic (9 Channels)",
+  "santa-circle": {
+    "slug": "santa-circle",
+    "name": "The Santa Circle Modern Gift Exchange",
+    "badge": "100% Free • Ad-Free Secret Santa",
+    "eyebrow": "Modern Holiday Gift Exchange",
+    "headlinePrefix": "Host the Ultimate",
+    "headlineGradient": "Modern Secret Santa Gift Exchange",
+    "headlineSuffix": "For Families & Teams.",
+    "subheadline": "The sleek, 100% ad-free Secret Santa platform with smart pair exclusions, Amazon wishlist integration, and instant private recipient reveals.",
+    "ctaButtonText": "Create Free Circle In 60s",
+    "affiliateUrl": "https://thesantacircle.com/",
+    "sponsorCode": "144",
+    "channelPreset": "Parenting & Kids (YT Storytime With Ms. Erica + IG)",
+    "landerArchetype": "voucher",
+    "landerTheme": "emerald",
     "steps": [
       {
-        "title": "Hunt Proven Viral Outliers",
-        "desc": "Search 530+ Gold, Silver & Bronze YouTube outliers pulling 10x–50x their channel average across 20 niches."
+        "title": "Create Your Circle in 60s",
+        "desc": "Set spending limits, date of exchange, and add optional rules in under a minute with zero ads."
       },
       {
-        "title": "Decode the 16-Point Retention Formula",
-        "desc": "See the exact verbatim opening hook, title pattern, stakes ladder, and 70% watch-time twist that forced viewers to stay."
+        "title": "Smart Pair Exclusions",
+        "desc": "Ensure partners and spouses never draw each other with automatic fair randomized pairing."
       },
       {
-        "title": "Transplant Into Your Brand or Offer",
-        "desc": "Connect via MCP or copy the plug-and-play script skeleton directly into ViralForge AI to produce high-converting short & long videos."
+        "title": "Private Reveals & Direct Wishlists",
+        "desc": "Members get their anonymous recipient with direct links to their wishlist with purchase tracking."
       }
     ],
     "brevo": {
@@ -65,6 +69,78 @@
       "welcomeTemplateId": 886,
       "followUpTemplateIds": [887, 888, 889]
     },
-    "createdAt": "2026-10-31T15:00:00.000Z"
+    "createdAt": "2026-11-01T15:00:00.000Z"
+  },
+  "bellver-card": {
+    "slug": "bellver-card",
+    "name": "Bellver Card Global Freedom",
+    "badge": "High-Limit Visa • No Credit Check",
+    "eyebrow": "Financial Sovereignty & High Limits",
+    "headlinePrefix": "Unlock Your High-Limit",
+    "headlineGradient": "Bellver Global Visa Card",
+    "headlineSuffix": "With Up to $250k Daily Spend.",
+    "subheadline": "Experience true international spending freedom with zero credit checks, instant account setup, and global Visa acceptance worldwide.",
+    "ctaButtonText": "Claim Your High-Limit Card",
+    "affiliateUrl": "https://app.bellvercards.com?ref=kmtwarrior",
+    "sponsorCode": "kmtwarrior",
+    "channelPreset": "Finance & Wealth (6 Channels)",
+    "landerArchetype": "comparison",
+    "landerTheme": "gold",
+    "steps": [
+      {
+        "title": "Instant Global Application",
+        "desc": "Get approved in minutes with no credit score inquiries or invasive documentation hurdles."
+      },
+      {
+        "title": "Load & Liquidate Worldwide",
+        "desc": "Spend up to $250,000 daily anywhere Visa is accepted globally with zero currency friction."
+      },
+      {
+        "title": "Total Privacy & Control",
+        "desc": "Manage virtual and physical cards with instant freezing, limit adjustments, and premium support."
+      }
+    ],
+    "brevo": {
+      "listId": 80,
+      "welcomeTemplateId": 886,
+      "followUpTemplateIds": [887, 888, 889]
+    },
+    "createdAt": "2026-11-01T16:00:00.000Z"
+  },
+  "yu-sleep": {
+    "slug": "yu-sleep",
+    "name": "Yu Sleep Tart Cherry Formula",
+    "badge": "Doctor Recommended • 60-Day Guarantee",
+    "eyebrow": "Restorative Deep Sleep Science",
+    "headlinePrefix": "Discover the 30-Second",
+    "headlineGradient": "Tart Cherry Deep Sleep Trick",
+    "headlineSuffix": "That Stops 3 AM Wakeups.",
+    "subheadline": "Restore deep, uninterrupted sleep on your very first night with the natural 10-ingredient nano-synergy formula backed by an ironclad 60-day guarantee.",
+    "ctaButtonText": "Try the 30-Second Sleep Trick",
+    "affiliateUrl": "https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=yusleep&op=glp&tid=tracking",
+    "sponsorCode": "kmtwarrior",
+    "channelPreset": "Everyday Mind & Wellness (Freebie Channel + FB)",
+    "landerArchetype": "split-video",
+    "landerTheme": "cyan",
+    "steps": [
+      {
+        "title": "30-Second Evening Ritual",
+        "desc": "Take one delicious dose 30 minutes before bed to soothe elevated nighttime cortisol receptors."
+      },
+      {
+        "title": "Stay Asleep Through the Night",
+        "desc": "Targeted phytonutrients signal your nervous system to remain in deep restorative REM until morning."
+      },
+      {
+        "title": "Wake Up 100% Refreshed",
+        "desc": "Zero morning grogginess or dependency, backed by an unconditional 60-day money-back guarantee."
+      }
+    ],
+    "brevo": {
+      "listId": 80,
+      "welcomeTemplateId": 886,
+      "followUpTemplateIds": [887, 888, 889]
+    },
+    "createdAt": "2026-11-01T17:00:00.000Z"
   }
 }
