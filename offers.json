@@ -12,7 +12,7 @@
     "affiliateUrl": "https://5dfpartners.idevaffiliate.com/144-34-3-32.html",
     "sponsorCode": "144",
     "channelPreset": "Marketing & Traffic (9 Channels)",
-    "landerArchetype": "matrix",
+    "landerArchetype": "split-video",
     "landerTheme": "emerald",
     "steps": [
       {
@@ -37,7 +37,8 @@
         889
       ]
     },
-    "createdAt": "2026-10-31T12:00:00.000Z"
+    "createdAt": "2026-10-31T12:00:00.000Z",
+    "videoUrl": "/videos/matrix-commercial.mp4"
   },
   "santa-circle": {
     "slug": "santa-circle",
@@ -52,7 +53,7 @@
     "affiliateUrl": "https://thesantacircle.com/",
     "sponsorCode": "144",
     "channelPreset": "Parenting & Kids (YT Storytime With Ms. Erica + IG)",
-    "landerArchetype": "voucher",
+    "landerArchetype": "split-video",
     "landerTheme": "emerald",
     "steps": [
       {
