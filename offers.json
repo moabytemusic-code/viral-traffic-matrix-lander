@@ -93,7 +93,7 @@
     "affiliateUrl": "https://app.bellvercards.com?ref=kmtwarrior",
     "sponsorCode": "kmtwarrior",
     "channelPreset": "Finance & Wealth (6 Channels)",
-    "landerArchetype": "comparison",
+    "landerArchetype": "split-video",
     "landerTheme": "gold",
     "steps": [
       {
