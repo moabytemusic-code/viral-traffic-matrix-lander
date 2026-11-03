@@ -381,9 +381,10 @@ const server = http.createServer(async (req, res) => {
   const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const pathname = parsedUrl.pathname;
 
-  // Healthcheck endpoint for Coolify
-  if (req.method === 'GET' && pathname === '/health') {
+  // Healthcheck endpoint for Coolify (supports both GET and HEAD for wget/curl spider checks)
+  if ((req.method === 'GET' || req.method === 'HEAD') && pathname === '/health') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
+    if (req.method === 'HEAD') return res.end();
     return res.end(JSON.stringify({ status: 'ok', uptime: process.uptime() }));
   }
 
