@@ -895,7 +895,8 @@ const server = http.createServer(async (req, res) => {
           channels: eligibleAccounts.map(
             (a) => `${a.account_name || a.name} (${a.account_type || a.type})`
           ),
-          scheduledAt: scheduledAt || 'Published Immediately',
+          scheduledAt: scheduledAt || 'Auto-Scheduled to Next Optimal Peak Slot',
+          message: schedRes?.message || 'Successfully queued on autopilot',
           result: schedRes
         })
       );

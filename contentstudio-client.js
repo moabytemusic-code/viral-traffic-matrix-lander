@@ -50,6 +50,51 @@ async function getConnectedAccounts() {
   return Array.isArray(res.data) ? res.data : [];
 }
 
+function getNextOptimalSlot(offsetDays = 0, preferredHour = null) {
+  const now = new Date();
+  const nyTimeStr = now.toLocaleString("en-US", { timeZone: "America/New_York" });
+  const nyDate = new Date(nyTimeStr);
+
+  const year = nyDate.getFullYear();
+  const month = nyDate.getMonth();
+  const date = nyDate.getDate();
+  const hour = nyDate.getHours();
+  const minute = nyDate.getMinutes();
+
+  let targetDate = new Date(year, month, date);
+  let targetHour = preferredHour !== null ? preferredHour : 12;
+  let targetMinute = preferredHour !== null ? 0 : 30;
+
+  if (preferredHour === null) {
+    if (hour < 12) {
+      targetHour = 12;
+      targetMinute = 30;
+    } else if (hour < 17) {
+      targetHour = 17;
+      targetMinute = 30;
+    } else if (hour < 19 || (hour === 19 && minute <= 30)) {
+      targetHour = 20;
+      targetMinute = 0;
+    } else {
+      targetDate.setDate(targetDate.getDate() + 1);
+      targetHour = 12;
+      targetMinute = 30;
+    }
+  }
+
+  if (offsetDays > 0) {
+    targetDate.setDate(targetDate.getDate() + offsetDays);
+  }
+
+  const y = targetDate.getFullYear();
+  const m = String(targetDate.getMonth() + 1).padStart(2, "0");
+  const d = String(targetDate.getDate()).padStart(2, "0");
+  const h = String(targetHour).padStart(2, "0");
+  const min = String(targetMinute).padStart(2, "0");
+
+  return `${y}-${m}-${d} ${h}:${min}:00`;
+}
+
 // Upload local video MP4 to ContentStudio Media Library
 async function uploadMediaFile(filePath) {
   if (!fs.existsSync(filePath)) {
@@ -105,14 +150,17 @@ async function schedulePostWithFirstComment({
     youtube_options: {
       title: (title || text || 'Featured Commercial').slice(0, 95)
     },
-    scheduling: scheduledAt
-      ? {
-          publish_type: 'scheduled',
-          scheduled_at: scheduledAt
-        }
-      : {
-          publish_type: 'draft' // Safe default if scheduledAt is omitted
-        }
+    scheduling:
+      scheduledAt === 'now'
+        ? { publish_type: 'now' }
+        : scheduledAt === 'draft'
+        ? { publish_type: 'draft' }
+        : scheduledAt
+        ? { publish_type: 'scheduled', scheduled_at: scheduledAt }
+        : {
+            publish_type: 'scheduled',
+            scheduled_at: getNextOptimalSlot()
+          }
   };
 
   // If firstCommentMessage is provided, attach it
@@ -131,5 +179,6 @@ module.exports = {
   getWorkspaceId,
   getConnectedAccounts,
   uploadMediaFile,
+  getNextOptimalSlot,
   schedulePostWithFirstComment
 };
