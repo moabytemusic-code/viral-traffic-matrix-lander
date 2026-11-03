@@ -31,7 +31,11 @@
     "brevo": {
       "listId": 80,
       "welcomeTemplateId": 886,
-      "followUpTemplateIds": [887, 888, 889]
+      "followUpTemplateIds": [
+        887,
+        888,
+        889
+      ]
     },
     "createdAt": "2026-10-31T12:00:00.000Z"
   },
@@ -67,9 +71,14 @@
     "brevo": {
       "listId": 80,
       "welcomeTemplateId": 886,
-      "followUpTemplateIds": [887, 888, 889]
+      "followUpTemplateIds": [
+        887,
+        888,
+        889
+      ]
     },
-    "createdAt": "2026-11-01T15:00:00.000Z"
+    "createdAt": "2026-11-01T15:00:00.000Z",
+    "videoUrl": "/videos/santa-circle-commercial.mp4"
   },
   "bellver-card": {
     "slug": "bellver-card",
@@ -103,9 +112,14 @@
     "brevo": {
       "listId": 80,
       "welcomeTemplateId": 886,
-      "followUpTemplateIds": [887, 888, 889]
+      "followUpTemplateIds": [
+        887,
+        888,
+        889
+      ]
     },
-    "createdAt": "2026-11-01T16:00:00.000Z"
+    "createdAt": "2026-11-01T16:00:00.000Z",
+    "videoUrl": "/videos/bellver-commercial.mp4"
   },
   "yu-sleep": {
     "slug": "yu-sleep",
@@ -139,8 +153,13 @@
     "brevo": {
       "listId": 80,
       "welcomeTemplateId": 886,
-      "followUpTemplateIds": [887, 888, 889]
+      "followUpTemplateIds": [
+        887,
+        888,
+        889
+      ]
     },
-    "createdAt": "2026-11-01T17:00:00.000Z"
+    "createdAt": "2026-11-01T17:00:00.000Z",
+    "videoUrl": "/videos/yusleep-commercial.mp4"
   }
 }

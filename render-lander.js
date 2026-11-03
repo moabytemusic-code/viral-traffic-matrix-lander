@@ -278,9 +278,12 @@ function renderOfferLander(offer) {
                 ${
                   videoPreviewUrl
                     ? `
-                <video autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover z-0">
+                <video id="heroPreviewVideo" autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover z-0">
                   <source src="${escapeHtml(videoPreviewUrl)}" type="video/mp4" />
                 </video>
+                <button type="button" onclick="const v=document.getElementById('heroPreviewVideo'); if(v){ v.muted=!v.muted; this.querySelector('span').textContent=v.muted?'🔇 Unmute':'🔊 Sound On'; }" class="absolute top-10 right-3 z-30 px-2.5 py-1 rounded-full bg-black/70 hover:bg-black/90 backdrop-blur-md border border-white/20 text-[10px] font-mono-code text-white flex items-center gap-1 cursor-pointer transition shadow-lg">
+                  <span>🔇 Unmute</span>
+                </button>
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 z-10 pointer-events-none"></div>
                 `
                     : `
