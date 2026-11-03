@@ -1,6 +1,5 @@
 node_modules
 .env
-*.mp4
 .git
 .DS_Store
 api

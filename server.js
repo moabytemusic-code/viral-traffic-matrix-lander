@@ -6,7 +6,12 @@ const nfbClient = require('./nfb-client');
 const vidiqClient = require('./vidiq-client');
 const vfClient = require('./viralforge-client');
 const csClient = require('./contentstudio-client');
-const cadenceEngine = require('./cadence-engine');
+let cadenceEngine = null;
+try {
+  cadenceEngine = require('./cadence-engine');
+} catch (e) {
+  console.warn('[Server] Cadence engine notice:', e.message);
+}
 const { renderOfferLander } = require('./render-lander');
 
 // Load local .env if present
@@ -929,6 +934,10 @@ const server = http.createServer(async (req, res) => {
   // GET /api/cadence-status -> Returns active angles, cycle counts, and schedule state
   if (req.method === 'GET' && pathname === '/api/cadence-status') {
     try {
+      if (!cadenceEngine) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ ok: false, error: 'Cadence engine not initialized' }));
+      }
       const state = cadenceEngine.loadState();
       const angles = cadenceEngine.loadAngles();
       res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -942,6 +951,10 @@ const server = http.createServer(async (req, res) => {
   // POST /api/cadence-advance -> Renders next angle video & pushes to ContentStudio calendar
   if (req.method === 'POST' && pathname === '/api/cadence-advance') {
     try {
+      if (!cadenceEngine) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ ok: false, error: 'Cadence engine not initialized' }));
+      }
       const { slug } = await readJsonBody(req);
       if (!slug) {
         res.writeHead(400, { 'Content-Type': 'application/json' });
