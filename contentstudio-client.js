@@ -115,11 +115,13 @@ async function uploadMediaFile(filePath) {
   return res.data;
 }
 
-// Schedule a post with VIDEO + FIRST COMMENT
+// Schedule a post with VIDEO + FIRST COMMENT + OPTIONAL CUSTOM THUMBNAIL
 async function schedulePostWithFirstComment({
   text,
   videoFilePath = null,
   videoUrl = null,
+  thumbnailFilePath = null,
+  thumbnailUrl = null,
   title = null,
   accountIds,
   scheduledAt, // 'YYYY-MM-DD HH:mm:ss'
@@ -136,13 +138,28 @@ async function schedulePostWithFirstComment({
     console.log(`✅ [ContentStudio] Uploaded successfully (Media ID: ${uploaded.id})`);
   }
 
+  let finalThumbUrl = null;
+  if (thumbnailFilePath && fs.existsSync(thumbnailFilePath)) {
+    console.log(`📤 [ContentStudio] Uploading custom thumbnail: ${path.basename(thumbnailFilePath)}...`);
+    const uploadedThumb = await uploadMediaFile(thumbnailFilePath);
+    finalThumbUrl = uploadedThumb.url;
+    console.log(`✅ [ContentStudio] Uploaded thumbnail: ${finalThumbUrl}`);
+  } else if (thumbnailUrl) {
+    finalThumbUrl = thumbnailUrl;
+  }
+
+  const mediaObj = {
+    images: [],
+    media_ids: mediaIds
+  };
+  if (finalThumbUrl) {
+    mediaObj.video_thumbnail = finalThumbUrl;
+  }
+
   const payload = {
     content: {
       text: text || '',
-      media: {
-        images: [],
-        media_ids: mediaIds
-      }
+      media: mediaObj
     },
     accounts: accountIds,
     post_type: 'feed',

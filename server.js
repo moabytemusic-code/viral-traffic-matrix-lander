@@ -860,8 +860,16 @@ const server = http.createServer(async (req, res) => {
         path.join(__dirname, 'public', 'videos', `${offer.slug}-remotion-commercial.mp4`)
       ];
       const videoFile = candidateFiles.find((f) => fs.existsSync(f)) || candidateFiles[0];
-
       const videoUrl = `https://traffic.aisimplesystem.com/videos/${path.basename(videoFile)}`;
+
+      // Check for available custom thumbnail file
+      const candidateThumbnails = [
+        path.join(__dirname, 'public', 'thumbnails', `${shortAlias}-thumbnail.jpg`),
+        path.join(__dirname, 'public', 'thumbnails', `${shortAlias}-thumbnail.png`),
+        path.join(__dirname, 'public', 'thumbnails', `${offer.slug}-thumbnail.jpg`),
+        path.join(__dirname, 'public', 'thumbnails', `${offer.slug}-thumbnail.png`)
+      ];
+      const thumbnailFile = candidateThumbnails.find((f) => fs.existsSync(f)) || null;
 
       // Multi-Platform Audience Routing (Pinterest, TikTok, Twitter/X, YouTube, Facebook)
       const csAccounts = await csClient.getConnectedAccounts();
@@ -939,6 +947,7 @@ const server = http.createServer(async (req, res) => {
         text: postText,
         videoFilePath: fs.existsSync(videoFile) ? videoFile : null,
         videoUrl,
+        thumbnailFilePath: thumbnailFile,
         title: `${offer.name} Commercial`,
         accountIds: eligibleIds,
         scheduledAt: scheduledAt || null,
