@@ -285,5 +285,46 @@
       ]
     },
     "createdAt": "2026-11-03T04:15:00.000Z"
+  },
+  "home-power": {
+    "slug": "home-power",
+    "name": "DIY Home Power & Energy Blueprint",
+    "badge": "Off-Grid Resilience • 100% Blackout Safe",
+    "eyebrow": "Grid Independence & Emergency Backup Protocol",
+    "headlinePrefix": "Power Your Home In Any Blackout With",
+    "headlineGradient": "The DIY Home Power System",
+    "headlineSuffix": "Built For Under $200 In Spare Parts.",
+    "subheadline": "Stop paying soaring utility bills or worrying about grid failure. Step-by-step video blueprints show you how to build a compact residential battery system that keeps refrigerators, lights, and medical devices running 24/7.",
+    "ctaButtonText": "Unlock Home Power Blueprint",
+    "affiliateUrl": "https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=enrev&tid=ytshorts",
+    "sponsorCode": "kmtwarrior",
+    "channelPreset": "Energy Independence (Smart Home Resilience YT)",
+    "landerArchetype": "split-video",
+    "landerTheme": "gold",
+    "videoUrl": "/videos/power-commercial.mp4",
+    "steps": [
+      {
+        "title": "Source Low-Cost Spare Parts",
+        "desc": "Gather simple, safe, off-the-shelf components for under $200 with zero electrical background required."
+      },
+      {
+        "title": "Assemble In 3 Simple Steps",
+        "desc": "Follow the illustrated video blueprint to connect the compact battery bank and 120V power inverter."
+      },
+      {
+        "title": "Enjoy Uninterrupted 24/7 Power",
+        "desc": "Plug in essential home appliances, slash your electric bill, and stay 100% powered through any outage."
+      }
+    ],
+    "brevo": {
+      "listId": 80,
+      "welcomeTemplateId": 886,
+      "followUpTemplateIds": [
+        887,
+        888,
+        889
+      ]
+    },
+    "createdAt": "2026-11-04T14:30:00.000Z"
   }
 }

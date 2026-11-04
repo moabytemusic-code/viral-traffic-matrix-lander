@@ -58,6 +58,11 @@ const VANITY_ALIASES = {
   trading: 'prop-trading',
   prop: 'prop-trading',
   funded: 'prop-trading',
+  power: 'home-power',
+  solar: 'home-power',
+  offgrid: 'home-power',
+  energy: 'home-power',
+  battery: 'home-power',
   matrix: 'viral-traffic-matrix',
   viral: 'viral-traffic-matrix',
   traffic: 'viral-traffic-matrix',
@@ -928,6 +933,13 @@ const server = http.createServer(async (req, res) => {
             name.includes('market ranger') ||
             name.includes('marketranger') ||
             name.includes('investing')
+          );
+        } else if (offer.slug === 'home-power') {
+          return (
+            name.includes('smart home') ||
+            name.includes('resilience') ||
+            name.includes('freebie') ||
+            name.includes('everyday')
           );
         }
         return false;
