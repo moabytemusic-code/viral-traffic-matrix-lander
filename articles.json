@@ -154,12 +154,12 @@
   },
   "emergency-water-storage-blackout": {
     "slug": "emergency-water-storage-blackout",
-    "category": "Water Security",
-    "categoryBadge": "💧 WATER CRISIS",
-    "title": "How to Secure 60+ Gallons of Drinkable Water When the Grid Goes Down",
-    "subtitle": "Municipal water mains burst, boil water advisories are declared, or electric well pumps fail. A household runs out of drinkable water in 48 hours, causing immediate dehydration panic and sanitation collapse.",
-    "publishedAt": "2026-11-04T21:55:08.173Z",
-    "readTime": "9 min read",
+    "category": "Water Security & Survival",
+    "categoryBadge": "💧 OFF-GRID WATER PROTOCOL",
+    "title": "How to Secure 60+ Gallons of Clean Water When Municipal Taps Fail",
+    "subtitle": "The vital engineering protocol for gravity filtration, water heater emergency siphoning, 12V transfer pumping, and chemical purification when power outages stop the municipal water supply.",
+    "publishedAt": "2026-11-04T16:55:00Z",
+    "readTime": "10 min read",
     "author": {
       "name": "Smart Home Resilience Engineering Desk",
       "channel": "@SmartHomeResilience",
@@ -168,32 +168,206 @@
     "offerSlug": "offgrid-water",
     "videoUrl": "/videos/power-commercial.mp4",
     "thumbnailUrl": "/thumbnails/power-thumbnail.jpg",
-    "clickbankUrl": "https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=watersb&tid=autopilot_offgrid-water",
+    "clickbankUrl": "https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=watersb&tid=guide_water",
     "amazonTag": "santa101-20",
     "hardwareComponents": [
       {
-        "name": "Gravity Fed Water Filter System (Stainless Steel)",
-        "description": "Verified essential tool for water security emergency preparedness.",
-        "searchQuery": "gravity fed water filter system stainless steel countertop",
-        "priceEstimate": "~$89 - $149"
+        "name": "Stainless Steel Gravity Countertop Water Filter System",
+        "description": "Removes 99.99% of bacteria, heavy metals, chlorine, and parasites without requiring electricity or water pressure.",
+        "searchQuery": "gravity water filter system stainless steel countertop 2.25 gallon",
+        "priceEstimate": "~$95 - $149"
       },
       {
-        "name": "12V DC RV Diaphragm Water Transfer Pump",
-        "description": "Verified essential tool for water security emergency preparedness.",
-        "searchQuery": "12v dc water diaphragm pump self priming",
-        "priceEstimate": "~$29 - $45"
+        "name": "12V DC RV Diaphragm Water Transfer Pump (3.0 GPM)",
+        "description": "Self-priming 12V pressure pump that runs directly off your emergency LiFePO4 battery to pressurize house lines or pump from rain barrels.",
+        "searchQuery": "12v dc water diaphragm pump self priming 3.0 gpm",
+        "priceEstimate": "~$32 - $48"
       },
       {
-        "name": "5-Gallon Heavy Duty Stackable Water Containers",
-        "description": "Verified essential tool for water security emergency preparedness.",
-        "searchQuery": "stackable water storage containers 5 gallon bpa free",
+        "name": "5-Gallon Heavy Duty Stackable Water Containers (x4 Pack)",
+        "description": "BPA-free food-grade emergency containers designed for vertical interlocking storage in closets and basements.",
+        "searchQuery": "stackable water storage containers 5 gallon bpa free pack",
+        "priceEstimate": "~$39 - $59"
+      },
+      {
+        "name": "Chlorine Dioxide Water Purification Tablets (50-Pack)",
+        "description": "EPA-registered emergency purification tablets that eliminate Cryptosporidium, viruses, and bacteria with zero chemical aftertaste.",
+        "searchQuery": "potable aqua chlorine dioxide water purification tablets 50 pack",
+        "priceEstimate": "~$12 - $18"
+      }
+    ]
+  },
+  "stop-dog-barking-mental-enrichment": {
+    "slug": "stop-dog-barking-mental-enrichment",
+    "category": "Canine Behavior & Enrichment",
+    "categoryBadge": "🐕 PET RESILIENCE PROTOCOL",
+    "title": "How to Stop Problem Barking & Separation Anxiety in 5 Minutes a Day",
+    "subtitle": "Certified CPDT-KA dog training techniques using mental enrichment games, puzzle stimulation, and natural neurochemical calming instead of harmful shock collars or stressful shouting.",
+    "publishedAt": "2026-11-04T17:00:00Z",
+    "readTime": "8 min read",
+    "author": {
+      "name": "Canine Enrichment & Behavior Desk",
+      "channel": "@SmartHomeResilience",
+      "channelUrl": "https://www.youtube.com/channel/UCy9DLRRHSPQ42do2q8Ookxw"
+    },
+    "offerSlug": "dog-enrichment",
+    "videoUrl": "/videos/power-commercial.mp4",
+    "thumbnailUrl": "/thumbnails/power-thumbnail.jpg",
+    "clickbankUrl": "https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=brainydogs&tid=cluster_dog",
+    "amazonTag": "santa101-20",
+    "hardwareComponents": [
+      {
+        "name": "Level 2 Interactive Dog Puzzle Toy for Mental Stimulation",
+        "description": "Challenging slide-and-seek compartments that engage your dog's natural foraging drive and exhaust mental hyperactivity in 10 minutes.",
+        "searchQuery": "dog puzzle toys interactive mental stimulation level 2",
+        "priceEstimate": "~$16 - $24"
+      },
+      {
+        "name": "Calming Compression Wrap Anti-Anxiety Thunder Vest",
+        "description": "Applies gentle, constant pressure to calm nervous dogs during storms, fireworks, separation, or loud doorbell triggers.",
+        "searchQuery": "dog anxiety wrap thunder vest compression",
+        "priceEstimate": "~$29 - $42"
+      },
+      {
+        "name": "Textured Silicone Lick Mat with Strong Suction Cups",
+        "description": "Promotes repetitive licking, which triggers natural endorphin release and lowers canine cortisol levels during stressful events.",
+        "searchQuery": "dog lick mat with suction cups silicone food grade",
+        "priceEstimate": "~$9 - $15"
+      },
+      {
+        "name": "All-Natural Hemp Calming Soft Chews for Dogs",
+        "description": "Veterinarian-formulated chamomile, L-theanine, and organic hemp chews that reduce stress without sedating your dog.",
+        "searchQuery": "dog calming chews all natural hemp anxiety relief chamomile",
+        "priceEstimate": "~$22 - $32"
+      }
+    ]
+  },
+  "why-do-i-wake-up-at-3am": {
+    "slug": "why-do-i-wake-up-at-3am",
+    "category": "Sleep Architecture & Recovery",
+    "categoryBadge": "🌙 SLEEP RESTORATION PROTOCOL",
+    "title": "Why You Wake Up at 3 AM Every Night (And How to Fix the Cortisol Spike)",
+    "subtitle": "The biological truth behind fragmented sleep, blood sugar drops, liver glycogen depletion, and non-habit-forming botanical adaptogens to restore uninterrupted 8-hour deep sleep.",
+    "publishedAt": "2026-11-04T17:05:00Z",
+    "readTime": "9 min read",
+    "author": {
+      "name": "Circadian Sleep & Recovery Lab",
+      "channel": "@SmartHomeResilience",
+      "channelUrl": "https://www.youtube.com/channel/UCy9DLRRHSPQ42do2q8Ookxw"
+    },
+    "offerSlug": "yu-sleep",
+    "videoUrl": "/videos/power-commercial.mp4",
+    "thumbnailUrl": "/thumbnails/power-thumbnail.jpg",
+    "clickbankUrl": "https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=yusleep&tid=cluster_sleep",
+    "amazonTag": "santa101-20",
+    "hardwareComponents": [
+      {
+        "name": "3D Contoured 100% Blackout Sleep Mask (Zero Eye Pressure)",
+        "description": "Deep memory foam eye cavities that allow natural REM eye movement while blocking 100% of intrusive light photons.",
+        "searchQuery": "3d contoured sleep mask zero eye pressure blackout",
+        "priceEstimate": "~$14 - $22"
+      },
+      {
+        "name": "Amber / Red Light Night Reading Lamp (Zero Blue Spectrum)",
+        "description": "Clips onto books with warm 1600K amber LEDs that do not suppress melatonin production before bed.",
+        "searchQuery": "amber red light reading book light no blue light 1600k",
+        "priceEstimate": "~$12 - $18"
+      },
+      {
+        "name": "Pure Magnesium Glycinate Complex 400mg (High Absorption)",
+        "description": "Gentle chelated magnesium that relaxes muscles and binds to calming GABA receptors without digestive irritation.",
+        "searchQuery": "magnesium glycinate 400mg high absorption pure",
+        "priceEstimate": "~$19 - $27"
+      },
+      {
+        "name": "Dohm Classic Natural Sound White Noise Machine",
+        "description": "Features an authentic acoustic fan that generates soothing ambient sound to mask external noises without looping recordings.",
+        "searchQuery": "dohm classic natural sound machine white noise",
+        "priceEstimate": "~$39 - $49"
+      }
+    ]
+  },
+  "how-prop-trading-firms-work": {
+    "slug": "how-prop-trading-firms-work",
+    "category": "Financial Resilience & Capital",
+    "categoryBadge": "📈 CAPITAL ALLOCATION BLUEPRINT",
+    "title": "How Prop Trading Firms Work: Trade $100K in Capital (Keep 80% Profit)",
+    "subtitle": "The complete breakdown of proprietary trading evaluations, simulated capital challenges, 1% risk management rules, and how everyday traders access substantial liquidity without risking life savings.",
+    "publishedAt": "2026-11-04T17:10:00Z",
+    "readTime": "11 min read",
+    "author": {
+      "name": "Capital Hedging & Markets Desk",
+      "channel": "@SmartHomeResilience",
+      "channelUrl": "https://www.youtube.com/channel/UCy9DLRRHSPQ42do2q8Ookxw"
+    },
+    "offerSlug": "prop-trading",
+    "videoUrl": "/videos/power-commercial.mp4",
+    "thumbnailUrl": "/thumbnails/power-thumbnail.jpg",
+    "clickbankUrl": "https://5dfpartners.idevaffiliate.com/144.html",
+    "amazonTag": "santa101-20",
+    "hardwareComponents": [
+      {
+        "name": "Dual Portable 14-inch Laptop Screen Extender (Triple Monitor)",
+        "description": "Folds around any 13-17 inch laptop to give you instant 3-screen charting capability at home or while traveling.",
+        "searchQuery": "portable dual monitor laptop screen extender 14 inch fhd",
+        "priceEstimate": "~$149 - $219"
+      },
+      {
+        "name": "Technical Analysis of the Financial Markets by John J. Murphy",
+        "description": "The definitive institutional bible on chart patterns, support/resistance, volume indicators, and trading psychology.",
+        "searchQuery": "technical analysis of the financial markets john murphy",
         "priceEstimate": "~$24 - $38"
       },
       {
-        "name": "Water Purification Tablets (Chlorine Dioxide)",
-        "description": "Verified essential tool for water security emergency preparedness.",
-        "searchQuery": "potable aqua chlorine dioxide water purification tablets",
-        "priceEstimate": "~$11 - $16"
+        "name": "Ergonomic Mechanical Keyboard with Dedicated Macro Keys",
+        "description": "Precision mechanical switches and programmable hotkeys for rapid order entry and stop-loss positioning.",
+        "searchQuery": "mechanical gaming keyboard macro keys hot swap",
+        "priceEstimate": "~$59 - $89"
+      }
+    ]
+  },
+  "prevent-frozen-pipes-blackout": {
+    "slug": "prevent-frozen-pipes-blackout",
+    "category": "Winter Freeze Resilience",
+    "categoryBadge": "❄️ SUB-ZERO DEFENSE PROTOCOL",
+    "title": "How to Heat a Home & Prevent Frozen Pipes During a Winter Grid Freeze",
+    "subtitle": "Indoor-safe radiant heating protocols, creating an insulated emergency micro-room, and draining plumbing traps to prevent catastrophic $15,000 burst pipe damage when furnace blowers lose power.",
+    "publishedAt": "2026-11-04T17:15:00Z",
+    "readTime": "10 min read",
+    "author": {
+      "name": "Smart Home Resilience Engineering Desk",
+      "channel": "@SmartHomeResilience",
+      "channelUrl": "https://www.youtube.com/channel/UCy9DLRRHSPQ42do2q8Ookxw"
+    },
+    "offerSlug": "home-power",
+    "videoUrl": "/videos/power-commercial.mp4",
+    "thumbnailUrl": "/thumbnails/power-thumbnail.jpg",
+    "clickbankUrl": "https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=enrev&tid=cluster_freeze",
+    "amazonTag": "santa101-20",
+    "hardwareComponents": [
+      {
+        "name": "Mr. Heater Portable Buddy Indoor-Safe Propane Radiant Heater",
+        "description": "4,000 to 9,000 BTU indoor-safe heater with automatic low-oxygen shutoff (ODS) and tip-over safety switch.",
+        "searchQuery": "mr heater buddy indoor safe portable propane radiant heater",
+        "priceEstimate": "~$79 - $119"
+      },
+      {
+        "name": "Digital Carbon Monoxide Detector with Battery Readout",
+        "description": "Mandatory safety device for emergency indoor heating that detects trace CO in parts per million (PPM) with loud 85dB alarm.",
+        "searchQuery": "digital carbon monoxide detector battery powered ppm readout",
+        "priceEstimate": "~$19 - $28"
+      },
+      {
+        "name": "Thermal Window Insulation Shrink Film Kit (5-Window Pack)",
+        "description": "Crystal-clear plastic film that creates an airtight dead-air insulation pocket to stop cold drafts through glass windows.",
+        "searchQuery": "thermal window insulation shrink wrap kit 5 window",
+        "priceEstimate": "~$14 - $22"
+      },
+      {
+        "name": "12V Heated Electric Fleece Blanket for Lithium Power Banks",
+        "description": "Low-wattage (45W) electric blanket that plugs directly into your 12V LiFePO4 battery to keep family members warm all night.",
+        "searchQuery": "12v heated electric fleece blanket car rv camping",
+        "priceEstimate": "~$24 - $36"
       }
     ]
   }
