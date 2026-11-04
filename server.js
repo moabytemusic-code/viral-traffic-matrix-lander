@@ -16,6 +16,7 @@ const { renderOfferLander } = require('./render-lander');
 const { renderArticle, renderGuidesIndex } = require('./render-article');
 const catalystEngine = require('./catalyst-engine');
 const autonomousCatalyst = require('./autonomous-catalyst');
+const continuousDaemon = require('./continuous-daemon');
 const ARTICLES_PATH = path.join(__dirname, 'articles.json');
 
 function loadArticles() {
@@ -641,6 +642,37 @@ Sitemap: https://${host}/sitemap.xml
   if (req.method === 'GET' && pathname === '/api/catalyst/radar-seeds') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify({ ok: true, seeds: autonomousCatalyst.PROBLEM_RADAR_SEEDS }));
+  }
+
+  // GET /api/catalyst/continuous/status -> Return 24h Guardrailed Auto-Pilot Daemon State
+  if (req.method === 'GET' && pathname === '/api/catalyst/continuous/status') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ ok: true, state: continuousDaemon.getStatus() }));
+  }
+
+  // POST /api/catalyst/continuous/toggle -> Enable/disable or adjust interval of continuous daemon
+  if (req.method === 'POST' && pathname === '/api/catalyst/continuous/toggle') {
+    try {
+      const body = await readJsonBody(req);
+      const state = continuousDaemon.toggleContinuous(body.enabled, body.intervalHours);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: true, state }));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+  }
+
+  // POST /api/catalyst/continuous/trigger-now -> Manually fire 1 immediate iteration of daemon
+  if (req.method === 'POST' && pathname === '/api/catalyst/continuous/trigger-now') {
+    try {
+      const result = await continuousDaemon.executeScheduledRun('manual_launchpad_trigger');
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify(result));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
   }
 
   // GET /api/vf/job-status?slug=... -> Check live ViralForge render + auto-schedule state
@@ -1280,4 +1312,9 @@ Sitemap: https://${host}/sitemap.xml
 
 server.listen(PORT, HOST, () => {
   console.log(`🚀 Offer Launchpad & Viral Giveaway Engine running at http://${HOST}:${PORT}`);
+  try {
+    continuousDaemon.initContinuousDaemon();
+  } catch (daemonErr) {
+    console.error('Failed to initialize Continuous Daemon:', daemonErr);
+  }
 });

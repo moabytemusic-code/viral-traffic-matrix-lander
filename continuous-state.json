@@ -1,0 +1,29 @@
+{
+  "enabled": true,
+  "intervalHours": 24,
+  "lastRunAt": "2026-11-04T22:31:16.815Z",
+  "nextRunAt": "2026-11-05T22:31:16.821Z",
+  "totalRuns": 1,
+  "guardrails": {
+    "velocityCap": "1 deployment per 24 hours",
+    "socialPacing": "Max 1 video scheduled per 48 hours",
+    "categoryAllowlist": [
+      "Home Energy & Blackout Backup",
+      "Clean Water & Survival Sanitation",
+      "Pet Behavior & Anxiety",
+      "Sleep Restoration & Cortisol",
+      "Winter Freeze & Heating Defense",
+      "Financial Capital & Trading"
+    ],
+    "hoplinkHealthCheck": "Active (HTTP 307 verified)"
+  },
+  "history": [
+    {
+      "timestamp": "2026-11-04T22:31:16.822Z",
+      "niche": "Water Security: emergency water filtration",
+      "status": "success",
+      "articleUrl": "https://traffic.aisimplesystem.com/guides/emergency-water-storage-blackout",
+      "landerUrl": "https://traffic.aisimplesystem.com/o/offgrid-water"
+    }
+  ]
+}

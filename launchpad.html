@@ -110,6 +110,75 @@
         </div>
       </div>
 
+      <!-- Continuous Auto-Pilot Mode (Goldilocks Pace: 1 per 24h) -->
+      <div id="continuousDaemonCard" class="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-slate-900/80 to-teal-950/40 border border-emerald-500/30 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 shadow-lg">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span id="daemonStatusPill" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono-code font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              CONTINUOUS: ACTIVE (Every 24h)
+            </span>
+            <span class="text-[11px] font-mono-code text-slate-400 hidden sm:inline">🛡️ Guardrailed Goldilocks Pace</span>
+          </div>
+          <p class="text-xs text-slate-300">
+            Background daemon scans vidIQ & NFB daily, picking the top acute problem and publishing 1 authoritative guide + lander without triggering search engine crawl or social rate limits.
+          </p>
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] font-mono-code text-slate-400 pt-1">
+            <span>📅 Next Auto-Deploy: <strong id="daemonNextRun" class="text-emerald-300">Loading...</strong></span>
+            <span>⚡ Total Auto-Runs: <strong id="daemonTotalRuns" class="text-white">1</strong></span>
+            <button id="toggleDaemonAuditBtn" type="button" class="text-amber-400 hover:text-amber-300 underline cursor-pointer">
+              View Audit History ▾
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 w-full lg:w-auto justify-end">
+          <button
+            type="button"
+            id="toggleContinuousDaemonBtn"
+            class="px-3.5 py-2 rounded-xl text-xs font-mono-code font-bold transition border border-white/20 bg-white/10 hover:bg-white/20 text-white cursor-pointer whitespace-nowrap"
+          >
+            ⏸️ Pause Daemon
+          </button>
+          <button
+            type="button"
+            id="triggerDaemonNowBtn"
+            class="px-3.5 py-2 rounded-xl text-xs font-mono-code font-bold transition bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 cursor-pointer flex items-center gap-1.5 whitespace-nowrap"
+            title="Immediately trigger 1 cycle of the continuous pipeline now"
+          >
+            <span>⚡</span> Run 1x Now
+          </button>
+        </div>
+      </div>
+
+      <!-- Expandable Daemon History & Guardrail Spec -->
+      <div id="daemonAuditBox" class="hidden p-4 rounded-2xl bg-black/60 border border-white/10 space-y-3 text-xs">
+        <div class="flex items-center justify-between border-b border-white/10 pb-2">
+          <span class="font-mono-code font-bold text-slate-300 text-[11px] uppercase">
+            🛡️ Guardrails & Execution Audit History
+          </span>
+          <span class="text-[11px] font-mono-code text-slate-400">Pacing: 1 deploy / 24h max</span>
+        </div>
+        <div class="grid sm:grid-cols-3 gap-2 text-[11px] font-mono-code">
+          <div class="p-2.5 rounded-lg bg-white/5 border border-white/5">
+            <span class="text-slate-400 block text-[10px]">VELOCITY CAP</span>
+            <span class="text-emerald-300">1 per 24 hours</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-white/5 border border-white/5">
+            <span class="text-slate-400 block text-[10px]">CATEGORY ALLOWLIST</span>
+            <span class="text-amber-300">5 Resilience Pillars</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-white/5 border border-white/5">
+            <span class="text-slate-400 block text-[10px]">MONETIZATION SYNERGY</span>
+            <span class="text-blue-300">Amazon + ClickBank</span>
+          </div>
+        </div>
+        <div class="space-y-1.5 pt-1">
+          <span class="text-[10px] font-mono-code text-slate-400 uppercase block">Recent Runs:</span>
+          <div id="daemonHistoryList" class="space-y-1 max-h-40 overflow-y-auto font-mono-code text-[11px]"></div>
+        </div>
+      </div>
+
       <!-- Auto-Pilot Live Execution Console (Hidden until triggered) -->
       <div id="autopilotLogBox" class="hidden p-5 rounded-2xl bg-slate-950/90 border border-emerald-500/40 space-y-4 shadow-xl">
         <div class="flex items-center justify-between border-b border-white/10 pb-3">
@@ -1168,7 +1237,141 @@
       }
     });
 
+    // ==========================================
+    // 🛡️ Continuous Auto-Pilot Daemon UI
+    // ==========================================
+    let continuousState = null;
+
+    async function syncContinuousStatus() {
+      try {
+        const res = await fetch('/api/catalyst/continuous/status');
+        const data = await res.json();
+        if (!data.ok || !data.state) return;
+
+        continuousState = data.state;
+        const pill = document.getElementById('daemonStatusPill');
+        const nextRunEl = document.getElementById('daemonNextRun');
+        const totalRunsEl = document.getElementById('daemonTotalRuns');
+        const toggleBtn = document.getElementById('toggleContinuousDaemonBtn');
+        const historyList = document.getElementById('daemonHistoryList');
+
+        if (pill) {
+          if (continuousState.enabled) {
+            pill.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono-code font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+            pill.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> CONTINUOUS: ACTIVE (Every ${continuousState.intervalHours || 24}h)`;
+            if (toggleBtn) {
+              toggleBtn.innerText = '⏸️ Pause Daemon';
+              toggleBtn.className = 'px-3.5 py-2 rounded-xl text-xs font-mono-code font-bold transition border border-white/20 bg-white/10 hover:bg-white/20 text-white cursor-pointer whitespace-nowrap';
+            }
+          } else {
+            pill.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono-code font-bold bg-slate-500/20 text-slate-400 border border-slate-500/40';
+            pill.innerHTML = `<span class="w-2 h-2 rounded-full bg-slate-400"></span> CONTINUOUS: PAUSED`;
+            if (toggleBtn) {
+              toggleBtn.innerText = '▶️ Resume Daemon';
+              toggleBtn.className = 'px-3.5 py-2 rounded-xl text-xs font-mono-code font-bold transition bg-emerald-500 hover:bg-emerald-400 text-slate-950 cursor-pointer whitespace-nowrap';
+            }
+          }
+        }
+
+        if (totalRunsEl) totalRunsEl.innerText = continuousState.totalRuns || 0;
+
+        if (nextRunEl) {
+          if (!continuousState.enabled) {
+            nextRunEl.innerText = 'Paused';
+            nextRunEl.className = 'text-slate-400';
+          } else {
+            const nextDate = new Date(continuousState.nextRunAt);
+            const now = new Date();
+            const diffMs = nextDate - now;
+            if (diffMs <= 0) {
+              nextRunEl.innerText = 'Running soon...';
+            } else {
+              const diffHours = Math.floor(diffMs / (3600 * 1000));
+              const diffMins = Math.floor((diffMs % (3600 * 1000)) / (60 * 1000));
+              nextRunEl.innerText = `in ${diffHours}h ${diffMins}m (${nextDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`;
+              nextRunEl.className = 'text-emerald-300';
+            }
+          }
+        }
+
+        if (historyList && continuousState.history) {
+          historyList.innerHTML = continuousState.history.map(h => `
+            <div class="flex items-center justify-between p-2 rounded bg-white/[0.02] border border-white/5">
+              <span class="text-slate-300 truncate max-w-xs">• ${h.niche || 'Automated Deploy'}</span>
+              <div class="flex items-center gap-3">
+                <span class="text-slate-500 text-[10px]">${new Date(h.timestamp).toLocaleDateString()} ${new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                ${h.articleUrl ? `<a href="${h.articleUrl}" target="_blank" class="text-blue-400 hover:underline">Guide ↗</a>` : ''}
+                ${h.landerUrl ? `<a href="${h.landerUrl}" target="_blank" class="text-amber-400 hover:underline">Lander ↗</a>` : ''}
+              </div>
+            </div>
+          `).join('');
+        }
+      } catch (err) {
+        console.error('Error syncing continuous daemon status:', err);
+      }
+    }
+
+    document.getElementById('toggleContinuousDaemonBtn')?.addEventListener('click', async () => {
+      const toggleBtn = document.getElementById('toggleContinuousDaemonBtn');
+      toggleBtn.disabled = true;
+      try {
+        const nextEnabled = !continuousState?.enabled;
+        const res = await fetch('/api/catalyst/continuous/toggle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enabled: nextEnabled, intervalHours: 24 })
+        });
+        await res.json();
+        await syncContinuousStatus();
+      } catch (e) {
+        alert('Toggle error: ' + e.message);
+      } finally {
+        toggleBtn.disabled = false;
+      }
+    });
+
+    document.getElementById('triggerDaemonNowBtn')?.addEventListener('click', async () => {
+      const btn = document.getElementById('triggerDaemonNowBtn');
+      btn.disabled = true;
+      btn.innerText = 'Triggering...';
+      try {
+        const res = await fetch('/api/catalyst/continuous/trigger-now', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        const data = await res.json();
+        if (data.ok) {
+          alert('✅ Immediate daemon cycle completed successfully!');
+          syncContinuousStatus();
+          loadOffers();
+          loadCatalysts();
+        } else {
+          alert('Daemon trigger error: ' + (data.error || 'Unknown error'));
+        }
+      } catch (e) {
+        alert('Trigger error: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>⚡</span> Run 1x Now';
+      }
+    });
+
+    document.getElementById('toggleDaemonAuditBtn')?.addEventListener('click', () => {
+      const auditBox = document.getElementById('daemonAuditBox');
+      const btn = document.getElementById('toggleDaemonAuditBtn');
+      if (auditBox.classList.contains('hidden')) {
+        auditBox.classList.remove('hidden');
+        btn.innerText = 'Hide Audit History ▴';
+      } else {
+        auditBox.classList.add('hidden');
+        btn.innerText = 'View Audit History ▾';
+      }
+    });
+
     loadCatalysts();
+    syncContinuousStatus();
+    setInterval(syncContinuousStatus, 30000);
     loadOffers();
     searchOutliers();
     syncChannels();
