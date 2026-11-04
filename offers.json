@@ -326,5 +326,20 @@
       ]
     },
     "createdAt": "2026-11-04T14:30:00.000Z"
+  },
+  "offgrid-water": {
+    "name": "Emergency Drinking Water & Off-Grid Sanitation",
+    "slug": "offgrid-water",
+    "affiliateUrl": "https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=watersb&tid=autopilot_offgrid-water",
+    "sponsorCode": "kmtwarrior",
+    "headlinePrefix": "Free Emergency Protocol:",
+    "headlineGradient": "The Emergency Gravity Water Filtration & Storage Protocol",
+    "headlineSuffix": "Without Expensive Contractors.",
+    "subheadline": "Municipal water mains burst, boil water advisories are declared, or electric well pumps fail. A household runs out of drinkable water in 48 hours, causing immediate dehydration panic and sanitation collapse.",
+    "badge": "💧 WATER CRISIS",
+    "videoScript": "You can survive 3 weeks without food, but only 3 days without water. When the grid fails, tap pressure dies in under 12 hours.",
+    "primaryColor": "amber",
+    "status": "live",
+    "createdAt": "2026-11-04T21:55:08.175Z"
   }
 }

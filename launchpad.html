@@ -95,11 +95,32 @@
           <button
             type="button"
             id="analyzeProblemBtn"
-            class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold transition shadow-sm whitespace-nowrap cursor-pointer"
+            class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold transition shadow-sm whitespace-nowrap cursor-pointer"
           >
-            ⚡ Analyze Problem
+            ⚡ Analyze
+          </button>
+          <button
+            type="button"
+            id="runAutoPilotBtn"
+            class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-400 hover:brightness-110 text-slate-950 text-xs font-black transition shadow-lg shadow-emerald-500/25 whitespace-nowrap cursor-pointer flex items-center gap-1.5"
+            title="Automatically scan vidIQ & 9 Figure Buddy, pick the highest scoring human problem, and deploy the entire funnel (article, products, lander)"
+          >
+            <span>🤖</span> Auto-Pilot Deploy
           </button>
         </div>
+      </div>
+
+      <!-- Auto-Pilot Live Execution Console (Hidden until triggered) -->
+      <div id="autopilotLogBox" class="hidden p-5 rounded-2xl bg-slate-950/90 border border-emerald-500/40 space-y-4 shadow-xl">
+        <div class="flex items-center justify-between border-b border-white/10 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+            <span class="font-bold text-sm text-emerald-300 font-mono-code">🤖 Autonomous Niche Radar & Auto-Pilot Active</span>
+          </div>
+          <span id="autopilotProgressBadge" class="text-xs font-mono-code text-slate-400">Executing...</span>
+        </div>
+        <div id="autopilotLogList" class="space-y-1.5 text-xs font-mono-code text-slate-300 max-h-48 overflow-y-auto"></div>
+        <div id="autopilotResultCard" class="hidden pt-3 border-t border-white/10 space-y-3"></div>
       </div>
 
       <!-- Quick Niche Catalyst Selector Grid -->
@@ -1080,6 +1101,70 @@
       } finally {
         btn.disabled = false;
         btn.innerText = '⚡ Analyze Problem';
+      }
+    });
+
+    // 🤖 1-Click Auto-Pilot Deploy Handler
+    document.getElementById('runAutoPilotBtn')?.addEventListener('click', async () => {
+      const btn = document.getElementById('runAutoPilotBtn');
+      const box = document.getElementById('autopilotLogBox');
+      const logList = document.getElementById('autopilotLogList');
+      const badge = document.getElementById('autopilotProgressBadge');
+      const resultCard = document.getElementById('autopilotResultCard');
+
+      box.classList.remove('hidden');
+      resultCard.classList.add('hidden');
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳</span> Auto-Pilot Working...';
+      badge.innerText = 'Scanning vidIQ & NFB...';
+      logList.innerHTML = '<div class="text-emerald-400">📡 Scanning for highest scoring human problems with vidIQ Overall Score 60+...</div>';
+
+      try {
+        const res = await fetch('/api/catalyst/autopilot', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+          badge.innerText = '✅ Deployed Successfully!';
+          badge.className = 'text-xs font-mono-code text-emerald-400 font-bold';
+
+          logList.innerHTML = (data.executionLogs || []).map(l => `<div>• ${l}</div>`).join('');
+
+          resultCard.classList.remove('hidden');
+          resultCard.innerHTML = `
+            <div class="p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/30 flex flex-col md:flex-row items-center justify-between gap-4">
+              <div>
+                <span class="text-[10px] font-mono-code text-emerald-400 uppercase tracking-wider block font-bold">🎯 Auto-Deployed Problem Niche</span>
+                <h4 class="text-base font-bold text-white">${data.detectedProblem?.category || 'Niche'}: ${data.detectedProblem?.seed || ''}</h4>
+                <p class="text-xs text-slate-300 mt-1">vidIQ Score: <strong class="text-emerald-400">${data.quantitativeDemand?.overallScore || 65}/100</strong> | Monthly Searches: <strong>${data.quantitativeDemand?.estimatedMonthlySearches || '4,500+'}</strong></p>
+              </div>
+              <div class="flex items-center gap-2">
+                <a href="${data.deployedAssets?.articleUrl || '#'}" target="_blank" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-sm transition">
+                  View Live Guide ↗
+                </a>
+                <a href="${data.deployedAssets?.landerUrl || '#'}" target="_blank" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs shadow-sm transition">
+                  View Offer Lander ↗
+                </a>
+              </div>
+            </div>
+          `;
+
+          // Refresh offers list and catalysts
+          loadOffers();
+          loadCatalysts();
+        } else {
+          badge.innerText = 'Error';
+          logList.innerHTML += `<div class="text-rose-400">❌ Error: ${data.error || 'Failed to complete auto-pilot deployment'}</div>`;
+        }
+      } catch (err) {
+        badge.innerText = 'Failed';
+        logList.innerHTML += `<div class="text-rose-400">❌ Network error: ${err.message}</div>`;
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>🤖</span> Auto-Pilot Deploy';
       }
     });
 

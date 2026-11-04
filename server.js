@@ -15,6 +15,7 @@ try {
 const { renderOfferLander } = require('./render-lander');
 const { renderArticle, renderGuidesIndex } = require('./render-article');
 const catalystEngine = require('./catalyst-engine');
+const autonomousCatalyst = require('./autonomous-catalyst');
 const ARTICLES_PATH = path.join(__dirname, 'articles.json');
 
 function loadArticles() {
@@ -621,6 +622,25 @@ Sitemap: https://${host}/sitemap.xml
       res.writeHead(500, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify({ ok: false, error: err.message }));
     }
+  }
+
+  // POST /api/catalyst/autopilot -> Autonomous Niche Radar & 1-Click Complete Funnel Deployment
+  if (req.method === 'POST' && pathname === '/api/catalyst/autopilot') {
+    try {
+      const body = await readJsonBody(req);
+      const result = await autonomousCatalyst.runAutonomousPipeline(body);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify(result));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+  }
+
+  // GET /api/catalyst/radar-seeds -> Return Candidate Problem Radar Seeds
+  if (req.method === 'GET' && pathname === '/api/catalyst/radar-seeds') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ ok: true, seeds: autonomousCatalyst.PROBLEM_RADAR_SEEDS }));
   }
 
   // GET /api/vf/job-status?slug=... -> Check live ViralForge render + auto-schedule state

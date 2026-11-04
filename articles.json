@@ -151,5 +151,50 @@
         "priceEstimate": "~$14 - $22"
       }
     ]
+  },
+  "emergency-water-storage-blackout": {
+    "slug": "emergency-water-storage-blackout",
+    "category": "Water Security",
+    "categoryBadge": "💧 WATER CRISIS",
+    "title": "How to Secure 60+ Gallons of Drinkable Water When the Grid Goes Down",
+    "subtitle": "Municipal water mains burst, boil water advisories are declared, or electric well pumps fail. A household runs out of drinkable water in 48 hours, causing immediate dehydration panic and sanitation collapse.",
+    "publishedAt": "2026-11-04T21:55:08.173Z",
+    "readTime": "9 min read",
+    "author": {
+      "name": "Smart Home Resilience Engineering Desk",
+      "channel": "@SmartHomeResilience",
+      "channelUrl": "https://www.youtube.com/channel/UCy9DLRRHSPQ42do2q8Ookxw"
+    },
+    "offerSlug": "offgrid-water",
+    "videoUrl": "/videos/power-commercial.mp4",
+    "thumbnailUrl": "/thumbnails/power-thumbnail.jpg",
+    "clickbankUrl": "https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=watersb&tid=autopilot_offgrid-water",
+    "amazonTag": "santa101-20",
+    "hardwareComponents": [
+      {
+        "name": "Gravity Fed Water Filter System (Stainless Steel)",
+        "description": "Verified essential tool for water security emergency preparedness.",
+        "searchQuery": "gravity fed water filter system stainless steel countertop",
+        "priceEstimate": "~$89 - $149"
+      },
+      {
+        "name": "12V DC RV Diaphragm Water Transfer Pump",
+        "description": "Verified essential tool for water security emergency preparedness.",
+        "searchQuery": "12v dc water diaphragm pump self priming",
+        "priceEstimate": "~$29 - $45"
+      },
+      {
+        "name": "5-Gallon Heavy Duty Stackable Water Containers",
+        "description": "Verified essential tool for water security emergency preparedness.",
+        "searchQuery": "stackable water storage containers 5 gallon bpa free",
+        "priceEstimate": "~$24 - $38"
+      },
+      {
+        "name": "Water Purification Tablets (Chlorine Dioxide)",
+        "description": "Verified essential tool for water security emergency preparedness.",
+        "searchQuery": "potable aqua chlorine dioxide water purification tablets",
+        "priceEstimate": "~$11 - $16"
+      }
+    ]
   }
 }
