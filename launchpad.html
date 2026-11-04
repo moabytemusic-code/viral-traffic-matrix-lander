@@ -71,6 +71,51 @@
       <div id="activeOffersGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </section>
 
+    <!-- Problem-First Niche Catalyst Engine -->
+    <section class="glass-surface rounded-3xl p-6 sm:p-8 space-y-6 border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-slate-950/80 to-purple-950/20 shadow-2xl">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-mono-code font-bold uppercase mb-2">
+            <span>⚡</span> NICHE CATALYST ARCHITECTURE
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            Problem-First Niche Catalyst Engine
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-300 max-w-2xl mt-1 leading-relaxed">
+            Never pick products at random. Start with a desperate human pain point to auto-deploy the entire ecosystem: Amazon hardware kits, ClickBank masterclasses, SEO cluster guides, and email sequences.
+          </p>
+        </div>
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+          <input
+            id="customProblemInput"
+            type="text"
+            placeholder="Type any problem (e.g. well pump freeze, dog barking)..."
+            class="px-3.5 py-2 rounded-xl bg-black/60 border border-white/15 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-amber-400 w-full sm:w-64"
+          />
+          <button
+            type="button"
+            id="analyzeProblemBtn"
+            class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold transition shadow-sm whitespace-nowrap cursor-pointer"
+          >
+            ⚡ Analyze Problem
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Niche Catalyst Selector Grid -->
+      <div class="space-y-2">
+        <span class="text-[11px] font-mono-code text-slate-400 uppercase tracking-wider block">
+          Select A Pre-Validated Problem Catalyst:
+        </span>
+        <div id="catalystPills" class="flex flex-wrap gap-2"></div>
+      </div>
+
+      <!-- Active Catalyst Deep-Dive Card -->
+      <div id="catalystCard" class="p-6 rounded-2xl bg-black/50 border border-white/10 space-y-6">
+        <div class="text-slate-400 text-xs">Loading Niche Catalysts...</div>
+      </div>
+    </section>
+
     <!-- Main 2-Column Workspace -->
     <div class="grid lg:grid-cols-12 gap-8 items-start">
 
@@ -808,6 +853,237 @@
     }
     document.getElementById('refreshChannelsBtn')?.addEventListener('click', syncChannels);
 
+    // ==========================================
+    // ⚡ Problem-First Niche Catalyst Logic
+    // ==========================================
+    let allCatalysts = {};
+    let activeCatalystId = 'blackout_power';
+
+    async function loadCatalysts() {
+      try {
+        const res = await fetch('/api/catalyst/niches');
+        const data = await res.json();
+        if (data.ok && data.catalysts) {
+          allCatalysts = data.catalysts;
+          renderCatalystPills();
+          renderCatalystDetail(allCatalysts[activeCatalystId] || Object.values(allCatalysts)[0]);
+        }
+      } catch (err) {
+        console.error('Error loading catalysts:', err);
+      }
+    }
+
+    function renderCatalystPills() {
+      const container = document.getElementById('catalystPills');
+      if (!container) return;
+      container.innerHTML = Object.values(allCatalysts).map(c => `
+        <button
+          type="button"
+          onclick="selectCatalyst('${c.id}')"
+          class="px-3 py-1.5 rounded-xl border text-xs font-mono-code transition cursor-pointer flex items-center gap-1.5 ${c.id === activeCatalystId ? 'bg-amber-400 text-black border-amber-400 font-bold shadow-md shadow-amber-500/20' : 'bg-black/40 text-slate-300 border-white/10 hover:border-amber-400/50 hover:text-white'}"
+        >
+          <span>${c.icon}</span>
+          <span>${c.title}</span>
+        </button>
+      `).join('');
+    }
+
+    window.selectCatalyst = function(id) {
+      activeCatalystId = id;
+      renderCatalystPills();
+      if (allCatalysts[id]) {
+        renderCatalystDetail(allCatalysts[id]);
+      }
+    };
+
+    function renderCatalystDetail(c) {
+      const container = document.getElementById('catalystCard');
+      if (!container || !c) return;
+
+      const cbHop = c.monetization?.clickbank ? `https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=${c.monetization.clickbank.vendor}&tid=catalyst_${c.id}` : '#';
+
+      container.innerHTML = `
+        <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-6 border-b border-white/10 pb-5">
+          <div class="space-y-2 max-w-3xl">
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono-code text-[11px] font-bold">
+                ${c.badge}
+              </span>
+              <span class="text-xs font-mono-code text-slate-400">Target Persona: ${c.targetPersona}</span>
+            </div>
+            <h3 class="text-xl sm:text-2xl font-black text-white leading-tight">${c.title}</h3>
+            <p class="text-xs sm:text-sm text-rose-300/90 leading-relaxed">
+              <strong>🚨 The Acute Human Pain:</strong> ${c.acuteProblem}
+            </p>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              <strong>💸 Fear & Cost of Inaction:</strong> ${c.costOfInaction}
+            </p>
+          </div>
+          <div class="flex flex-col gap-2 flex-shrink-0">
+            <button
+              type="button"
+              onclick="applyCatalystToLauncher('${c.id}')"
+              class="px-5 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:brightness-110 text-black font-black text-xs shadow-lg shadow-amber-500/25 transition cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap"
+            >
+              <span>🚀</span> Load Into Campaign Launcher ↓
+            </button>
+            <a
+              href="/guides/${c.clusterPlan?.[0]?.slug || ''}"
+              target="_blank"
+              class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 text-xs text-center font-bold transition flex items-center justify-center gap-1.5"
+            >
+              <span>📖</span> Preview Live Pillar Article ↗
+            </a>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <!-- Column 1: Trojan Horse Asset -->
+          <div class="p-4 rounded-xl bg-white/[0.03] border border-white/5 space-y-2">
+            <span class="text-[10px] font-mono-code text-amber-400 uppercase tracking-wider block font-bold">
+              1. Trojan Horse Free Asset
+            </span>
+            <h4 class="text-sm font-bold text-white">${c.trojanHorseLeadMagnet?.headline || ''}</h4>
+            <p class="text-xs text-slate-400">${c.trojanHorseLeadMagnet?.type || ''}</p>
+            <div class="pt-2 border-t border-white/5 text-[11px] text-emerald-400 font-mono-code">
+              CTA: "${c.trojanHorseLeadMagnet?.cta || ''}"
+            </div>
+          </div>
+
+          <!-- Column 2: Amazon Hardware Stack -->
+          <div class="p-4 rounded-xl bg-white/[0.03] border border-white/5 space-y-2">
+            <span class="text-[10px] font-mono-code text-blue-400 uppercase tracking-wider block font-bold">
+              2. Amazon Hardware Picks (tag=santa101-20)
+            </span>
+            <ul class="text-xs text-slate-300 space-y-1.5">
+              ${(c.monetization?.amazonHardware || []).slice(0, 3).map(h => `
+                <li class="flex items-center justify-between text-[11px]">
+                  <span class="truncate pr-2">• ${h.name}</span>
+                  <span class="font-mono-code text-slate-400">${h.price}</span>
+                </li>
+              `).join('')}
+            </ul>
+            <div class="pt-2 border-t border-white/5 text-[11px] text-slate-400 font-mono-code">
+              Earns 24-hr universal cart cookie
+            </div>
+          </div>
+
+          <!-- Column 3: High-Ticket / ClickBank Solution -->
+          <div class="p-4 rounded-xl bg-white/[0.03] border border-white/5 space-y-2">
+            <span class="text-[10px] font-mono-code text-purple-400 uppercase tracking-wider block font-bold">
+              3. Masterclass Solution (${c.monetization?.clickbank?.commission || '75%'} Commission)
+            </span>
+            <h4 class="text-sm font-bold text-white">${c.monetization?.clickbank?.productName || c.monetization?.idevaffiliate?.productName || 'Direct Masterclass'}</h4>
+            <p class="text-xs text-slate-400">
+              Vendor Hoplink: <code class="text-amber-300 font-mono-code">${c.monetization?.clickbank?.vendor || 'idevaffiliate'}</code>
+            </p>
+            <div class="pt-2 border-t border-white/5">
+              <a href="${cbHop}" target="_blank" class="text-[11px] text-purple-300 hover:text-white underline font-mono-code">
+                Test Hoplink Redirect ↗
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Content Cluster & Social Hook -->
+        <div class="p-4 rounded-xl bg-black/40 border border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
+          <div class="flex-1">
+            <span class="text-[10px] font-mono-code text-slate-400 uppercase tracking-wider block mb-1">
+              3-Cluster Content Map:
+            </span>
+            <div class="flex flex-wrap gap-2">
+              ${(c.clusterPlan || []).map(p => `
+                <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300 text-[11px]">
+                  <strong class="text-amber-400">${p.role}:</strong> ${p.title}
+                </span>
+              `).join('')}
+            </div>
+          </div>
+          <div class="md:max-w-xs text-slate-400 border-l border-white/10 pl-4">
+            <span class="text-[10px] font-mono-code text-slate-400 uppercase tracking-wider block mb-0.5">
+              Viral 3s Video Hook:
+            </span>
+            <p class="text-[11px] text-slate-300 italic leading-snug">"${c.videoHook || ''}"</p>
+          </div>
+        </div>
+      `;
+    }
+
+    // Auto-fill Launchpad Form from Selected Catalyst
+    window.applyCatalystToLauncher = function(id) {
+      const c = allCatalysts[id];
+      if (!c) return;
+
+      const nameInput = document.getElementById('offerName');
+      const slugInput = document.getElementById('offerSlug');
+      const affInput = document.getElementById('affiliateUrl');
+      const sponsorInput = document.getElementById('sponsorCode');
+      const prefixInput = document.getElementById('headlinePrefix');
+      const gradInput = document.getElementById('headlineGradient');
+      const suffixInput = document.getElementById('headlineSuffix');
+      const subInput = document.getElementById('subheadline');
+
+      if (nameInput) nameInput.value = c.title;
+      if (slugInput) slugInput.value = c.id.replace(/_/g, '-');
+      if (sponsorInput) sponsorInput.value = 'kmtwarrior';
+
+      if (affInput) {
+        if (c.monetization?.clickbank) {
+          affInput.value = `https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=${c.monetization.clickbank.vendor}&tid=launchpad_${c.id}`;
+        } else if (c.monetization?.idevaffiliate) {
+          affInput.value = c.monetization.idevaffiliate.affiliateUrl;
+          if (sponsorInput) sponsorInput.value = '144';
+        }
+      }
+
+      if (prefixInput) prefixInput.value = "How to Solve";
+      if (gradInput) gradInput.value = c.title.split('&')[0].trim();
+      if (suffixInput) suffixInput.value = "Without Expensive Contractors";
+      if (subInput) subInput.value = c.acuteProblem;
+
+      // Scroll smoothly down to the form
+      const formEl = document.getElementById('launchForm');
+      if (formEl) {
+        formEl.scrollIntoView({ behavior: 'smooth' });
+        formEl.classList.add('ring-2', 'ring-amber-400', 'ring-offset-2', 'ring-offset-black');
+        setTimeout(() => {
+          formEl.classList.remove('ring-2', 'ring-amber-400', 'ring-offset-2', 'ring-offset-black');
+        }, 1500);
+      }
+    };
+
+    // Handle Custom Problem Analysis
+    document.getElementById('analyzeProblemBtn')?.addEventListener('click', async () => {
+      const input = document.getElementById('customProblemInput');
+      const problem = (input?.value || '').trim();
+      if (!problem) return;
+
+      const btn = document.getElementById('analyzeProblemBtn');
+      btn.disabled = true;
+      btn.innerText = 'Analyzing Problem...';
+
+      try {
+        const res = await fetch('/api/catalyst/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ problem })
+        });
+        const data = await res.json();
+        if (data.ok && data.blueprint) {
+          allCatalysts[data.blueprint.id] = data.blueprint;
+          activeCatalystId = data.blueprint.id;
+          renderCatalystPills();
+          renderCatalystDetail(data.blueprint);
+        }
+      } catch (err) {
+        alert('Error analyzing problem: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = '⚡ Analyze Problem';
+      }
+    });
+
+    loadCatalysts();
     loadOffers();
     searchOutliers();
     syncChannels();

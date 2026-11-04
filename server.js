@@ -14,6 +14,7 @@ try {
 }
 const { renderOfferLander } = require('./render-lander');
 const { renderArticle, renderGuidesIndex } = require('./render-article');
+const catalystEngine = require('./catalyst-engine');
 const ARTICLES_PATH = path.join(__dirname, 'articles.json');
 
 function loadArticles() {
@@ -596,6 +597,30 @@ Sitemap: https://${host}/sitemap.xml
   if (req.method === 'GET' && pathname === '/api/offers') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify({ ok: true, offers: loadOffers() }));
+  }
+
+  // GET /api/catalyst/niches -> Retrieve all pre-engineered Problem Catalysts
+  if (req.method === 'GET' && pathname === '/api/catalyst/niches') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ ok: true, catalysts: catalystEngine.getCatalysts() }));
+  }
+
+  // POST /api/catalyst/analyze -> Analyze custom problem input and return campaign blueprint
+  if (req.method === 'POST' && pathname === '/api/catalyst/analyze') {
+    try {
+      const body = await readJsonBody(req);
+      const problem = body.problem || '';
+      if (!problem) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ ok: false, error: 'Problem description required' }));
+      }
+      const blueprint = catalystEngine.analyzeCustomProblem(problem);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: true, blueprint }));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
   }
 
   // GET /api/vf/job-status?slug=... -> Check live ViralForge render + auto-schedule state
