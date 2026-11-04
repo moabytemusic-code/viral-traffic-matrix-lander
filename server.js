@@ -13,7 +13,7 @@ try {
   console.warn('[Server] Cadence engine notice:', e.message);
 }
 const { renderOfferLander } = require('./render-lander');
-const { renderArticle } = require('./render-article');
+const { renderArticle, renderGuidesIndex } = require('./render-article');
 const ARTICLES_PATH = path.join(__dirname, 'articles.json');
 
 function loadArticles() {
@@ -418,6 +418,71 @@ const server = http.createServer(async (req, res) => {
     return res.end(JSON.stringify({ status: 'ok', uptime: process.uptime() }));
   }
 
+  // GET /robots.txt -> Standard Search Engine & AI Crawler Directives
+  if ((req.method === 'GET' || req.method === 'HEAD') && pathname === '/robots.txt') {
+    const host = req.headers.host || 'traffic.aisimplesystem.com';
+    const robots = `User-agent: *
+Allow: /
+Disallow: /api/
+
+# Sitemaps
+Sitemap: https://${host}/sitemap.xml
+`;
+    res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+    return res.end(robots);
+  }
+
+  // GET /sitemap.xml -> Dynamic XML Sitemap for Google, Bing, and AI Search Engines
+  if ((req.method === 'GET' || req.method === 'HEAD') && pathname === '/sitemap.xml') {
+    const host = req.headers.host || 'traffic.aisimplesystem.com';
+    const now = new Date().toISOString().split('T')[0];
+    const articlesList = loadArticles();
+    const offersList = loadOffers();
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://${host}/guides</loc>
+    <lastmod>${now}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://${host}/power-guide</loc>
+    <lastmod>${now}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>`;
+
+    for (const [slug, art] of Object.entries(articlesList)) {
+      const artDate = art.publishedAt ? art.publishedAt.split('T')[0] : now;
+      xml += `
+  <url>
+    <loc>https://${host}/guides/${slug}</loc>
+    <lastmod>${artDate}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>`;
+    }
+
+    for (const [slug, off] of Object.entries(offersList)) {
+      if (off && (off.status === 'live' || off.active !== false)) {
+        xml += `
+  <url>
+    <loc>https://${host}/o/${slug}</loc>
+    <lastmod>${now}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>`;
+      }
+    }
+
+    xml += `
+</urlset>`;
+    res.writeHead(200, { 'Content-Type': 'application/xml; charset=utf-8' });
+    return res.end(xml);
+  }
+
   // GET /launchpad -> Serve the Offer Launchpad OS Dashboard
   if ((req.method === 'GET' || req.method === 'HEAD') && pathname === '/launchpad') {
     const filePath = path.join(__dirname, 'launchpad.html');
@@ -449,24 +514,32 @@ const server = http.createServer(async (req, res) => {
     return res.end('Video not found');
   }
 
+  // GET /guides -> Render Guides Hub Directory
+  if ((req.method === 'GET' || req.method === 'HEAD') && (pathname === '/guides' || pathname === '/guides/')) {
+    const articlesList = loadArticles();
+    const html = renderGuidesIndex(articlesList, { reqHost: req.headers.host || 'traffic.aisimplesystem.com' });
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    return res.end(html);
+  }
+
   // GET /guides/:slug or /power-guide or /blackout -> Render deep high-converting cluster article
-  const articlesList = loadArticles();
   if (
     (req.method === 'GET' || req.method === 'HEAD') &&
-    (pathname.startsWith('/guides/') || pathname === '/power-guide' || pathname === '/blackout' || pathname === '/guides')
+    (pathname.startsWith('/guides/') || pathname === '/power-guide' || pathname === '/blackout')
   ) {
+    const articlesList = loadArticles();
     let articleSlug = pathname.replace(/^\/guides\//, '').replace(/\/$/, '');
     if (pathname === '/power-guide' || pathname === '/blackout') {
       articleSlug = 'diy-home-power-blackout';
-    } else if (pathname === '/guides') {
-      const keys = Object.keys(articlesList);
-      articleSlug = keys[0] || 'diy-home-power-blackout';
     }
     const article = articlesList[articleSlug];
     if (article) {
       const html = renderArticle(article, { reqHost: req.headers.host || 'traffic.aisimplesystem.com' });
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       return res.end(html);
+    } else {
+      res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
+      return res.end(`<h1>Guide Not Found</h1><p><a href="/guides">Browse All Resilience Guides</a></p>`);
     }
   }
 

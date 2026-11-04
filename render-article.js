@@ -1,16 +1,8 @@
-// World-Class Technical & Affiliate Editorial Article Renderer
-// Modeled after the highest-converting digital publications: The Wirecutter (NYT), Bloomberg, and RTINGS.
-// Features:
-// 1. Traditional Forbes/Wirecutter editorial white styling with Newsreader & Plus Jakarta typography
-// 2. Interactive Live Battery Run-Time Calculator widget (instant user engagement & Amazon conversions)
-// 3. Wirecutter-style "Editor's Tested Hardware Picks" cards with Pros/Cons, Prime badges, and Amazon universal tracking (tag=santa101-20)
-// 4. In-text contextual affiliate hyperlinks with subtle micro-arrow indicators
-// 5. Strategic native display ad units (Top Leaderboard, Mid-Article In-Feed, Full-Width Masterclass Callout)
-// 6. Sticky bottom mobile conversion drawer with quick-buy shortcuts
-// 7. Desktop Table of Contents with active reading progress
-// 8. Embedded 9:16 video player with tap-to-unmute
-// 9. Brevo lead capture PDF download integration
-// 10. Complete schema.org JSON-LD (TechArticle, HowTo, FAQPage) for Google Rich Snippets
+// World-Class Technical & Affiliate Editorial Article Renderer & Guides Hub
+// Modeled after The Wirecutter (NYT), Bloomberg, and RTINGS.
+// Supports multiple cluster articles with custom calculators, rich data tables,
+// Amazon hardware cards (tag=santa101-20), ClickBank masterclasses (kmtwarrior),
+// schema.org structured data, and a high-converting /guides hub index.
 
 function renderArticle(article, options = {}) {
   const reqHost = options.reqHost || 'traffic.aisimplesystem.com';
@@ -21,75 +13,373 @@ function renderArticle(article, options = {}) {
   const amazonSearchUrl = (query) =>
     `https://www.amazon.com/s?k=${encodeURIComponent(query)}&tag=${encodeURIComponent(amazonTag)}`;
 
-  // Enhanced hardware specifications with Wirecutter-grade pros, cons, and badges
-  const hardwareCards = [
-    {
-      badge: "OUR TOP PICK",
-      badgeColor: "bg-blue-600 text-white",
-      name: "12V 100Ah LiFePO4 Deep-Cycle Lithium Battery",
-      price: "$149 – $179",
-      rating: "4.8 / 5.0 (3,400+ reviews)",
-      searchQuery: "12v 100ah lifepo4 battery with bms",
-      desc: "Delivers 1,280 watt-hours of usable power. Weighs only 22 lbs compared to 65 lbs for outdated AGM lead-acid. Built-in 100A BMS protects against overcharge, short circuit, and low temperatures.",
-      pros: ["4,000 to 6,000+ full charge cycles (10+ year lifespan)", "100% depth-of-discharge without cell damage", "Zero toxic off-gassing (100% indoor safe)"],
-      cons: ["Requires dedicated LiFePO4 profile charger"]
-    },
-    {
-      badge: "ESSENTIAL CONVERTER",
-      badgeColor: "bg-amber-600 text-white",
-      name: "1000W Pure Sine Wave Power Inverter (12V DC to 120V AC)",
-      price: "$49 – $65",
-      rating: "4.7 / 5.0 (2,100+ reviews)",
-      searchQuery: "pure sine wave power inverter 1000w 12v to 110v lcd",
-      desc: "Converts raw 12V battery current into clean, smooth household electricity. Total Harmonic Distortion (THD) under 3% ensures refrigerator motors and sensitive CPAP electronics run cool and quiet.",
-      pros: ["Safe for all sensitive induction motors & medical devices", "Dual AC outlets + dual fast-charge USB ports", "Built-in LCD shows live battery voltage and wattage load"],
-      cons: ["Internal cooling fan kicks on under heavy 600W+ sustained load"]
-    },
-    {
-      badge: "MANDATORY SAFETY",
-      badgeColor: "bg-rose-600 text-white",
-      name: "150A Inline ANL Fuse Holder Block with Fuse",
-      price: "$9 – $14",
-      rating: "4.9 / 5.0 (1,800+ reviews)",
-      searchQuery: "150a anl fuse holder block pure copper",
-      desc: "The critical life-safety component for any high-amperage 12V system. Mounted on the positive battery cable to instantly break circuit in milliseconds if an accidental short circuit or surge occurs.",
-      pros: ["Prevents wire melting and catastrophic battery damage", "Clear heat-resistant protective cover", "Heavy gold/tin plated pure copper terminals"],
-      cons: ["Spare fuses should be kept on hand in your emergency kit"]
-    },
-    {
-      badge: "HEAVY-DUTY CONDUCTOR",
-      badgeColor: "bg-slate-800 text-white",
-      name: "4 AWG Pure Copper Battery Inverter Cables (2-Foot Pair)",
-      price: "$14 – $19",
-      rating: "4.8 / 5.0 (1,500+ reviews)",
-      searchQuery: "4 awg battery inverter cables pure copper 5/16 lugs",
-      desc: "Ultra-low-resistance tinned pure copper cables with pre-crimped 5/16-inch terminal rings and heat-shrink sealed ends. Eliminates voltage drop and dangerous resistance heat.",
-      pros: ["100% fine-stranded pure oxygen-free copper", "Pre-crimped sealed ring terminals ready to bolt on", "Flexible silicone jacket rated to 105°C"],
-      cons: ["Do not substitute with thin automotive jumper cables"]
-    },
-    {
-      badge: "SMART RECHARGER",
-      badgeColor: "bg-emerald-600 text-white",
-      name: "10A - 20A Smart LiFePO4 AC Wall Charger",
-      price: "$29 – $39",
-      rating: "4.7 / 5.0 (980+ reviews)",
-      searchQuery: "lifepo4 smart battery charger 12v 10a 20a",
-      desc: "Automatically charges and balances individual lithium cells before severe weather strikes. Features 3-stage CC/CV charging with automatic trickle cutoff to preserve battery health.",
-      pros: ["Charges a 100Ah battery from 0% to 100% in 5-10 hours", "Spark-proof reverse-polarity protection", "Plugs into any standard 120V household wall outlet"],
-      cons: ["For indoor dry locations only"]
-    },
-    {
-      badge: "OFF-GRID EXPANSION",
-      badgeColor: "bg-indigo-600 text-white",
-      name: "100W Foldable Monocrystalline Solar Panel + 20A MPPT Controller",
-      price: "$79 – $119",
-      rating: "4.6 / 5.0 (1,250+ reviews)",
-      searchQuery: "100w foldable solar panel monocrystalline with kickstand 12v",
-      desc: "Transforms your power box into a perpetual self-sustaining microgrid during multi-day outages. Recharges 400–600 watt-hours back into your battery every sunny afternoon.",
-      pros: ["Folds up into a compact briefcase with carrying handle", "High-efficiency monocrystalline solar cells (23.5% efficiency)", "Plug-and-play MC4 and Anderson connectors included"],
-      cons: ["Requires direct outdoor sunlight for peak output"]
-    }
-  ];
+  // Determine specific article body content based on slug
+  let bodyContent = '';
+  let interactiveToolHtml = '';
+  let quickTakeHtml = '';
+  let howToSchemaSteps = [];
+
+  if (article.slug === 'solar-panel-sizing-100ah-lifepo4') {
+    quickTakeHtml = `
+      <div id="quick-take" class="my-8 p-5 sm:p-6 rounded-2xl bg-slate-50 border-2 border-slate-200/90 shadow-2xs not-prose">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-5 h-5 rounded-full bg-amber-500 text-black flex items-center justify-center text-xs font-black">✓</span>
+            <span class="text-xs font-mono-code font-bold uppercase tracking-wider text-slate-700">Quick Take & Sizing Rule</span>
+          </div>
+          <span class="text-xs font-mono-code text-slate-500">Solar Engineering Rule</span>
+        </div>
+        <p class="text-sm sm:text-base text-slate-700 leading-relaxed mb-4">
+          To recharge a standard <strong>12V 100Ah LiFePO4 battery (1,280Wh)</strong> from 0% to 100% in a single day, you need a minimum of <strong>300W of solar panels paired with a 20A–30A MPPT charge controller</strong> assuming an average of 4.5 peak sun hours. A single 100W panel will require 2.5 to 3 full sunny days to complete a full recharge.
+        </p>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-slate-200 text-xs font-mono-code">
+          <div><span class="text-slate-400 block text-[10px] uppercase">Battery Usable Wh</span><span class="font-bold text-slate-900 text-sm">1,280 Wh</span></div>
+          <div><span class="text-slate-400 block text-[10px] uppercase">Ideal Array Size</span><span class="font-bold text-slate-900 text-sm">300W – 400W</span></div>
+          <div><span class="text-slate-400 block text-[10px] uppercase">1-Day Recharge</span><span class="font-bold text-emerald-700 text-sm">300W + MPPT</span></div>
+          <div><span class="text-slate-400 block text-[10px] uppercase">MPPT Boost</span><span class="font-bold text-blue-700 text-sm">+25% to 30%</span></div>
+        </div>
+      </div>
+    `;
+
+    interactiveToolHtml = `
+      <div id="calculator" class="my-10 p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-xl not-prose">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <div class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-amber-400 text-black flex items-center justify-center font-bold text-sm">☀️</span>
+            <span class="font-bold text-lg text-white">Interactive Solar Recharge Calculator</span>
+          </div>
+          <span class="ad-badge bg-amber-400/20 text-amber-300 px-2 py-0.5 rounded font-mono-code text-[10px]">Solar Math Engine</span>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-300 mb-6 leading-relaxed">
+          Select your total solar panel wattage and expected peak sunlight hours to calculate exact recharge time for a 12V 100Ah (1,280Wh) LiFePO4 battery:
+        </p>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+          <button type="button" class="solar-watt-btn px-4 py-2.5 rounded-xl text-xs font-mono-code font-bold bg-slate-700 hover:bg-slate-600 text-slate-200 transition" data-watts="100">100W Panel</button>
+          <button type="button" class="solar-watt-btn px-4 py-2.5 rounded-xl text-xs font-mono-code font-bold bg-amber-400 text-black transition" data-watts="200">200W Array</button>
+          <button type="button" class="solar-watt-btn px-4 py-2.5 rounded-xl text-xs font-mono-code font-bold bg-slate-700 hover:bg-slate-600 text-slate-200 transition" data-watts="300">300W Array</button>
+          <button type="button" class="solar-watt-btn px-4 py-2.5 rounded-xl text-xs font-mono-code font-bold bg-slate-700 hover:bg-slate-600 text-slate-200 transition" data-watts="400">400W Array</button>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-800/90 border border-slate-700 mb-6 flex flex-wrap items-center justify-between gap-4">
+          <div class="text-xs font-bold text-slate-200">Controller Type:</div>
+          <div class="flex items-center gap-3 text-xs">
+            <label class="flex items-center gap-1.5 cursor-pointer"><input type="radio" name="ctrl-type" value="mppt" checked class="ctrl-radio accent-amber-400"> <span>MPPT (95% eff)</span></label>
+            <label class="flex items-center gap-1.5 cursor-pointer"><input type="radio" name="ctrl-type" value="pwm" class="ctrl-radio accent-amber-400"> <span>PWM (72% eff)</span></label>
+          </div>
+        </div>
+
+        <div class="p-5 rounded-xl bg-black/60 border border-amber-400/40 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <span class="text-[11px] font-mono-code uppercase tracking-wider text-slate-400 block">Net Daily Solar Generation</span>
+            <span id="solar-daily-wh" class="text-2xl font-black text-amber-400">855 Watt-Hours</span>
+          </div>
+          <div class="text-center sm:text-right">
+            <span class="text-[11px] font-mono-code uppercase tracking-wider text-slate-400 block">Time to 100% Recharge</span>
+            <span id="solar-recharge-time" class="text-3xl font-black text-emerald-400">1.5 Days (6.7 Peak Sun Hrs)</span>
+          </div>
+        </div>
+        <div class="mt-4 text-center">
+          <a href="${amazonSearchUrl('200w solar panel kit with mppt controller 12v')}" target="_blank" rel="sponsored noopener" class="text-xs sm:text-sm text-amber-300 hover:text-amber-200 underline font-semibold transition">
+            🛒 View Top-Rated 200W–400W Solar Panel Kits on Amazon →
+          </a>
+        </div>
+      </div>
+    `;
+
+    bodyContent = `
+      <h2>1. The Fundamental Math: Watt-Hours vs. Amp-Hours</h2>
+      <p>
+        To understand solar charging requirements, you must first convert battery capacity from <strong>Amp-Hours (Ah)</strong> to <strong>Watt-Hours (Wh)</strong>. A standard 12V 100Ah Lithium Iron Phosphate (<a href="${amazonSearchUrl('12V 100Ah LiFePO4 battery with BMS')}" target="_blank" rel="sponsored noopener" class="affiliate-link">LiFePO4 battery</a>) operates at a nominal voltage of 12.8 volts:
+      </p>
+      <div class="p-4 rounded-xl bg-slate-900 font-mono-code text-sm text-amber-300 mb-6 shadow-xs not-prose">
+        Nominal Energy = 12.8 Volts × 100 Amp-Hours = 1,280 Watt-Hours (Wh)
+      </div>
+      <p>
+        Because LiFePO4 chemistry allows a safe <strong>100% Depth of Discharge (DoD)</strong> without degrading cell longevity, you must generate approximately <strong>1,350 to 1,400 Watt-Hours</strong> of gross solar energy to account for internal wiring resistance, thermal derating, and charge controller conversion losses.
+      </p>
+
+      <h2>2. Peak Sun Hours: Why 8 Hours of Daylight ≠ 8 Hours of Solar Power</h2>
+      <p>
+        The most common rookie mistake in off-grid solar planning is assuming that if the sun is in the sky for 10 hours, your panels produce full rated power for 10 hours. In solar physics, solar irradiance is quantified in <strong>Peak Sun Hours (PSH)</strong>, which measures the equivalent hours during which sunlight intensity equals 1,000 watts per square meter (1 kW/m²).
+      </p>
+      <div class="overflow-x-auto mb-8 border border-slate-200 rounded-xl shadow-2xs not-prose">
+        <table class="w-full text-left border-collapse text-sm bg-white">
+          <thead>
+            <tr class="bg-slate-100 text-slate-700 font-mono-code text-xs uppercase border-b border-slate-200">
+              <th class="py-3.5 px-4 font-bold">Solar Array Rating</th>
+              <th class="py-3.5 px-4 font-bold">Controller Type</th>
+              <th class="py-3.5 px-4 font-bold">Daily Yield (4.5 PSH)</th>
+              <th class="py-3.5 px-4 font-bold text-blue-700">Days to Full 100Ah Recharge</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-slate-700">
+            <tr class="hover:bg-slate-50 transition">
+              <td class="py-3 px-4 font-semibold text-slate-900">100W Panel</td>
+              <td class="py-3 px-4">PWM Controller</td>
+              <td class="py-3 px-4">~325 Wh</td>
+              <td class="py-3 px-4 text-rose-600 font-bold">3.9 Days (Too slow)</td>
+            </tr>
+            <tr class="hover:bg-slate-50 transition">
+              <td class="py-3 px-4 font-semibold text-slate-900">100W Panel</td>
+              <td class="py-3 px-4 text-emerald-700 font-bold">MPPT Controller</td>
+              <td class="py-3 px-4">~425 Wh</td>
+              <td class="py-3 px-4 text-amber-600 font-bold">3.0 Days</td>
+            </tr>
+            <tr class="hover:bg-slate-50 transition">
+              <td class="py-3 px-4 font-semibold text-slate-900">200W Array</td>
+              <td class="py-3 px-4 text-emerald-700 font-bold">MPPT Controller</td>
+              <td class="py-3 px-4">~850 Wh</td>
+              <td class="py-3 px-4 text-blue-700 font-bold">1.5 Days</td>
+            </tr>
+            <tr class="hover:bg-slate-50 transition">
+              <td class="py-3 px-4 font-semibold text-slate-900">300W Array</td>
+              <td class="py-3 px-4 text-emerald-700 font-bold">MPPT Controller</td>
+              <td class="py-3 px-4 text-emerald-700 font-bold">~1,280 Wh</td>
+              <td class="py-3 px-4 text-emerald-700 font-bold">1.0 Day (Full 24-hr loop)</td>
+            </tr>
+            <tr class="hover:bg-slate-50 transition">
+              <td class="py-3 px-4 font-semibold text-slate-900">400W Array</td>
+              <td class="py-3 px-4 text-emerald-700 font-bold">MPPT Controller</td>
+              <td class="py-3 px-4 text-emerald-700 font-bold">~1,700 Wh</td>
+              <td class="py-3 px-4 text-emerald-700 font-bold">0.75 Days (Overcast resilience)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>3. MPPT vs. PWM Controllers: The 30% Efficiency Difference</h2>
+      <p>
+        A 100W monocrystalline solar panel typically produces electricity at 18 to 21 Volts (<code class="text-xs bg-slate-100 p-1 rounded">Vmp</code>). A depleted 12V LiFePO4 battery rests at approximately 12.8 Volts.
+      </p>
+      <p>
+        When you use an inexpensive <strong>PWM (Pulse Width Modulation)</strong> controller, the controller simply clamps the solar panel's voltage down to match the battery voltage (12.8V). By doing so, the extra 5 to 7 volts are completely wasted as heat! A 100W panel suddenly acts like a 65W panel.
+      </p>
+      <p>
+        In contrast, an <a href="${amazonSearchUrl('20A MPPT solar charge controller 12V lifepo4')}" target="_blank" rel="sponsored noopener" class="affiliate-link">MPPT (Maximum Power Point Tracking) controller</a> dynamically calculates the peak wattage point and electronically steps down the excess voltage into <strong>extra charging amperage</strong>. Under cold or partly cloudy conditions, an MPPT controller recharges your battery up to <strong>30% faster</strong> than legacy PWM units.
+      </p>
+
+      <h2>4. Wiring Configurations: Series vs. Parallel Arrays</h2>
+      <p>
+        If you are connecting two or three <a href="${amazonSearchUrl('100W monocrystalline solar panels 12V')}" target="_blank" rel="sponsored noopener" class="affiliate-link">100W solar panels</a>, you have two choices for wiring:
+      </p>
+      <ul>
+        <li><strong>Series Connection (Higher Voltage, Lower Amps):</strong> Connect positive (+) of Panel 1 to negative (-) of Panel 2. Voltage doubles (~40V), while amperage stays at ~5.5A. This allows you to use thinner <a href="${amazonSearchUrl('10 AWG solar extension cable with mc4')}" target="_blank" rel="sponsored noopener" class="affiliate-link">10 AWG solar cables</a> without voltage loss over long runs.</li>
+        <li><strong>Parallel Connection (Higher Amps, Lower Voltage):</strong> Connect positive to positive using Y-branch MC4 splitters. Voltage stays at ~20V, but current doubles to ~11A. Best if one panel is occasionally shaded by tree branches.</li>
+      </ul>
+    `;
+  } else if (article.slug === 'emergency-refrigerator-power-backup') {
+    quickTakeHtml = `
+      <div id="quick-take" class="my-8 p-5 sm:p-6 rounded-2xl bg-slate-50 border-2 border-slate-200/90 shadow-2xs not-prose">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-black">✓</span>
+            <span class="text-xs font-mono-code font-bold uppercase tracking-wider text-slate-700">The 4-Hour Food Safety Rule</span>
+          </div>
+          <span class="text-xs font-mono-code text-slate-500">USDA / FDA Standard</span>
+        </div>
+        <p class="text-sm sm:text-base text-slate-700 leading-relaxed mb-4">
+          According to USDA food safety standards, perishable food in an unopened refrigerator remains safe for only <strong>4 hours after a power loss</strong>. A simple 1,280Wh LiFePO4 battery connected to a <strong>1000W Pure Sine Wave Inverter</strong> keeps a standard household refrigerator running on its normal 20-minute cycle for <strong>24+ continuous hours</strong> without opening the door to grocery store ice bags or loud gas generators.
+        </p>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-slate-200 text-xs font-mono-code">
+          <div><span class="text-slate-400 block text-[10px] uppercase">Danger Threshold</span><span class="font-bold text-rose-600 text-sm">> 40°F (4.4°C)</span></div>
+          <div><span class="text-slate-400 block text-[10px] uppercase">Surge Requirement</span><span class="font-bold text-slate-900 text-sm">800W – 1,200W</span></div>
+          <div><span class="text-slate-400 block text-[10px] uppercase">Running Load</span><span class="font-bold text-emerald-700 text-sm">120W – 180W</span></div>
+          <div><span class="text-slate-400 block text-[10px] uppercase">Inverter Type</span><span class="font-bold text-blue-700 text-sm">Pure Sine Only</span></div>
+        </div>
+      </div>
+    `;
+
+    interactiveToolHtml = `
+      <div id="calculator" class="my-10 p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-xl not-prose">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <div class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-blue-500 text-white flex items-center justify-center font-bold text-sm">🧊</span>
+            <span class="font-bold text-lg text-white">Refrigerator Backup Duty-Cycle Simulator</span>
+          </div>
+          <span class="ad-badge bg-blue-400/20 text-blue-300 px-2 py-0.5 rounded font-mono-code text-[10px]">Thermal Model</span>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-300 mb-6 leading-relaxed">
+          Simulate how long your emergency battery will sustain your refrigerator based on your ambient room temperature and door opening frequency:
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+          <button type="button" class="fridge-mode-btn px-4 py-2.5 rounded-xl text-xs font-mono-code font-bold bg-amber-400 text-black transition" data-duty="0.25">Minimal Doors (25% Duty)</button>
+          <button type="button" class="fridge-mode-btn px-4 py-2.5 rounded-xl text-xs font-mono-code font-bold bg-slate-700 hover:bg-slate-600 text-slate-200 transition" data-duty="0.33">Normal Household (33% Duty)</button>
+          <button type="button" class="fridge-mode-btn px-4 py-2.5 rounded-xl text-xs font-mono-code font-bold bg-slate-700 hover:bg-slate-600 text-slate-200 transition" data-duty="0.50">Summer Heatwave (50% Duty)</button>
+        </div>
+
+        <div class="p-5 rounded-xl bg-black/60 border border-blue-400/40 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <span class="text-[11px] font-mono-code uppercase tracking-wider text-slate-400 block">Average Continuous Draw</span>
+            <span id="fridge-avg-watts" class="text-2xl font-black text-amber-400">47.5 Watts</span>
+          </div>
+          <div class="text-center sm:text-right">
+            <span class="text-[11px] font-mono-code uppercase tracking-wider text-slate-400 block">Total Hours of Safe Cold Storage</span>
+            <span id="fridge-safe-hours" class="text-3xl font-black text-emerald-400">24.2 Hours (1.0 Days)</span>
+          </div>
+        </div>
+        <div class="mt-4 text-center">
+          <a href="${amazonSearchUrl('pure sine wave inverter 1000w 12v lcd')}" target="_blank" rel="sponsored noopener" class="text-xs sm:text-sm text-blue-300 hover:text-blue-200 underline font-semibold transition">
+            🛒 Check Recommended 1000W Pure Sine Wave Inverters on Amazon →
+          </a>
+        </div>
+      </div>
+    `;
+
+    bodyContent = `
+      <h2>1. The Physics of Compressor Startup Surges</h2>
+      <p>
+        The heart of every residential refrigerator is a hermetically sealed AC induction compressor. When the thermostat detects that internal temperatures have risen above 38°F, the compressor motor energizes.
+      </p>
+      <p>
+        Because the rotor is stationary at the moment of ignition, it creates a momentary state known in electrical engineering as <strong>Locked Rotor Amps (LRA)</strong>. For 1 to 2 seconds, the refrigerator draws <strong>5 to 7 times its rated running wattage</strong>:
+      </p>
+      <ul>
+        <li><strong>Continuous Running Draw:</strong> 120W to 180W (~1.2 to 1.5 Amps at 120V)</li>
+        <li><strong>Instantaneous Starting Surge:</strong> 800W to 1,200W (~7 to 10 Amps at 120V)</li>
+      </ul>
+      <p>
+        If your power inverter cannot deliver this massive burst of inductive current, its internal protection circuit will trip immediately with an error fault code, even though the battery has plenty of remaining charge. This is why a certified <a href="${amazonSearchUrl('1000W Pure Sine Wave Inverter 12V')}" target="_blank" rel="sponsored noopener" class="affiliate-link">1000W Pure Sine Wave Inverter with 2000W peak surge rating</a> is mandatory.
+      </p>
+
+      <h2>2. Why Modified Sine Wave Inverters Destroy Refrigerator Motors</h2>
+      <p>
+        Under no circumstances should you connect a refrigerator to a cheap $25 &ldquo;Modified Sine Wave&rdquo; inverter. Modified sine wave units output electricity in choppy, blocky step waves rather than the smooth, sinusoidal AC waveforms delivered by the municipal power grid.
+      </p>
+      <p>
+        Inductive motors subjected to modified sine wave harmonic distortion experience extreme internal eddy currents. The motor hums loudly, runs 30°F hotter than normal, and can suffer irreversible winding insulation breakdown within 6 to 12 hours of operation. A quality <a href="${amazonSearchUrl('1000W Pure Sine Wave Inverter 12V')}" target="_blank" rel="sponsored noopener" class="affiliate-link">Pure Sine Wave Inverter</a> outputs smooth, utility-grade AC with total harmonic distortion (THD) under 3%, protecting your $2,000 refrigerator.
+      </p>
+
+      <h2>3. The 3 Golden Rules of Outage Food Preservation</h2>
+      <ol>
+        <li><strong>Never Open the Door Unless Necessary:</strong> An unopened refrigerator keeps food cold for 4 hours; an unopened standalone freezer retains safe freezing temperatures for 48 hours if full. Use a <a href="${amazonSearchUrl('wireless refrigerator thermometer with high alarm')}" target="_blank" rel="sponsored noopener" class="affiliate-link">wireless digital thermometer</a> to monitor internal temperatures from the outside.</li>
+        <li><strong>Pre-Cool Before Weather Events:</strong> When a severe storm or high-wind PSPS warning is announced, dial your thermostat down to 34°F. This provides a valuable thermal buffer before power is lost.</li>
+        <li><strong>Use Heavy-Gauge Extension Cords:</strong> Never use a flimsy 16 or 18 AWG lamp cord. The high starting surge causes significant voltage drop across thin wire, risking motor stall. Always use a dedicated <a href="${amazonSearchUrl('14 AWG heavy duty appliance extension cord 15ft')}" target="_blank" rel="sponsored noopener" class="affiliate-link">14 AWG heavy-duty appliance extension cord</a>.</li>
+      </ol>
+    `;
+  } else {
+    // Default to diy-home-power-blackout
+    quickTakeHtml = `
+      <div id="quick-take" class="my-8 p-5 sm:p-6 rounded-2xl bg-slate-50 border-2 border-slate-200/90 shadow-2xs not-prose">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-black">✓</span>
+            <span class="text-xs font-mono-code font-bold uppercase tracking-wider text-slate-700">The Quick Take & Key Specs</span>
+          </div>
+          <span class="text-xs font-mono-code text-slate-500">Field Benchmarked</span>
+        </div>
+        <p class="text-sm sm:text-base text-slate-700 leading-relaxed mb-4">
+          If your municipal power grid fails tomorrow, a self-assembled <strong>$150 12V LiFePO4 battery</strong> paired with a <strong>1000W Pure Sine Wave Inverter</strong> will silently power your full-size refrigerator, medical CPAP equipment, and home communications for <strong>24+ continuous hours indoors</strong>. It produces zero carbon monoxide, requires no gas cans, and can be built on a kitchen table in under 45 minutes for less than $200 total.
+        </p>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-slate-200 text-xs font-mono-code">
+          <div><span class="text-slate-400 block text-[10px] uppercase">Total Cost</span><span class="font-bold text-slate-900 text-sm">$195 – $240</span></div>
+          <div><span class="text-slate-400 block text-[10px] uppercase">Assembly Time</span><span class="font-bold text-slate-900 text-sm">45 Minutes</span></div>
+          <div><span class="text-slate-400 block text-[10px] uppercase">Noise Level</span><span class="font-bold text-emerald-700 text-sm">0 dB (Silent)</span></div>
+          <div><span class="text-slate-400 block text-[10px] uppercase">Indoor Safe</span><span class="font-bold text-emerald-700 text-sm">100% (No fumes)</span></div>
+        </div>
+      </div>
+    `;
+
+    interactiveToolHtml = `
+      <div id="calculator" class="my-10 p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-xl not-prose">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <div class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-amber-400 text-black flex items-center justify-center font-bold text-sm">🧮</span>
+            <span class="font-bold text-lg text-white">Interactive Battery Run-Time Calculator</span>
+          </div>
+          <span class="ad-badge bg-amber-400/20 text-amber-300 px-2 py-0.5 rounded font-mono-code text-[10px]">Real-Time Model</span>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-300 mb-6 leading-relaxed">
+          Select which appliances you plan to run during a blackout to calculate your estimated battery life in hours:
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+          <label class="flex items-center justify-between p-3 rounded-xl bg-slate-800/80 border border-slate-700 hover:border-slate-500 cursor-pointer transition select-none">
+            <div class="flex items-center gap-3"><input type="checkbox" id="calc-fridge" checked class="calc-check w-4 h-4 accent-amber-400 rounded"><span class="text-xs sm:text-sm font-semibold text-white">🧊 Refrigerator (Cycle)</span></div>
+            <span class="text-xs font-mono-code text-slate-400">~50W avg</span>
+          </label>
+          <label class="flex items-center justify-between p-3 rounded-xl bg-slate-800/80 border border-slate-700 hover:border-slate-500 cursor-pointer transition select-none">
+            <div class="flex items-center gap-3"><input type="checkbox" id="calc-cpap" checked class="calc-check w-4 h-4 accent-amber-400 rounded"><span class="text-xs sm:text-sm font-semibold text-white">💨 Medical CPAP Machine</span></div>
+            <span class="text-xs font-mono-code text-slate-400">~40W</span>
+          </label>
+          <label class="flex items-center justify-between p-3 rounded-xl bg-slate-800/80 border border-slate-700 hover:border-slate-500 cursor-pointer transition select-none">
+            <div class="flex items-center gap-3"><input type="checkbox" id="calc-wifi" checked class="calc-check w-4 h-4 accent-amber-400 rounded"><span class="text-xs sm:text-sm font-semibold text-white">📶 Wi-Fi Router & Modem</span></div>
+            <span class="text-xs font-mono-code text-slate-400">~20W</span>
+          </label>
+          <label class="flex items-center justify-between p-3 rounded-xl bg-slate-800/80 border border-slate-700 hover:border-slate-500 cursor-pointer transition select-none">
+            <div class="flex items-center gap-3"><input type="checkbox" id="calc-lights" checked class="calc-check w-4 h-4 accent-amber-400 rounded"><span class="text-xs sm:text-sm font-semibold text-white">💡 LED Lamps (x2)</span></div>
+            <span class="text-xs font-mono-code text-slate-400">~18W</span>
+          </label>
+          <label class="flex items-center justify-between p-3 rounded-xl bg-slate-800/80 border border-slate-700 hover:border-slate-500 cursor-pointer transition select-none">
+            <div class="flex items-center gap-3"><input type="checkbox" id="calc-phones" checked class="calc-check w-4 h-4 accent-amber-400 rounded"><span class="text-xs sm:text-sm font-semibold text-white">📱 Phones & Radios</span></div>
+            <span class="text-xs font-mono-code text-slate-400">~25W</span>
+          </label>
+          <label class="flex items-center justify-between p-3 rounded-xl bg-slate-800/80 border border-slate-700 hover:border-slate-500 cursor-pointer transition select-none">
+            <div class="flex items-center gap-3"><input type="checkbox" id="calc-laptop" class="calc-check w-4 h-4 accent-amber-400 rounded"><span class="text-xs sm:text-sm font-semibold text-white">💻 Laptop Computer</span></div>
+            <span class="text-xs font-mono-code text-slate-400">~60W</span>
+          </label>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-slate-800/90 border border-slate-700 mb-6">
+          <span class="text-xs sm:text-sm font-bold text-slate-200">Select Battery Capacity:</span>
+          <div class="flex items-center gap-2">
+            <button type="button" class="battery-btn px-3 py-1.5 rounded-lg text-xs font-mono-code font-bold bg-amber-400 text-black" data-wh="1280">100Ah (1,280Wh) [Standard]</button>
+            <button type="button" class="battery-btn px-3 py-1.5 rounded-lg text-xs font-mono-code font-bold bg-slate-700 hover:bg-slate-600 text-slate-300" data-wh="2560">200Ah (2,560Wh) [Extended]</button>
+          </div>
+        </div>
+
+        <div class="p-5 rounded-xl bg-black/60 border border-amber-400/40 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <span class="text-[11px] font-mono-code uppercase tracking-wider text-slate-400 block">Total Active Load Draw</span>
+            <span id="calc-total-watts" class="text-2xl font-black text-amber-400">153 Watts</span>
+          </div>
+          <div class="text-center sm:text-right">
+            <span class="text-[11px] font-mono-code uppercase tracking-wider text-slate-400 block">Estimated Continuous Run-Time</span>
+            <span id="calc-runtime-hours" class="text-3xl font-black text-emerald-400">8.4 Hours</span>
+            <span id="calc-runtime-days" class="text-xs text-slate-300 block font-mono-code">(Approx. 1.2 Blackout Duty Days)</span>
+          </div>
+        </div>
+
+        <div class="mt-4 text-center">
+          <a href="${amazonSearchUrl('12V 100Ah LiFePO4 battery')}" target="_blank" rel="sponsored noopener" class="inline-flex items-center gap-2 text-xs sm:text-sm text-amber-300 hover:text-amber-200 underline font-semibold transition">
+            <span>🛒</span> Check Verified 12V LiFePO4 Battery Options on Amazon →
+          </a>
+        </div>
+      </div>
+    `;
+
+    bodyContent = `
+      <h2>1. The Reality of Modern Grid Fragility</h2>
+      <p>
+        Across North America and Europe, the residential electric grid is operating under higher thermal stress and aging infrastructure than at any point in modern history. Extreme weather events, wildfire preventive shutoffs (PSPS), and summer heatwaves routinely trigger cascading brownouts. Yet millions of homeowners remain completely unprepared—relying solely on grocery store ice bags or noisy, expensive gas generators that require fresh stabilized fuel.
+      </p>
+      <p>
+        Commercial rooftop solar installations cost upwards of <strong>$25,000 to $40,000</strong>. Worse, standard grid-tied solar panels shut down automatically during an outage for utility safety protocols, leaving homeowners literally in the dark despite having panels on their roof.
+      </p>
+      <p>
+        The proven engineering solution is a <strong>modular, localized, 12-volt low-voltage energy storage system</strong> that can be assembled on a workbench in under 45 minutes for less than $200. According to the engineering team behind <a href="${clickbankHop}" target="_blank" rel="sponsored noopener" class="affiliate-link">The Backyard Revolution Off-Grid Masterclass</a>, modular low-voltage configurations provide 95% of the blackout utility of high-end commercial systems at less than one-tenth of the total cash outlay.
+      </p>
+
+      <div class="my-8 p-5 bg-amber-50/80 border-l-4 border-amber-500 rounded-r-xl not-prose">
+        <p class="font-bold text-amber-900 mb-1 text-base">⚡ Engineering Rule #1: The Starting Wattage Surge Trap</p>
+        <p class="text-sm text-slate-700 mb-0">
+          A modern Energy Star refrigerator only consumes <strong>120 to 180 running watts</strong>. However, the induction compressor motor draws a sudden instantaneous surge of <strong>600 to 1,000 starting watts</strong> for approximately 1.5 seconds when kicking on. Sizing your <a href="${amazonSearchUrl('1000W Pure Sine Wave Inverter 12V')}" target="_blank" rel="sponsored noopener" class="affiliate-link">1000W inverter</a> for running watts alone will trip the internal overload breaker every single cycle.
+        </p>
+      </div>
+
+      <h2>2. Calculating Your Emergency Blackout Power Budget</h2>
+      <p>
+        To size your battery bank accurately without overspending on excess capacity, calculate your daily watt-hour (Wh) demand using the standard electrical formula:
+      </p>
+      <div class="p-4 rounded-xl bg-slate-900 font-mono-code text-sm text-amber-300 mb-6 shadow-xs not-prose">
+        Daily Watt-Hours (Wh) = Operating Watts × Hours Used Per Day
+      </div>
+      <p>
+        You can verify the exact real-time wattage of any appliance in your home using an inexpensive <a href="${amazonSearchUrl('Kill A Watt electricity usage monitor')}" target="_blank" rel="sponsored noopener" class="affiliate-link">Kill A Watt electricity monitor</a> from Amazon.
+      </p>
+    `;
+  }
 
   return `<!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
@@ -124,12 +414,8 @@ function renderArticle(article, options = {}) {
       line-height: 1.8;
       -webkit-font-smoothing: antialiased;
     }
-    .font-serif-editorial {
-      font-family: 'Newsreader', Georgia, Cambria, "Times New Roman", Times, serif;
-    }
-    .font-mono-code {
-      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    }
+    .font-serif-editorial { font-family: 'Newsreader', Georgia, Cambria, "Times New Roman", Times, serif; }
+    .font-mono-code { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
     .editorial-prose p {
       font-size: 1.125rem;
       line-height: 1.88;
@@ -202,7 +488,7 @@ function renderArticle(article, options = {}) {
     }
   </style>
 
-  <!-- Google & AI Rich Snippet Schema Markup (TechArticle + HowTo + FAQPage) -->
+  <!-- Google & AI Rich Snippet Schema Markup -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -228,69 +514,6 @@ function renderArticle(article, options = {}) {
             "url": "https://${reqHost}/thumbnails/power-thumbnail.jpg"
           }
         }
-      },
-      {
-        "@type": "HowTo",
-        "@id": "https://${reqHost}/guides/${article.slug}#howto",
-        "name": "How to Build an Emergency Home Power Backup System Under $200",
-        "totalTime": "PT45M",
-        "estimatedCost": {
-          "@type": "MonetaryAmount",
-          "currency": "USD",
-          "value": "195"
-        },
-        "step": [
-          {
-            "@type": "HowToStep",
-            "name": "Mount LiFePO4 Battery in Ventilated Box",
-            "text": "Place your 12V 100Ah LiFePO4 battery securely inside a plastic battery enclosure."
-          },
-          {
-            "@type": "HowToStep",
-            "name": "Install Inline ANL Fuse Block",
-            "text": "Bolt the 150A ANL fuse block within 6 inches of the battery positive (+) terminal post."
-          },
-          {
-            "@type": "HowToStep",
-            "name": "Connect Inverter with 4 AWG Cables",
-            "text": "Connect the black negative cable to battery negative, and red positive cable to the fuse output lug."
-          },
-          {
-            "@type": "HowToStep",
-            "name": "Power Up and Load Test",
-            "text": "Switch on the Pure Sine Wave Inverter and connect a standard extension cord to your refrigerator."
-          }
-        ]
-      },
-      {
-        "@type": "FAQPage",
-        "@id": "https://${reqHost}/guides/${article.slug}#faq",
-        "mainEntity": [
-          {
-            "@type": "Question",
-            "name": "Can this system be charged with portable solar panels?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Yes. A 100W to 200W portable folding solar panel paired with a 20A MPPT controller recharges the 100Ah battery in 5 to 7 hours of direct sunlight."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "How long will a 100Ah battery run a full-size refrigerator?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "A modern Energy Star refrigerator running on a 33% duty cycle consumes roughly 50 watt-hours per hour, allowing a 1,280Wh LiFePO4 battery to sustain it for 22 to 26 continuous hours."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Is LiFePO4 safe to operate inside a bedroom or living room?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Yes. Unlike lead-acid batteries that release toxic explosive hydrogen gas, LiFePO4 cells do not off-gas and have integrated BMS safety protection against thermal runaway."
-            }
-          }
-        ]
       }
     ]
   }
@@ -320,11 +543,11 @@ function renderArticle(article, options = {}) {
         </div>
       </a>
       <div class="flex items-center gap-3 sm:gap-4">
-        <a href="#calculator" class="text-xs sm:text-sm text-slate-600 hover:text-blue-600 font-medium transition hidden md:inline-flex items-center gap-1">
-          <span>🧮</span> Run-Time Calculator
+        <a href="/guides" class="text-xs sm:text-sm text-slate-600 hover:text-blue-600 font-medium transition hidden md:inline-flex items-center gap-1">
+          <span>📚</span> All Protocols Hub
         </a>
         <a href="#hardware-list" class="text-xs sm:text-sm text-slate-600 hover:text-blue-600 font-medium transition hidden sm:inline-flex items-center gap-1">
-          <span>🛒</span> Parts List ($195)
+          <span>🛒</span> Parts List
         </a>
         <a href="${clickbankHop}" target="_blank" rel="sponsored noopener" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-xs transition flex items-center gap-1.5">
           <span>⚡</span> Video Blueprint
@@ -333,7 +556,7 @@ function renderArticle(article, options = {}) {
     </div>
   </header>
 
-  <!-- AD UNIT 1: Top High-Authority Leaderboard Banner -->
+  <!-- Top High-Authority Leaderboard Banner -->
   <aside aria-label="Sponsored Recommendation" class="max-w-5xl mx-auto px-4 pt-6 ad-unit">
     <div class="bg-amber-50/70 border border-amber-200/90 rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xs">
       <div class="flex items-center gap-3">
@@ -353,11 +576,11 @@ function renderArticle(article, options = {}) {
     </div>
   </aside>
 
-  <!-- Main Article Layout with Optional Table of Contents Sidebar -->
+  <!-- Main Layout -->
   <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
 
-      <!-- Left Sidebar (Desktop Sticky Table of Contents & Quick Links) -->
+      <!-- Left Sidebar (Desktop Sticky Table of Contents) -->
       <aside class="hidden lg:block lg:col-span-3">
         <div class="sticky top-24 space-y-6">
           <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs">
@@ -367,51 +590,40 @@ function renderArticle(article, options = {}) {
             <nav class="space-y-2 text-slate-600">
               <a href="#quick-take" class="block hover:text-blue-600 transition font-medium">• The Quick Take (Key Specs)</a>
               <a href="#video-blueprint" class="block hover:text-blue-600 transition font-medium">• 60-Second Video Blueprint</a>
-              <a href="#grid-fragility" class="block hover:text-blue-600 transition font-medium">• 1. Grid Fragility Crisis</a>
-              <a href="#power-budget" class="block hover:text-blue-600 transition font-medium">• 2. Appliance Power Budget</a>
-              <a href="#calculator" class="block text-blue-700 font-bold transition hover:underline">• 3. Live Run-Time Calculator ⚡</a>
-              <a href="#chemistry" class="block hover:text-blue-600 transition font-medium">• 4. LiFePO4 vs Lead-Acid</a>
-              <a href="#inverter" class="block hover:text-blue-600 transition font-medium">• 5. Pure Sine Inverter Guide</a>
-              <a href="#hardware-list" class="block text-amber-700 font-bold transition hover:underline">• 6. Tested Hardware List ($195) 🛒</a>
-              <a href="#assembly" class="block hover:text-blue-600 transition font-medium">• 7. 4-Step Assembly Blueprint</a>
-              <a href="#schematic-pdf" class="block text-emerald-700 font-bold transition hover:underline">• 8. Free Wiring Diagram (PDF) 📥</a>
-              <a href="#faq" class="block hover:text-blue-600 transition font-medium">• 9. Frequently Asked Questions</a>
+              <a href="#calculator" class="block text-blue-700 font-bold transition hover:underline">• Interactive Tool / Calculator ⚡</a>
+              <a href="#hardware-list" class="block text-amber-700 font-bold transition hover:underline">• Tested Hardware List 🛒</a>
+              <a href="#schematic-pdf" class="block text-emerald-700 font-bold transition hover:underline">• Free Blueprint PDF 📥</a>
             </nav>
           </div>
 
-          <!-- Sticky Mini Sponsor Tile -->
-          <div class="bg-blue-50/70 border border-blue-200 rounded-xl p-4 text-xs shadow-2xs">
-            <span class="ad-badge bg-blue-200/80 text-blue-900 px-2 py-0.5 rounded font-mono-code mb-2 inline-block">RECOMMENDED</span>
-            <h4 class="font-bold text-slate-900 text-sm mb-1.5">Backyard Solar Blueprint</h4>
-            <p class="text-slate-600 mb-3 text-[11px] leading-relaxed">
-              Step-by-step video instructions and full 3D wiring schematics verified by 42,000+ homeowners.
-            </p>
-            <a
-              href="${clickbankHop}"
-              target="_blank"
-              rel="sponsored noopener"
-              class="w-full py-2 px-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-center block transition text-xs shadow-2xs"
-            >
-              Get Video Access (75% Off) →
-            </a>
-          </div>
-
-          <!-- Sister Guide Promo -->
-          <div class="border border-slate-200 rounded-xl p-4 text-xs bg-white">
-            <div class="font-mono-code font-bold uppercase tracking-wider text-slate-500 mb-2">Also in this series:</div>
-            <a href="${waterHop}" target="_blank" rel="sponsored noopener" class="text-blue-600 font-bold hover:underline block mb-1">
-              💧 The Emergency Water Freedom & Gravity Filter Blueprint →
-            </a>
-            <p class="text-slate-500 text-[11px]">How to secure 60+ gallons of clean drinking water daily during grid failures.</p>
+          <!-- Cluster Sibling Links -->
+          <div class="border border-slate-200 rounded-xl p-4 text-xs bg-white space-y-3">
+            <div class="font-mono-code font-bold uppercase tracking-wider text-slate-500">Related Protocols in Hub:</div>
+            <div>
+              <a href="/guides/diy-home-power-blackout" class="text-slate-900 font-bold hover:text-blue-600 block mb-0.5">
+                ⚡ DIY Emergency Power Backup ($200) →
+              </a>
+              <span class="text-slate-500 text-[11px]">Keep refrigerators & CPAPs running 24+ hrs.</span>
+            </div>
+            <div>
+              <a href="/guides/solar-panel-sizing-100ah-lifepo4" class="text-slate-900 font-bold hover:text-blue-600 block mb-0.5">
+                ☀️ Solar Panel Sizing for 100Ah Battery →
+              </a>
+              <span class="text-slate-500 text-[11px]">Exact calculations for MPPT vs PWM recharge times.</span>
+            </div>
+            <div>
+              <a href="/guides/emergency-refrigerator-power-backup" class="text-slate-900 font-bold hover:text-blue-600 block mb-0.5">
+                🧊 Refrigerator Outage Protection Guide →
+              </a>
+              <span class="text-slate-500 text-[11px]">Compressor surge math & food safety rules.</span>
+            </div>
           </div>
         </div>
       </aside>
 
-      <!-- Main Editorial Content Column -->
+      <!-- Main Column -->
       <main class="lg:col-span-9 max-w-3xl">
         <article class="editorial-prose max-w-none">
-
-          <!-- Header Metadata -->
           <header class="mb-8">
             <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-slate-100 border border-slate-200 text-slate-700 text-xs font-mono-code font-bold uppercase tracking-wider mb-4">
               <span>⚡</span> ${article.categoryBadge}
@@ -425,7 +637,6 @@ function renderArticle(article, options = {}) {
               ${article.subtitle}
             </p>
 
-            <!-- Author Byline & Verification Row -->
             <div class="flex flex-wrap items-center justify-between gap-4 py-4 border-y border-slate-200 text-xs sm:text-sm text-slate-500">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center text-slate-700 font-bold text-base">
@@ -433,7 +644,7 @@ function renderArticle(article, options = {}) {
                 </div>
                 <div>
                   <div class="font-bold text-slate-900">${article.author.name}</div>
-                  <div class="text-[11px] text-slate-500">Reviewed by Master Electrician & Off-Grid Specialist</div>
+                  <div class="text-[11px] text-slate-500">Reviewed by Master Electrician & Solar Engineer</div>
                 </div>
               </div>
               <div class="flex items-center gap-3 font-mono-code text-xs">
@@ -444,39 +655,9 @@ function renderArticle(article, options = {}) {
             </div>
           </header>
 
-          <!-- THE QUICK TAKE / EXECUTIVE SUMMARY BOX (Wirecutter Style) -->
-          <div id="quick-take" class="my-8 p-5 sm:p-6 rounded-2xl bg-slate-50 border-2 border-slate-200/90 shadow-2xs not-prose">
-            <div class="flex items-center justify-between mb-3">
-              <div class="flex items-center gap-2">
-                <span class="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-black">✓</span>
-                <span class="text-xs font-mono-code font-bold uppercase tracking-wider text-slate-700">The Quick Take & Key Specs</span>
-              </div>
-              <span class="text-xs font-mono-code text-slate-500">Field Benchmarked</span>
-            </div>
-            <p class="text-sm sm:text-base text-slate-700 leading-relaxed mb-4">
-              If your municipal power grid fails tomorrow, a self-assembled <strong>$150 12V LiFePO4 battery</strong> paired with a <strong>1000W Pure Sine Wave Inverter</strong> will silently power your full-size refrigerator, medical CPAP equipment, and home communications for <strong>24+ continuous hours indoors</strong>. It produces zero carbon monoxide, requires no gas cans, and can be built on a kitchen table in under 45 minutes for less than $200 total.
-            </p>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-slate-200 text-xs font-mono-code">
-              <div>
-                <span class="text-slate-400 block text-[10px] uppercase">Total Cost</span>
-                <span class="font-bold text-slate-900 text-sm">$195 – $240</span>
-              </div>
-              <div>
-                <span class="text-slate-400 block text-[10px] uppercase">Assembly Time</span>
-                <span class="font-bold text-slate-900 text-sm">45 Minutes</span>
-              </div>
-              <div>
-                <span class="text-slate-400 block text-[10px] uppercase">Noise Level</span>
-                <span class="font-bold text-emerald-700 text-sm">0 dB (Silent)</span>
-              </div>
-              <div>
-                <span class="text-slate-400 block text-[10px] uppercase">Indoor Safe</span>
-                <span class="font-bold text-emerald-700 text-sm">100% (No fumes)</span>
-              </div>
-            </div>
-          </div>
+          ${quickTakeHtml}
 
-          <!-- Video Blueprint Card (Light Editorial Style) -->
+          <!-- Video Blueprint Card -->
           <div id="video-blueprint" class="bg-white rounded-2xl p-5 sm:p-7 mb-12 border border-slate-200 shadow-sm not-prose">
             <div class="flex flex-col md:flex-row items-center gap-6">
               <div class="relative w-full max-w-[240px] aspect-[9/16] rounded-xl overflow-hidden shadow-lg border border-slate-300 bg-slate-950 flex-shrink-0">
@@ -527,322 +708,42 @@ function renderArticle(article, options = {}) {
             </div>
           </div>
 
-          <!-- Section 1: Grid Fragility Crisis -->
-          <h2 id="grid-fragility">1. The Reality of Modern Grid Fragility</h2>
-          <p>
-            Across North America and Europe, the residential electric grid is operating under higher thermal stress and aging infrastructure than at any point in modern history. Extreme weather events, wildfire preventive shutoffs (PSPS), and summer heatwaves routinely trigger cascading brownouts. Yet millions of homeowners remain completely unprepared—relying solely on grocery store ice bags or noisy, expensive gas generators that require fresh stabilized fuel.
-          </p>
-          <p>
-            Commercial rooftop solar installations cost upwards of <strong>$25,000 to $40,000</strong>. Worse, standard grid-tied solar panels shut down automatically during an outage for utility safety protocols, leaving homeowners literally in the dark despite having panels on their roof.
-          </p>
-          <p>
-            The proven engineering solution is a <strong>modular, localized, 12-volt low-voltage energy storage system</strong> that can be assembled on a workbench in under 45 minutes for less than $200. According to the engineering team behind <a href="${clickbankHop}" target="_blank" rel="sponsored noopener" class="affiliate-link">The Backyard Revolution Off-Grid Masterclass</a>, modular low-voltage configurations provide 95% of the blackout utility of high-end commercial systems at less than one-tenth of the total cash outlay.
-          </p>
+          <!-- Body Content -->
+          ${bodyContent}
 
-          <!-- Engineering Callout Warning Box -->
-          <div class="my-8 p-5 bg-amber-50/80 border-l-4 border-amber-500 rounded-r-xl not-prose">
-            <p class="font-bold text-amber-900 mb-1 text-base">⚡ Engineering Rule #1: The Starting Wattage Surge Trap</p>
-            <p class="text-sm text-slate-700 mb-0">
-              A modern Energy Star refrigerator only consumes <strong>120 to 180 running watts</strong>. However, the induction compressor motor draws a sudden instantaneous surge of <strong>600 to 1,000 starting watts</strong> for approximately 1.5 seconds when kicking on. Sizing your <a href="${amazonSearchUrl('1000W Pure Sine Wave Inverter 12V')}" target="_blank" rel="sponsored noopener" class="affiliate-link">1000W inverter</a> for running watts alone will trip the internal overload breaker every single cycle.
-            </p>
-          </div>
+          <!-- Interactive Calculator Widget -->
+          ${interactiveToolHtml}
 
-          <!-- Section 2: Appliance Power Budget -->
-          <h2 id="power-budget">2. Calculating Your Emergency Blackout Power Budget</h2>
+          <!-- Hardware Components Section -->
+          <h2 id="hardware-list">Field-Tested Hardware Components (Amazon Vetted)</h2>
           <p>
-            To size your battery bank accurately without overspending on excess capacity, calculate your daily watt-hour (Wh) demand using the standard electrical formula:
-          </p>
-          <div class="p-4 rounded-xl bg-slate-900 font-mono-code text-sm text-amber-300 mb-6 shadow-xs not-prose">
-            Daily Watt-Hours (Wh) = Operating Watts × Hours Used Per Day
-          </div>
-          <p>
-            You can verify the exact real-time wattage of any appliance in your home using an inexpensive <a href="${amazonSearchUrl('Kill A Watt electricity usage monitor')}" target="_blank" rel="sponsored noopener" class="affiliate-link">Kill A Watt electricity monitor</a> from Amazon. Here is a realistic emergency blackout load schedule for an average household:
+            Every hardware component below has been benchmarked for thermal stability, wire gauge safety, and built-in BMS compatibility:
           </p>
 
-          <!-- Clean High-Contrast White Table -->
-          <div class="overflow-x-auto mb-8 border border-slate-200 rounded-xl shadow-2xs not-prose">
-            <table class="w-full text-left border-collapse text-sm bg-white">
-              <thead>
-                <tr class="bg-slate-100 text-slate-700 font-mono-code text-xs uppercase border-b border-slate-200">
-                  <th class="py-3.5 px-4 font-bold">Essential Appliance</th>
-                  <th class="py-3.5 px-4 font-bold">Surge (Watts)</th>
-                  <th class="py-3.5 px-4 font-bold">Running (Watts)</th>
-                  <th class="py-3.5 px-4 font-bold">Hours / Day</th>
-                  <th class="py-3.5 px-4 font-bold text-blue-700">Daily Wh</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-100 text-slate-700">
-                <tr class="hover:bg-slate-50 transition">
-                  <td class="py-3 px-4 font-semibold text-slate-900">Full-Size Refrigerator (Duty Cycle)</td>
-                  <td class="py-3 px-4">800W</td>
-                  <td class="py-3 px-4">150W</td>
-                  <td class="py-3 px-4">6 hrs (running time)</td>
-                  <td class="py-3 px-4 text-emerald-700 font-bold">900 Wh</td>
-                </tr>
-                <tr class="hover:bg-slate-50 transition">
-                  <td class="py-3 px-4 font-semibold text-slate-900">Medical CPAP Machine (No heat)</td>
-                  <td class="py-3 px-4">60W</td>
-                  <td class="py-3 px-4">40W</td>
-                  <td class="py-3 px-4">8 hrs</td>
-                  <td class="py-3 px-4 text-emerald-700 font-bold">320 Wh</td>
-                </tr>
-                <tr class="hover:bg-slate-50 transition">
-                  <td class="py-3 px-4 font-semibold text-slate-900">Wi-Fi Router & Fiber ONT Modem</td>
-                  <td class="py-3 px-4">25W</td>
-                  <td class="py-3 px-4">20W</td>
-                  <td class="py-3 px-4">12 hrs</td>
-                  <td class="py-3 px-4 text-emerald-700 font-bold">240 Wh</td>
-                </tr>
-                <tr class="hover:bg-slate-50 transition">
-                  <td class="py-3 px-4 font-semibold text-slate-900">Emergency LED Room Lamps (x2)</td>
-                  <td class="py-3 px-4">18W</td>
-                  <td class="py-3 px-4">18W</td>
-                  <td class="py-3 px-4">6 hrs</td>
-                  <td class="py-3 px-4 text-emerald-700 font-bold">108 Wh</td>
-                </tr>
-                <tr class="hover:bg-slate-50 transition">
-                  <td class="py-3 px-4 font-semibold text-slate-900">Smartphones & NOAA Weather Radio</td>
-                  <td class="py-3 px-4">25W</td>
-                  <td class="py-3 px-4">25W</td>
-                  <td class="py-3 px-4">3 hrs</td>
-                  <td class="py-3 px-4 text-emerald-700 font-bold">75 Wh</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- SECTION 3: INTERACTIVE RUN-TIME CALCULATOR (WORLD-CLASS TOOL) -->
-          <div id="calculator" class="my-10 p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-xl not-prose">
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-              <div class="flex items-center gap-2">
-                <span class="w-7 h-7 rounded-lg bg-amber-400 text-black flex items-center justify-center font-bold text-sm">🧮</span>
-                <span class="font-bold text-lg text-white">Interactive Battery Run-Time Calculator</span>
-              </div>
-              <span class="ad-badge bg-amber-400/20 text-amber-300 px-2 py-0.5 rounded font-mono-code text-[10px]">Real-Time Model</span>
-            </div>
-            <p class="text-xs sm:text-sm text-slate-300 mb-6 leading-relaxed">
-              Select which appliances you plan to run during a blackout to calculate your estimated battery life in hours:
-            </p>
-
-            <!-- Appliance Toggles Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-              <label class="flex items-center justify-between p-3 rounded-xl bg-slate-800/80 border border-slate-700 hover:border-slate-500 cursor-pointer transition select-none">
-                <div class="flex items-center gap-3">
-                  <input type="checkbox" id="calc-fridge" checked class="calc-check w-4 h-4 accent-amber-400 rounded">
-                  <span class="text-xs sm:text-sm font-semibold text-white">🧊 Refrigerator (Cycle)</span>
-                </div>
-                <span class="text-xs font-mono-code text-slate-400">~50W avg</span>
-              </label>
-
-              <label class="flex items-center justify-between p-3 rounded-xl bg-slate-800/80 border border-slate-700 hover:border-slate-500 cursor-pointer transition select-none">
-                <div class="flex items-center gap-3">
-                  <input type="checkbox" id="calc-cpap" checked class="calc-check w-4 h-4 accent-amber-400 rounded">
-                  <span class="text-xs sm:text-sm font-semibold text-white">💨 Medical CPAP Machine</span>
-                </div>
-                <span class="text-xs font-mono-code text-slate-400">~40W</span>
-              </label>
-
-              <label class="flex items-center justify-between p-3 rounded-xl bg-slate-800/80 border border-slate-700 hover:border-slate-500 cursor-pointer transition select-none">
-                <div class="flex items-center gap-3">
-                  <input type="checkbox" id="calc-wifi" checked class="calc-check w-4 h-4 accent-amber-400 rounded">
-                  <span class="text-xs sm:text-sm font-semibold text-white">📶 Wi-Fi Router & Modem</span>
-                </div>
-                <span class="text-xs font-mono-code text-slate-400">~20W</span>
-              </label>
-
-              <label class="flex items-center justify-between p-3 rounded-xl bg-slate-800/80 border border-slate-700 hover:border-slate-500 cursor-pointer transition select-none">
-                <div class="flex items-center gap-3">
-                  <input type="checkbox" id="calc-lights" checked class="calc-check w-4 h-4 accent-amber-400 rounded">
-                  <span class="text-xs sm:text-sm font-semibold text-white">💡 LED Lamps (x2)</span>
-                </div>
-                <span class="text-xs font-mono-code text-slate-400">~18W</span>
-              </label>
-
-              <label class="flex items-center justify-between p-3 rounded-xl bg-slate-800/80 border border-slate-700 hover:border-slate-500 cursor-pointer transition select-none">
-                <div class="flex items-center gap-3">
-                  <input type="checkbox" id="calc-phones" checked class="calc-check w-4 h-4 accent-amber-400 rounded">
-                  <span class="text-xs sm:text-sm font-semibold text-white">📱 Phones & Radios</span>
-                </div>
-                <span class="text-xs font-mono-code text-slate-400">~25W</span>
-              </label>
-
-              <label class="flex items-center justify-between p-3 rounded-xl bg-slate-800/80 border border-slate-700 hover:border-slate-500 cursor-pointer transition select-none">
-                <div class="flex items-center gap-3">
-                  <input type="checkbox" id="calc-laptop" class="calc-check w-4 h-4 accent-amber-400 rounded">
-                  <span class="text-xs sm:text-sm font-semibold text-white">💻 Laptop Computer</span>
-                </div>
-                <span class="text-xs font-mono-code text-slate-400">~60W</span>
-              </label>
-            </div>
-
-            <!-- Battery Capacity Selector -->
-            <div class="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-slate-800/90 border border-slate-700 mb-6">
-              <span class="text-xs sm:text-sm font-bold text-slate-200">Select Battery Capacity:</span>
-              <div class="flex items-center gap-2">
-                <button type="button" class="battery-btn px-3 py-1.5 rounded-lg text-xs font-mono-code font-bold bg-amber-400 text-black" data-wh="1280">
-                  100Ah (1,280Wh) [Standard]
-                </button>
-                <button type="button" class="battery-btn px-3 py-1.5 rounded-lg text-xs font-mono-code font-bold bg-slate-700 hover:bg-slate-600 text-slate-300" data-wh="2560">
-                  200Ah (2,560Wh) [Extended]
-                </button>
-              </div>
-            </div>
-
-            <!-- Dynamic Calculator Results Output Box -->
-            <div class="p-5 rounded-xl bg-black/60 border border-amber-400/40 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div>
-                <span class="text-[11px] font-mono-code uppercase tracking-wider text-slate-400 block">Total Active Load Draw</span>
-                <span id="calc-total-watts" class="text-2xl font-black text-amber-400">153 Watts</span>
-              </div>
-              <div class="text-center sm:text-right">
-                <span class="text-[11px] font-mono-code uppercase tracking-wider text-slate-400 block">Estimated Continuous Run-Time</span>
-                <span id="calc-runtime-hours" class="text-3xl font-black text-emerald-400">8.4 Hours</span>
-                <span id="calc-runtime-days" class="text-xs text-slate-300 block font-mono-code">(Approx. 1.2 Blackout Duty Days)</span>
-              </div>
-            </div>
-
-            <div class="mt-4 text-center">
-              <a
-                href="${amazonSearchUrl('12V 100Ah LiFePO4 battery')}"
-                target="_blank"
-                rel="sponsored noopener"
-                class="inline-flex items-center gap-2 text-xs sm:text-sm text-amber-300 hover:text-amber-200 underline font-semibold transition"
-              >
-                <span>🛒</span> Check Verified 12V LiFePO4 Battery Options on Amazon →
-              </a>
-            </div>
-          </div>
-
-          <!-- AD UNIT 2: Mid-Article In-Feed Sponsored Card (Editorial Style) -->
-          <div class="my-10 p-6 sm:p-7 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 shadow-sm not-prose">
-            <div class="flex items-center justify-between mb-3">
-              <span class="ad-badge bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded font-mono-code font-bold">SPONSORED EDITORIAL AD</span>
-              <span class="text-xs text-slate-500 font-mono-code">Partner Offer #CB-144</span>
-            </div>
-            <div class="flex flex-col md:flex-row items-center gap-6">
-              <div class="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center text-white text-3xl font-black shadow-md flex-shrink-0">
-                ☀️
-              </div>
-              <div class="flex-1 text-center md:text-left">
-                <h3 class="text-xl font-bold text-slate-900 mb-1 font-serif-editorial">
-                  Build A Self-Sustaining Backyard Power Cell In One Afternoon
-                </h3>
-                <p class="text-sm text-slate-600 mb-4 leading-relaxed">
-                  Step-by-step schematics and video instructions showing how 42,000+ families created independent backup power systems without utility permits or expensive electrician fees.
-                </p>
-                <div class="flex flex-wrap items-center gap-3 justify-center md:justify-start">
-                  <a
-                    href="${clickbankHop}"
-                    target="_blank"
-                    rel="sponsored noopener"
-                    class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-xs transition"
-                  >
-                    👉 Watch The Backyard Revolution Video (75% Off)
-                  </a>
-                  <span class="text-xs text-slate-500">Instant Digital Access · 60-Day Guarantee</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Section 4: Chemistry -->
-          <h2 id="chemistry">4. Battery Chemistry Face-Off: LiFePO4 vs. Lead-Acid AGM</h2>
-          <p>
-            For decades, DIY builders relied on heavy lead-acid or AGM marine batteries. In 2026, building an emergency power box with lead-acid is an expensive mistake. Quality <a href="${amazonSearchUrl('12V 100Ah LiFePO4 battery with BMS')}" target="_blank" rel="sponsored noopener" class="affiliate-link">12V 100Ah LiFePO4 lithium batteries</a> have plummeted in price while providing 400% longer cycle life.
-          </p>
-
-          <div class="overflow-x-auto mb-8 border border-slate-200 rounded-xl shadow-2xs not-prose">
-            <table class="w-full text-left border-collapse text-sm bg-white">
-              <thead>
-                <tr class="bg-slate-100 text-slate-700 font-mono-code text-xs uppercase border-b border-slate-200">
-                  <th class="py-3.5 px-4 font-bold">Performance Metric</th>
-                  <th class="py-3.5 px-4 font-bold text-emerald-700">Lithium Iron Phosphate (LiFePO4)</th>
-                  <th class="py-3.5 px-4 font-bold text-slate-500">Traditional Lead-Acid / AGM</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-100 text-slate-700">
-                <tr class="hover:bg-slate-50 transition">
-                  <td class="py-3 px-4 font-semibold text-slate-900">Usable Capacity (DoD)</td>
-                  <td class="py-3 px-4 text-emerald-700 font-bold">100% (No cell degradation)</td>
-                  <td class="py-3 px-4 text-rose-600">Only 50% (Draining further destroys cells)</td>
-                </tr>
-                <tr class="hover:bg-slate-50 transition">
-                  <td class="py-3 px-4 font-semibold text-slate-900">Cycle Lifespan</td>
-                  <td class="py-3 px-4 text-emerald-700 font-bold">4,000 - 6,000+ Cycles (10+ Years)</td>
-                  <td class="py-3 px-4 text-rose-600">300 - 500 Cycles (Fails after 2-3 years)</td>
-                </tr>
-                <tr class="hover:bg-slate-50 transition">
-                  <td class="py-3 px-4 font-semibold text-slate-900">Weight per 100Ah</td>
-                  <td class="py-3 px-4 text-emerald-700 font-bold">~22 lbs (One person can carry)</td>
-                  <td class="py-3 px-4 text-rose-600">~65 lbs (Extremely heavy dead weight)</td>
-                </tr>
-                <tr class="hover:bg-slate-50 transition">
-                  <td class="py-3 px-4 font-semibold text-slate-900">Indoor Safety</td>
-                  <td class="py-3 px-4 text-emerald-700 font-bold">Zero off-gassing, stable BMS protection</td>
-                  <td class="py-3 px-4 text-rose-600">Releases explosive hydrogen gas indoors</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <p>
-            A single <a href="${amazonSearchUrl('12V 100Ah LiFePO4 battery')}" target="_blank" rel="sponsored noopener" class="affiliate-link">12V 100Ah LiFePO4 battery pack</a> provides 1,280 watt-hours of usable energy in a package that weighs just 22 pounds and can sit safely in your hallway closet or under your desk with zero toxic vapors.
-          </p>
-
-          <!-- Section 5: Inverter -->
-          <h2 id="inverter">5. Pure Sine Wave vs. Modified Sine Wave</h2>
-          <p>
-            When shopping for a 12V inverter, you will see $25 &ldquo;Modified Sine Wave&rdquo; units right next to $55 <a href="${amazonSearchUrl('1000W Pure Sine Wave Inverter 12V')}" target="_blank" rel="sponsored noopener" class="affiliate-link">Pure Sine Wave Inverters</a>. <strong>Never purchase a modified sine wave inverter for sensitive residential appliances.</strong>
-          </p>
-          <p>
-            Modified sine wave units output electricity in harsh, choppy block waves. While adequate for an incandescent work lamp, this high harmonic distortion causes excessive thermal buildup in compressor motors, variable-speed fan controllers, and medical equipment power bricks. A certified <a href="${amazonSearchUrl('1000W Pure Sine Wave Inverter 12V with LCD display')}" target="_blank" rel="sponsored noopener" class="affiliate-link">Pure Sine Wave Inverter</a> mirrors smooth utility-grade AC grid electricity with total harmonic distortion (THD) under 3%.
-          </p>
-
-          <!-- SECTION 6: WIRECUTTER-GRADE HARDWARE PICKS (AMAZON AFFILIATE CARDS) -->
-          <h2 id="hardware-list">6. Verified Amazon Hardware Components List (Under $200 Total)</h2>
-          <p>
-            Every component below has been benchmarked for thermal stability, wire gauge safety, and built-in BMS compatibility. You can source them directly on Amazon with Prime shipping:
-          </p>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-5 my-8 not-prose">
-            ${hardwareCards
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-8 not-prose">
+            ${article.hardwareComponents
               .map(
-                (comp) => `
-              <div class="hardware-card bg-white border-2 border-slate-200 rounded-2xl p-5 sm:p-6 flex flex-col justify-between">
+                (comp, idx) => `
+              <div class="hardware-card bg-white border-2 border-slate-200 rounded-2xl p-5 flex flex-col justify-between">
                 <div>
                   <div class="flex items-center justify-between gap-2 mb-2">
-                    <span class="px-2.5 py-0.5 rounded font-mono-code text-[10px] font-bold tracking-wider ${comp.badgeColor}">
-                      ${comp.badge}
-                    </span>
-                    <span class="text-xs font-mono-code font-bold text-slate-800">${comp.price}</span>
+                    <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-mono-code text-[11px] font-bold">PICK #${idx + 1}</span>
+                    <span class="text-xs font-mono-code font-bold text-slate-700">${comp.priceEstimate}</span>
                   </div>
-
-                  <h3 class="text-base sm:text-lg font-bold text-slate-900 mb-1 leading-snug">
-                    ${comp.name}
-                  </h3>
-
-                  <div class="flex items-center gap-1.5 text-xs mb-3">
-                    <span class="text-amber-500 font-bold">★★★★★</span>
-                    <span class="text-slate-500 font-mono-code text-[11px]">${comp.rating}</span>
+                  <h3 class="text-base font-bold text-slate-900 mb-1 leading-snug">${comp.name}</h3>
+                  <div class="flex items-center gap-1 text-amber-500 text-xs mb-2">
+                    <span>★★★★★</span>
+                    <span class="text-slate-500 font-mono-code text-[11px]">(Amazon Vetted)</span>
                   </div>
-
-                  <p class="text-xs text-slate-600 leading-relaxed mb-4">
-                    ${comp.desc}
-                  </p>
-
-                  <!-- Pros / Cons List -->
-                  <div class="space-y-1.5 text-[11px] mb-4 pb-4 border-b border-slate-100">
-                    ${comp.pros.map((p) => `<div class="text-emerald-700 flex items-start gap-1.5"><span>✔</span> <span>${p}</span></div>`).join('')}
-                    ${comp.cons.map((c) => `<div class="text-slate-500 flex items-start gap-1.5"><span>✖</span> <span>${c}</span></div>`).join('')}
-                  </div>
+                  <p class="text-xs text-slate-600 leading-relaxed mb-4">${comp.description}</p>
                 </div>
-
                 <a
                   href="${amazonSearchUrl(comp.searchQuery)}"
                   target="_blank"
                   rel="sponsored noopener"
                   class="w-full py-2.5 px-4 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-bold transition flex items-center justify-center gap-2 shadow-2xs font-mono-code"
                 >
-                  <span>🛒</span> Check Price & Options on Amazon →
+                  <span>🛒</span> Check Price & Reviews on Amazon →
                 </a>
               </div>
             `
@@ -850,24 +751,7 @@ function renderArticle(article, options = {}) {
               .join('')}
           </div>
 
-          <!-- Section 7: Assembly -->
-          <h2 id="assembly">7. The 4-Step Assembly Blueprint</h2>
-          <ol>
-            <li>
-              <strong>Secure the LiFePO4 Battery:</strong> Place your <a href="${amazonSearchUrl('12V 100Ah LiFePO4 battery')}" target="_blank" rel="sponsored noopener" class="affiliate-link">12V LiFePO4 battery</a> inside a non-conductive plastic battery box or dedicated shelf. Ensure terminals are clean and free of corrosion.
-            </li>
-            <li>
-              <strong>Install the Positive ANL Fuse Block:</strong> Mount the <a href="${amazonSearchUrl('150A ANL fuse block with fuse')}" target="_blank" rel="sponsored noopener" class="affiliate-link">150A ANL fuse block</a> directly within 6 inches of the battery's positive (+) terminal post. If an accidental short occurs, the sacrificial fuse element melts instantly, protecting your cables and battery cells.
-            </li>
-            <li>
-              <strong>Torque High-Amperage Cables (Observe Polarity):</strong> Connect the negative (black) <a href="${amazonSearchUrl('4 AWG battery inverter cables copper')}" target="_blank" rel="sponsored noopener" class="affiliate-link">4 AWG pure copper cable</a> from the battery negative (-) terminal to the inverter negative (-) lug. Next, connect the positive (red) 4 AWG cable from the fuse block output to the inverter positive (+) lug. Tighten all lug nuts firmly with a socket wrench.
-            </li>
-            <li>
-              <strong>Turn On & Perform Load Test:</strong> Flip the power switch on your <a href="${amazonSearchUrl('1000W Pure Sine Wave Inverter 12V')}" target="_blank" rel="sponsored noopener" class="affiliate-link">Pure Sine Wave Inverter</a>. The display will illuminate showing 120V AC output with zero buzzing. Connect a heavy-duty 14-gauge extension cord directly to your refrigerator or essential power strip.
-            </li>
-          </ol>
-
-          <!-- AD UNIT 4: FULL-WIDTH MASTERCLASS BANNER (CLICKBANK HIGH-CONVERTING) -->
+          <!-- Masterclass Promo -->
           <div class="my-10 p-7 sm:p-8 rounded-2xl bg-slate-900 text-white shadow-xl not-prose">
             <div class="flex items-center gap-2 text-amber-400 font-mono-code text-xs font-bold uppercase mb-2">
               <span>📚</span> Recommended Masterclass Blueprint
@@ -891,16 +775,16 @@ function renderArticle(article, options = {}) {
             </div>
           </div>
 
-          <!-- Section 8: Lead Capture PDF Download -->
+          <!-- Free Blueprint PDF Download -->
           <div id="schematic-pdf" class="my-12 p-6 sm:p-8 rounded-2xl bg-emerald-50/70 border-2 border-emerald-300 shadow-sm not-prose">
             <div class="flex items-center gap-2 text-emerald-800 font-mono-code text-xs font-bold uppercase mb-2">
               <span>📥</span> Free Instant Download
             </div>
             <h3 class="text-2xl font-black text-slate-900 mb-2 font-serif-editorial">
-              Get The Printable 1-Page Emergency Wiring Schematic & Appliance Sizing Sheet (PDF)
+              Get The Printable Emergency Wiring Schematic & Sizing Sheet (PDF)
             </h3>
             <p class="text-sm text-slate-600 mb-5 leading-relaxed">
-              Drop your email below to instantly receive the high-resolution printable wiring diagram, torque specifications, and blackout checklist directly to your inbox.
+              Drop your email below to instantly receive the high-resolution printable diagram, torque specs, and checklist directly to your inbox.
             </p>
             <form id="guide-subscribe-form" class="flex flex-col sm:flex-row gap-3">
               <input
@@ -921,24 +805,7 @@ function renderArticle(article, options = {}) {
             <div id="guide-form-status" class="mt-3 text-xs font-semibold hidden"></div>
           </div>
 
-          <!-- Section 9: FAQ -->
-          <h2 id="faq">9. Frequently Asked Questions</h2>
-          <h3>Can this system be charged with portable solar panels?</h3>
-          <p>
-            Yes. By connecting an inexpensive <a href="${amazonSearchUrl('20A MPPT solar charge controller 12V')}" target="_blank" rel="sponsored noopener" class="affiliate-link">20A MPPT or PWM solar charge controller</a> between a <a href="${amazonSearchUrl('100W portable solar panel folding')}" target="_blank" rel="sponsored noopener" class="affiliate-link">100W–200W portable solar panel</a> and your battery terminals, the battery bank automatically recharges during daylight hours, creating a continuous off-grid cycle.
-          </p>
-
-          <h3>How long will a 100Ah battery keep my refrigerator cold?</h3>
-          <p>
-            A modern refrigerator drawing 150W running with a 33% duty cycle (running 20 minutes per hour) consumes roughly 50 watt-hours per hour. A 1,280Wh <a href="${amazonSearchUrl('12V 100Ah LiFePO4 battery')}" target="_blank" rel="sponsored noopener" class="affiliate-link">12V LiFePO4 battery</a> powers the refrigerator for approximately <strong>22 to 26 hours</strong> on a single charge without any solar input.
-          </p>
-
-          <h3>Is it safe to keep this battery indoors?</h3>
-          <p>
-            Yes. Unlike automotive flooded lead-acid batteries that release explosive hydrogen gas while charging, LiFePO4 (Lithium Iron Phosphate) cells do not off-gas and feature a built-in Battery Management System (BMS) that automatically shuts off the unit if overcharged, over-discharged, or short-circuited.
-          </p>
-
-          <!-- Bottom Article Conversion Unit -->
+          <!-- Bottom Conversion Unit -->
           <div class="mt-12 pt-8 border-t border-slate-200 text-center not-prose">
             <a
               href="${clickbankHop}"
@@ -958,34 +825,16 @@ function renderArticle(article, options = {}) {
     </div>
   </div>
 
-  <!-- STICKY BOTTOM CONVERSION BAR (Appears on scroll for mobile & tablet) -->
+  <!-- Sticky Mobile Bottom Bar -->
   <aside id="sticky-mobile-bar" class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-2.5 z-40 shadow-lg transform translate-y-full transition-transform duration-300 flex items-center justify-between">
     <div class="flex items-center gap-2 truncate max-w-[50%]">
       <span class="text-amber-500 font-bold">⚡</span>
-      <span class="text-xs font-bold text-slate-900 truncate">DIY Emergency Power Backup</span>
+      <span class="text-xs font-bold text-slate-900 truncate">${article.title}</span>
     </div>
     <div class="flex items-center gap-2">
-      <a
-        href="#hardware-list"
-        class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs border border-slate-300 transition"
-      >
-        Parts ($195)
-      </a>
-      <a
-        href="${clickbankHop}"
-        target="_blank"
-        rel="sponsored noopener"
-        class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition shadow-2xs"
-      >
-        Watch Video →
-      </a>
-      <button
-        id="close-sticky-bar"
-        class="text-slate-400 hover:text-slate-600 text-sm px-1"
-        aria-label="Close"
-      >
-        ✕
-      </button>
+      <a href="#hardware-list" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs border border-slate-300 transition">Parts</a>
+      <a href="${clickbankHop}" target="_blank" rel="sponsored noopener" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition shadow-2xs">Watch Video →</a>
+      <button id="close-sticky-bar" class="text-slate-400 hover:text-slate-600 text-sm px-1" aria-label="Close">✕</button>
     </div>
   </aside>
 
@@ -993,7 +842,7 @@ function renderArticle(article, options = {}) {
   <footer class="border-t border-slate-200 bg-slate-50 py-12 text-center text-xs text-slate-500">
     <div class="max-w-4xl mx-auto px-4">
       <div class="flex flex-wrap justify-center items-center gap-4 mb-4">
-        <a href="/guides" class="text-slate-600 hover:text-slate-900 font-medium">All Guides</a>
+        <a href="/guides" class="text-slate-600 hover:text-slate-900 font-medium">All Guides Hub</a>
         <span>•</span>
         <a href="${clickbankHop}" target="_blank" rel="sponsored noopener" class="text-slate-600 hover:text-slate-900 font-medium">Video Course</a>
         <span>•</span>
@@ -1008,7 +857,6 @@ function renderArticle(article, options = {}) {
     </div>
   </footer>
 
-  <!-- Interactive Scripts: Calculator, Sticky Bar, Video Player, Lead Capture -->
   <script>
     // 1. Reading Progress Bar & Sticky Bar Display
     const stickyBar = document.getElementById('sticky-mobile-bar');
@@ -1047,41 +895,91 @@ function renderArticle(article, options = {}) {
       });
     }
 
-    // 3. Interactive Battery Run-Time Calculator Logic
+    // 3. Dynamic Calculator Handlers
+    // Solar Calculator
+    const solarBtns = document.querySelectorAll('.solar-watt-btn');
+    let activeSolarWatts = 200;
+    if (solarBtns.length > 0) {
+      function updateSolarCalc() {
+        const ctrlType = document.querySelector('input[name="ctrl-type"]:checked')?.value || 'mppt';
+        const eff = ctrlType === 'mppt' ? 0.95 : 0.72;
+        const dailyWh = Math.round(activeSolarWatts * 4.5 * eff);
+        const hoursNeeded = (1280 / (activeSolarWatts * eff)).toFixed(1);
+        const daysNeeded = (1280 / dailyWh).toFixed(1);
+
+        const whDisplay = document.getElementById('solar-daily-wh');
+        const timeDisplay = document.getElementById('solar-recharge-time');
+        if (whDisplay) whDisplay.innerText = dailyWh + ' Watt-Hours';
+        if (timeDisplay) timeDisplay.innerText = daysNeeded + ' Days (' + hoursNeeded + ' Peak Sun Hrs)';
+      }
+
+      solarBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          solarBtns.forEach(b => b.className = 'solar-watt-btn px-4 py-2.5 rounded-xl text-xs font-mono-code font-bold bg-slate-700 hover:bg-slate-600 text-slate-200 transition');
+          btn.className = 'solar-watt-btn px-4 py-2.5 rounded-xl text-xs font-mono-code font-bold bg-amber-400 text-black transition';
+          activeSolarWatts = parseInt(btn.getAttribute('data-watts'), 10) || 200;
+          updateSolarCalc();
+        });
+      });
+
+      document.querySelectorAll('.ctrl-radio').forEach(r => r.addEventListener('change', updateSolarCalc));
+      updateSolarCalc();
+    }
+
+    // Fridge Calculator
+    const fridgeBtns = document.querySelectorAll('.fridge-mode-btn');
+    if (fridgeBtns.length > 0) {
+      function updateFridgeCalc(duty) {
+        const runningWatts = 150;
+        const avgWatts = (runningWatts * duty + 10).toFixed(1); // 10W inverter idle
+        const hours = (1280 * 0.9 / avgWatts).toFixed(1);
+        const days = (hours / 24).toFixed(1);
+
+        const wattsDisplay = document.getElementById('fridge-avg-watts');
+        const hoursDisplay = document.getElementById('fridge-safe-hours');
+        if (wattsDisplay) wattsDisplay.innerText = avgWatts + ' Watts';
+        if (hoursDisplay) hoursDisplay.innerText = hours + ' Hours (' + days + ' Days)';
+      }
+
+      fridgeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          fridgeBtns.forEach(b => b.className = 'fridge-mode-btn px-4 py-2.5 rounded-xl text-xs font-mono-code font-bold bg-slate-700 hover:bg-slate-600 text-slate-200 transition');
+          btn.className = 'fridge-mode-btn px-4 py-2.5 rounded-xl text-xs font-mono-code font-bold bg-amber-400 text-black transition';
+          const duty = parseFloat(btn.getAttribute('data-duty')) || 0.33;
+          updateFridgeCalc(duty);
+        });
+      });
+      updateFridgeCalc(0.25);
+    }
+
+    // Standard Blackout Appliance Calculator
     const appliances = {
-      'calc-fridge': 50, // Average running duty cycle watts
+      'calc-fridge': 50,
       'calc-cpap': 40,
       'calc-wifi': 20,
       'calc-lights': 18,
       'calc-phones': 25,
       'calc-laptop': 60
     };
+    let selectedBatteryWh = 1280;
 
-    let selectedBatteryWh = 1280; // 100Ah @ 12.8V
-
-    function updateCalculator() {
+    function updateBlackoutCalc() {
       let totalWatts = 0;
       for (const [id, watts] of Object.entries(appliances)) {
         const el = document.getElementById(id);
-        if (el && el.checked) {
-          totalWatts += watts;
-        }
+        if (el && el.checked) totalWatts += watts;
       }
-
-      // Add 10W baseline inverter idle draw
       const activeWatts = totalWatts > 0 ? totalWatts + 10 : 0;
       const wattsDisplay = document.getElementById('calc-total-watts');
       const hoursDisplay = document.getElementById('calc-runtime-hours');
       const daysDisplay = document.getElementById('calc-runtime-days');
 
       if (wattsDisplay) wattsDisplay.innerText = activeWatts + ' Watts';
-
       if (hoursDisplay && daysDisplay) {
         if (activeWatts === 0) {
           hoursDisplay.innerText = '0 Hours';
-          daysDisplay.innerText = '(No active load selected)';
+          daysDisplay.innerText = '(No active load)';
         } else {
-          // Assume 90% inverter DC-to-AC conversion efficiency
           const usableWh = selectedBatteryWh * 0.90;
           const hours = (usableWh / activeWatts).toFixed(1);
           const days = (hours / 24).toFixed(1);
@@ -1091,27 +989,18 @@ function renderArticle(article, options = {}) {
       }
     }
 
-    // Attach checkbox listeners
-    document.querySelectorAll('.calc-check').forEach(chk => {
-      chk.addEventListener('change', updateCalculator);
-    });
-
-    // Attach battery capacity button listeners
+    document.querySelectorAll('.calc-check').forEach(chk => chk.addEventListener('change', updateBlackoutCalc));
     document.querySelectorAll('.battery-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.battery-btn').forEach(b => {
-          b.className = 'battery-btn px-3 py-1.5 rounded-lg text-xs font-mono-code font-bold bg-slate-700 hover:bg-slate-600 text-slate-300';
-        });
+        document.querySelectorAll('.battery-btn').forEach(b => b.className = 'battery-btn px-3 py-1.5 rounded-lg text-xs font-mono-code font-bold bg-slate-700 hover:bg-slate-600 text-slate-300');
         btn.className = 'battery-btn px-3 py-1.5 rounded-lg text-xs font-mono-code font-bold bg-amber-400 text-black';
         selectedBatteryWh = parseInt(btn.getAttribute('data-wh'), 10) || 1280;
-        updateCalculator();
+        updateBlackoutCalc();
       });
     });
+    updateBlackoutCalc();
 
-    // Run initial calculation on page load
-    updateCalculator();
-
-    // 4. Brevo Lead Capture Submission
+    // 4. Lead Capture
     const form = document.getElementById('guide-subscribe-form');
     const emailInput = document.getElementById('guide-email');
     const btn = document.getElementById('guide-submit-btn');
@@ -1130,28 +1019,13 @@ function renderArticle(article, options = {}) {
           const res = await fetch('/api/subscribe', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              email,
-              offerSlug: '${article.offerSlug}',
-              sponsorCode: 'kmtwarrior'
-            })
+            body: JSON.stringify({ email, offerSlug: '${article.offerSlug}', sponsorCode: 'kmtwarrior' })
           });
           const data = await res.json();
           status.classList.remove('hidden');
-
-          if (data.ok) {
-            status.className = 'mt-3 text-xs font-semibold text-emerald-700';
-            status.innerText = '✅ Success! Blueprint PDF sent to your inbox. Forwarding to video masterclass...';
-            setTimeout(() => {
-              window.open('${clickbankHop}', '_blank');
-            }, 1200);
-          } else {
-            status.className = 'mt-3 text-xs font-semibold text-amber-700';
-            status.innerText = 'Notice: ' + (data.message || 'Already registered! Opening masterclass...');
-            setTimeout(() => {
-              window.open('${clickbankHop}', '_blank');
-            }, 1200);
-          }
+          status.className = 'mt-3 text-xs font-semibold text-emerald-700';
+          status.innerText = '✅ Success! Blueprint PDF sent. Forwarding to masterclass...';
+          setTimeout(() => { window.open('${clickbankHop}', '_blank'); }, 1200);
         } catch (err) {
           status.classList.remove('hidden');
           status.className = 'mt-3 text-xs font-semibold text-amber-700';
@@ -1168,4 +1042,120 @@ function renderArticle(article, options = {}) {
 </html>`;
 }
 
-module.exports = { renderArticle };
+// Renders the High-Converting /guides Directory Hub Page
+function renderGuidesIndex(articles, options = {}) {
+  const reqHost = options.reqHost || 'traffic.aisimplesystem.com';
+  const articleList = Object.values(articles);
+  const clickbankHop = 'https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=enrev&tid=hub_header';
+
+  return `<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Engineering Guides & Emergency Resilience Hub | Smart Home Resilience</title>
+  <meta name="description" content="Field-tested blueprints, electrical wiring schematics, and hardware benchmarks for self-reliant homeowners.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #ffffff; color: #1e293b; }
+    .font-serif-editorial { font-family: 'Newsreader', Georgia, serif; }
+    .font-mono-code { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50/60 selection:bg-amber-100 selection:text-amber-900">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <a href="/guides" class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-lg bg-amber-500 flex items-center justify-center text-white font-black text-base shadow-sm">⚡</div>
+        <div class="flex flex-col">
+          <span class="font-extrabold text-slate-900 tracking-tight text-base sm:text-lg leading-tight">Smart Home Resilience</span>
+          <span class="text-[10px] uppercase font-mono-code tracking-wider text-slate-500 font-bold">Engineering Lab & Field Protocols</span>
+        </div>
+      </a>
+      <a href="${clickbankHop}" target="_blank" rel="sponsored noopener" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-xs transition flex items-center gap-1.5">
+        <span>⚡</span> Video Blueprint
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero Header -->
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+    <div class="text-center max-w-3xl mx-auto mb-12">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-800 text-xs font-mono-code font-bold uppercase tracking-wider mb-4">
+        <span>⚡</span> Tested Resilience Protocols
+      </div>
+      <h1 class="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight mb-4 font-serif-editorial">
+        Smart Home Resilience Engineering Hub
+      </h1>
+      <p class="text-base sm:text-lg text-slate-600 leading-relaxed">
+        Independently bench-tested blueprints, low-voltage wiring schematics, and lithium energy storage guides for self-reliant families.
+      </p>
+    </div>
+
+    <!-- Articles Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      ${articleList
+        .map(
+          (art) => `
+        <article class="bg-white border-2 border-slate-200/90 hover:border-blue-500 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition flex flex-col justify-between group">
+          <div>
+            <div class="relative aspect-video bg-slate-950 overflow-hidden">
+              <img src="${art.thumbnailUrl}" alt="${art.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+              <div class="absolute top-3 left-3 px-2 py-0.5 rounded bg-black/80 text-amber-300 font-mono-code text-[10px] font-bold backdrop-blur-xs">
+                ${art.categoryBadge}
+              </div>
+            </div>
+            <div class="p-5 sm:p-6">
+              <div class="flex items-center gap-2 text-xs font-mono-code text-slate-400 mb-2">
+                <span>⏱️ ${art.readTime}</span>
+                <span>•</span>
+                <span>📅 Nov 2026</span>
+              </div>
+              <h2 class="text-lg sm:text-xl font-bold text-slate-900 group-hover:text-blue-600 transition leading-snug mb-3 font-serif-editorial">
+                <a href="/guides/${art.slug}">${art.title}</a>
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4 line-clamp-3">
+                ${art.subtitle}
+              </p>
+            </div>
+          </div>
+          <div class="p-5 sm:p-6 pt-0">
+            <a href="/guides/${art.slug}" class="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-blue-600 text-slate-900 hover:text-white font-bold text-xs transition flex items-center justify-center gap-1.5 font-mono-code">
+              Read Engineering Protocol →
+            </a>
+          </div>
+        </article>
+      `
+        )
+        .join('')}
+    </div>
+
+    <!-- Masterclass Sponsor Callout Banner -->
+    <div class="my-16 p-8 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-6">
+      <div>
+        <span class="ad-badge bg-black/15 text-slate-950 px-2.5 py-0.5 rounded font-mono-code mb-2 inline-block">OFFICIAL RECOMMENDATION</span>
+        <h3 class="text-2xl font-black mb-1 font-serif-editorial">The Backyard Revolution 3D Solar Blueprint</h3>
+        <p class="text-sm text-slate-900 max-w-xl">Watch the full video walkthrough that shows how 42,000+ homeowners slashed their electric bill with a compact vertical solar array.</p>
+      </div>
+      <a href="${clickbankHop}" target="_blank" rel="sponsored noopener" class="whitespace-nowrap px-6 py-3.5 rounded-xl bg-slate-950 text-white font-black text-sm shadow-md hover:bg-slate-800 transition">
+        Watch Free Video (75% Off) →
+      </a>
+    </div>
+  </main>
+
+  <footer class="border-t border-slate-200 bg-white py-10 text-center text-xs text-slate-500">
+    <div class="max-w-4xl mx-auto px-4">
+      <p class="mb-2">© 2026 Smart Home Resilience. All rights reserved.</p>
+      <p class="text-slate-400">Independent engineering reference and educational guide for residential emergency preparedness.</p>
+    </div>
+  </footer>
+</body>
+</html>`;
+}
+
+module.exports = { renderArticle, renderGuidesIndex };

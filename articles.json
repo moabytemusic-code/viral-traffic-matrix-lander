@@ -25,28 +25,130 @@
         "priceEstimate": "~$140 - $180"
       },
       {
-        "name": "500W - 1000W Pure Sine Wave Power Inverter",
+        "name": "1000W Pure Sine Wave Power Inverter",
         "description": "Converts 12V DC battery power into safe, clean 120V AC household electricity. Pure Sine Wave is mandatory to prevent motor burnout on refrigerators.",
-        "searchQuery": "pure sine wave power inverter 500w 1000w 12v to 110v",
-        "priceEstimate": "~$45 - $65"
+        "searchQuery": "pure sine wave power inverter 1000w 12v to 110v lcd",
+        "priceEstimate": "~$49 - $65"
       },
       {
         "name": "4 AWG Pure Copper Battery Inverter Cables",
         "description": "Ultra-flexible, heavy-gauge tinned copper battery interconnect cables with 5/16-inch terminal lugs to prevent voltage drop and resistance heat.",
-        "searchQuery": "4 awg battery inverter cables pure copper",
-        "priceEstimate": "~$12 - $18"
+        "searchQuery": "4 awg battery inverter cables pure copper 5/16 lugs",
+        "priceEstimate": "~$14 - $19"
       },
       {
-        "name": "100A - 150A Inline ANL Fuse Holder Block",
+        "name": "150A Inline ANL Fuse Holder Block with Fuse",
         "description": "Crucial electrical safety device placed on the positive battery line to instantly break circuit in case of an accidental short circuit.",
-        "searchQuery": "anl fuse holder 100a 150a 12v",
+        "searchQuery": "150a anl fuse holder block pure copper",
         "priceEstimate": "~$9 - $14"
       },
       {
-        "name": "10A - 20A Smart LiFePO4 AC Wall / Solar Charger",
+        "name": "10A - 20A Smart LiFePO4 AC Wall Charger",
         "description": "Automatically tops off and balances your battery cells from normal wall AC before a storm, or pairs with portable 100W solar folding panels.",
         "searchQuery": "lifepo4 smart battery charger 12v 10a 20a",
-        "priceEstimate": "~$24 - $35"
+        "priceEstimate": "~$29 - $39"
+      }
+    ]
+  },
+  "solar-panel-sizing-100ah-lifepo4": {
+    "slug": "solar-panel-sizing-100ah-lifepo4",
+    "category": "Solar & Off-Grid Engineering",
+    "categoryBadge": "☀️ SOLAR CHARGING PROTOCOL",
+    "title": "How Many Solar Panels to Charge a 100Ah LiFePO4 Battery? (Exact Sizing Math & Hours)",
+    "subtitle": "The definitive engineering blueprint for calculating solar panel wattage, charge controller efficiency (MPPT vs. PWM), peak sun hours, and real-world recharge times for off-grid lithium batteries.",
+    "publishedAt": "2026-11-04T14:30:00Z",
+    "readTime": "11 min read",
+    "author": {
+      "name": "Smart Home Resilience Engineering Desk",
+      "channel": "@SmartHomeResilience",
+      "channelUrl": "https://www.youtube.com/channel/UCy9DLRRHSPQ42do2q8Ookxw"
+    },
+    "offerSlug": "home-power",
+    "videoUrl": "/videos/power-commercial.mp4",
+    "thumbnailUrl": "/thumbnails/power-thumbnail.jpg",
+    "clickbankUrl": "https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=enrev&tid=guide_solar_calc",
+    "amazonTag": "santa101-20",
+    "hardwareComponents": [
+      {
+        "name": "100W Foldable Monocrystalline Solar Panel with Kickstand",
+        "description": "High-efficiency 23.5% monocrystalline cells in an ultra-portable briefcase design with built-in Anderson & MC4 connectors.",
+        "searchQuery": "100w foldable solar panel monocrystalline with kickstand 12v",
+        "priceEstimate": "~$79 - $109"
+      },
+      {
+        "name": "200W Rigid Monocrystalline Solar Panel (All-Weather)",
+        "description": "Heavy-duty tempered glass and aluminum frame panel providing up to 10-11 Amps of continuous charging power per peak sun hour.",
+        "searchQuery": "200w monocrystalline solar panel 12v tempered glass",
+        "priceEstimate": "~$130 - $169"
+      },
+      {
+        "name": "20A - 30A MPPT Solar Charge Controller (12V/24V Auto)",
+        "description": "Maximum Power Point Tracking extracts up to 30% more energy from solar arrays than legacy PWM controllers with built-in Bluetooth monitoring.",
+        "searchQuery": "20a 30a mppt solar charge controller 12v lifepo4",
+        "priceEstimate": "~$59 - $89"
+      },
+      {
+        "name": "10 AWG Solar Extension Cable Pair with MC4 Connectors (20ft)",
+        "description": "UV-resistant, waterproof pure copper solar wiring designed to minimize voltage loss between roof/yard panels and indoor charge controllers.",
+        "searchQuery": "10 awg solar extension cable mc4 connectors 20ft",
+        "priceEstimate": "~$18 - $26"
+      },
+      {
+        "name": "Digital Solar Multimeter & MC4 Inline Fuse Holder",
+        "description": "Essential diagnostic tools for verifying open-circuit voltage (Voc) and short-circuit current (Isc) before connecting to lithium terminals.",
+        "searchQuery": "mc4 inline fuse holder 15a 20a solar with fuses",
+        "priceEstimate": "~$12 - $18"
+      }
+    ]
+  },
+  "emergency-refrigerator-power-backup": {
+    "slug": "emergency-refrigerator-power-backup",
+    "category": "Blackout Food Security",
+    "categoryBadge": "🧊 CRITICAL APPLIANCE PROTOCOL",
+    "title": "How to Run a Refrigerator During a Power Outage (Without a Gas Generator)",
+    "subtitle": "The essential guide to starting watts vs. running watts, compressor induction surges, Pure Sine Wave Inverters, and extending battery life to protect your food indefinitely during long grid blackouts.",
+    "publishedAt": "2026-11-04T15:00:00Z",
+    "readTime": "10 min read",
+    "author": {
+      "name": "Smart Home Resilience Engineering Desk",
+      "channel": "@SmartHomeResilience",
+      "channelUrl": "https://www.youtube.com/channel/UCy9DLRRHSPQ42do2q8Ookxw"
+    },
+    "offerSlug": "home-power",
+    "videoUrl": "/videos/power-commercial.mp4",
+    "thumbnailUrl": "/thumbnails/power-thumbnail.jpg",
+    "clickbankUrl": "https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=enrev&tid=guide_fridge",
+    "amazonTag": "santa101-20",
+    "hardwareComponents": [
+      {
+        "name": "1000W - 1500W Pure Sine Wave Power Inverter",
+        "description": "Handles the 800W–1200W compressor startup surge cleanly without harmonic distortion, overheating coils, or tripping breaker faults.",
+        "searchQuery": "pure sine wave power inverter 1000w 1500w 12v lcd display",
+        "priceEstimate": "~$65 - $95"
+      },
+      {
+        "name": "12V 100Ah LiFePO4 Deep-Cycle Lithium Battery",
+        "description": "Provides 1,280Wh of storage capacity—enough to keep a modern Energy Star refrigerator cold for 22 to 26 hours on a single charge.",
+        "searchQuery": "12v 100ah lifepo4 battery with 100a bms",
+        "priceEstimate": "~$140 - $180"
+      },
+      {
+        "name": "Kill A Watt Electricity Usage Monitor & Surge Tester",
+        "description": "Measures exact real-time running watts and peak starting watts of your specific refrigerator before a storm arrives.",
+        "searchQuery": "kill a watt electricity monitor p3",
+        "priceEstimate": "~$24 - $32"
+      },
+      {
+        "name": "Wireless Refrigerator & Freezer Thermometer with Alarm",
+        "description": "Monitors internal temperatures through closed doors with audible alarm if cabinet rises above the FDA safety danger threshold (40°F).",
+        "searchQuery": "wireless refrigerator thermometer with high low alarm",
+        "priceEstimate": "~$19 - $28"
+      },
+      {
+        "name": "14 AWG Heavy-Duty Appliance Extension Cord (15ft)",
+        "description": "UL-certified, thick-gauge pure copper extension cord that prevents dangerous voltage drop when connecting your inverter to kitchen appliances.",
+        "searchQuery": "14 awg heavy duty appliance extension cord 15ft",
+        "priceEstimate": "~$14 - $22"
       }
     ]
   }
