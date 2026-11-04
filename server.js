@@ -13,6 +13,19 @@ try {
   console.warn('[Server] Cadence engine notice:', e.message);
 }
 const { renderOfferLander } = require('./render-lander');
+const { renderArticle } = require('./render-article');
+const ARTICLES_PATH = path.join(__dirname, 'articles.json');
+
+function loadArticles() {
+  try {
+    if (fs.existsSync(ARTICLES_PATH)) {
+      return JSON.parse(fs.readFileSync(ARTICLES_PATH, 'utf8'));
+    }
+  } catch (e) {
+    console.error('Error loading articles.json:', e);
+  }
+  return {};
+}
 
 // Load local .env if present
 const envPath = path.join(__dirname, '.env');
@@ -434,6 +447,27 @@ const server = http.createServer(async (req, res) => {
     }
     res.writeHead(404, { 'Content-Type': 'text/plain' });
     return res.end('Video not found');
+  }
+
+  // GET /guides/:slug or /power-guide or /blackout -> Render deep high-converting cluster article
+  const articlesList = loadArticles();
+  if (
+    (req.method === 'GET' || req.method === 'HEAD') &&
+    (pathname.startsWith('/guides/') || pathname === '/power-guide' || pathname === '/blackout' || pathname === '/guides')
+  ) {
+    let articleSlug = pathname.replace(/^\/guides\//, '').replace(/\/$/, '');
+    if (pathname === '/power-guide' || pathname === '/blackout') {
+      articleSlug = 'diy-home-power-blackout';
+    } else if (pathname === '/guides') {
+      const keys = Object.keys(articlesList);
+      articleSlug = keys[0] || 'diy-home-power-blackout';
+    }
+    const article = articlesList[articleSlug];
+    if (article) {
+      const html = renderArticle(article, { reqHost: req.headers.host || 'traffic.aisimplesystem.com' });
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      return res.end(html);
+    }
   }
 
   // GET /o/:slug or Friendly Short Root (e.g. /santa, /card, /sleep, /matrix) -> Render dynamic lander

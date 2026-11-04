@@ -1,0 +1,19 @@
+{
+  "clickbank": {
+    "affiliateId": "kmtwarrior",
+    "hoplinkFormat": "https://hop.clickbank.net/?affiliate=kmtwarrior&vendor={vendor}&tid={tid}"
+  },
+  "amazon": {
+    "trackingTag": "santa101-20",
+    "linkFormat": "https://www.amazon.com/dp/{asin}?tag=santa101-20",
+    "searchFormat": "https://www.amazon.com/s?k={query}&tag=santa101-20"
+  },
+  "digistore24": {
+    "affiliateId": "marketranger1",
+    "promolinkFormat": "https://www.digistore24.com/redir/{productId}/marketranger1/{custom}"
+  },
+  "idevaffiliate_5df": {
+    "sponsorCode": "144",
+    "affiliateUrl": "https://5dfpartners.idevaffiliate.com/144.html"
+  }
+}

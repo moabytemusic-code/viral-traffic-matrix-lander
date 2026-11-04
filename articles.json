@@ -1,0 +1,53 @@
+{
+  "diy-home-power-blackout": {
+    "slug": "diy-home-power-blackout",
+    "category": "Home Energy & Resilience",
+    "categoryBadge": "⚡ OFF-GRID RESILIENCE",
+    "title": "How to Build an Emergency Home Power Backup System Under $200 (Step-by-Step Blueprint)",
+    "subtitle": "A complete, safe, and field-tested DIY guide to powering essential household refrigerators, medical CPAP equipment, and emergency communications during extended grid outages without a noisy gas generator or $30,000 rooftop panels.",
+    "publishedAt": "2026-11-04T12:00:00Z",
+    "readTime": "9 min read",
+    "author": {
+      "name": "Smart Home Resilience Engineering Desk",
+      "channel": "@SmartHomeResilience",
+      "channelUrl": "https://www.youtube.com/channel/UCy9DLRRHSPQ42do2q8Ookxw"
+    },
+    "offerSlug": "home-power",
+    "videoUrl": "/videos/power-commercial.mp4",
+    "thumbnailUrl": "/thumbnails/power-thumbnail.jpg",
+    "clickbankUrl": "https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=enrev&tid=guide_power",
+    "amazonTag": "santa101-20",
+    "hardwareComponents": [
+      {
+        "name": "12V 100Ah LiFePO4 Deep-Cycle Lithium Battery",
+        "description": "1,280Wh of usable power with built-in 100A BMS protection, 4,000+ cycle life, and 10x the lifespan of traditional car lead-acid batteries.",
+        "searchQuery": "12v 100ah lifepo4 battery with bms",
+        "priceEstimate": "~$140 - $180"
+      },
+      {
+        "name": "500W - 1000W Pure Sine Wave Power Inverter",
+        "description": "Converts 12V DC battery power into safe, clean 120V AC household electricity. Pure Sine Wave is mandatory to prevent motor burnout on refrigerators.",
+        "searchQuery": "pure sine wave power inverter 500w 1000w 12v to 110v",
+        "priceEstimate": "~$45 - $65"
+      },
+      {
+        "name": "4 AWG Pure Copper Battery Inverter Cables",
+        "description": "Ultra-flexible, heavy-gauge tinned copper battery interconnect cables with 5/16-inch terminal lugs to prevent voltage drop and resistance heat.",
+        "searchQuery": "4 awg battery inverter cables pure copper",
+        "priceEstimate": "~$12 - $18"
+      },
+      {
+        "name": "100A - 150A Inline ANL Fuse Holder Block",
+        "description": "Crucial electrical safety device placed on the positive battery line to instantly break circuit in case of an accidental short circuit.",
+        "searchQuery": "anl fuse holder 100a 150a 12v",
+        "priceEstimate": "~$9 - $14"
+      },
+      {
+        "name": "10A - 20A Smart LiFePO4 AC Wall / Solar Charger",
+        "description": "Automatically tops off and balances your battery cells from normal wall AC before a storm, or pairs with portable 100W solar folding panels.",
+        "searchQuery": "lifepo4 smart battery charger 12v 10a 20a",
+        "priceEstimate": "~$24 - $35"
+      }
+    ]
+  }
+}
