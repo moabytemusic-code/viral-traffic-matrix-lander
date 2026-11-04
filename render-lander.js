@@ -1,6 +1,9 @@
 // Dynamic Multi-Archetype 8-Pillar Lander Engine (designing-web-landers skill)
 // Supports 4 High-Converting Archetypes (Matrix, Split-Video, Voucher, Comparison) & 4 Palette Themes (Emerald, Cyan, Gold, Sunset)
 
+const fs = require('fs');
+const path = require('path');
+
 function escapeHtml(str = '') {
   return String(str)
     .replace(/&/g, '&amp;')

@@ -43,6 +43,14 @@ if (fs.existsSync(envPath)) {
     });
 }
 
+// Process crash prevention
+process.on('uncaughtException', (err) => {
+  console.error('CRITICAL: Uncaught Exception:', err);
+});
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('CRITICAL: Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || '0.0.0.0';
 const BREVO_API_KEY = process.env.BREVO_API_KEY || '';
@@ -558,10 +566,16 @@ Sitemap: https://${host}/sitemap.xml
     pathname !== '/launchpad' &&
     pathname !== '/'
   ) {
-    const offer = offersList[resolvedSlug];
-    const html = renderOfferLander(offer);
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    return res.end(html);
+    try {
+      const offer = offersList[resolvedSlug];
+      const html = renderOfferLander(offer);
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      return res.end(html);
+    } catch (err) {
+      console.error('Error rendering lander for slug', resolvedSlug, err);
+      res.writeHead(500, { 'Content-Type': 'text/html; charset=utf-8' });
+      return res.end(`<h1>Error rendering offer lander</h1><p>${err.message}</p><p><a href="/launchpad">Back to Launchpad</a></p>`);
+    }
   }
 
   // Fallback GET /o/:slug 404 message
