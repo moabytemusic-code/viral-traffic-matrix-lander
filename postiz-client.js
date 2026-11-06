@@ -58,7 +58,7 @@ async function getConnectedAccounts() {
     return list.map((item) => ({
       id: item.id,
       name: item.name || item.identifier || item.type,
-      platform: item.type || item.provider,
+      platform: item.identifier || item.type || item.provider || 'youtube',
       picture: item.picture || null,
       validity: item.disabled ? 'invalid' : 'valid',
       raw: item
