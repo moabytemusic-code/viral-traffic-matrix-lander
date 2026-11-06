@@ -772,8 +772,9 @@ Sitemap: https://${host}/sitemap.xml
             subheadline:
               'The all-in-one platform that tracks, fixes, and forces AI search engines to recommend your business first when millions of high-intent buyers skip Google entirely.',
             affiliateUrl: url,
+            videoUrl: '/videos/ai-visibility-engine-commercial.mp4',
             sponsorCode: sponsorCode || '144',
-            landerArchetype: 'matrix',
+            landerArchetype: 'split-video',
             landerTheme: 'cyan',
             channelPreset: 'Marketing & Traffic (9 Channels: 5 FB Pages + YT AI Profit Lab + TikTok + X + Threads)',
             searchKeyword: 'ai search optimization',
@@ -797,6 +798,7 @@ Sitemap: https://${host}/sitemap.xml
             subheadline:
               'Turn single visitors into compounding organic reach with automated viral giveaway funnels, 2-tier referral loops, and instant Brevo lead generation.',
             affiliateUrl: url,
+            videoUrl: '/videos/viral-traffic-matrix-commercial.mp4',
             sponsorCode: sponsorCode || '144',
             landerArchetype: 'matrix',
             landerTheme: 'emerald',
@@ -847,6 +849,7 @@ Sitemap: https://${host}/sitemap.xml
             subheadline:
               'The sleek, 100% ad-free Secret Santa platform with smart pair exclusions, Amazon wishlist integration, and instant private recipient reveals.',
             affiliateUrl: url,
+            videoUrl: '/videos/ai-visibility-engine-commercial.mp4',
             sponsorCode: sponsorCode || '144',
             landerArchetype: 'voucher',
             landerTheme: 'emerald',
@@ -1044,6 +1047,7 @@ Sitemap: https://${host}/sitemap.xml
         headlineSuffix: body.headlineSuffix || 'Today.',
         subheadline: body.subheadline || 'Activate your free account and start scaling your traffic and leads in minutes.',
         ctaButtonText: body.ctaButtonText || 'Unlock Free Access',
+        videoUrl: body.videoUrl || null,
         affiliateUrl: body.affiliateUrl,
         sponsorCode: body.sponsorCode || '144',
         channelPreset: body.channelPreset || 'Marketing & Traffic (9 Channels)',

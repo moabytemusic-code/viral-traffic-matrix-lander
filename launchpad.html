@@ -813,6 +813,9 @@
           if (data.channelPreset) {
             document.getElementById('channelPreset').value = data.channelPreset;
           }
+          if (data.videoUrl) {
+            document.getElementById('launchForm').dataset.videoUrl = data.videoUrl;
+          }
           document.getElementById('affiliateUrl').value = data.affiliateUrl || url;
 
           // Dictate & Populate vidIQ + 9 Figure Buddy search term & niche!
@@ -864,6 +867,7 @@
           subheadline: getVal('subheadline'),
           channelPreset: getVal('channelPreset'),
           ctaButtonText: getVal('ctaButtonText', 'Unlock Free Access'),
+          videoUrl: document.getElementById('launchForm')?.dataset?.videoUrl || null,
           landerArchetype: getVal('landerArchetype', 'matrix'),
           landerTheme: getVal('landerTheme', 'emerald'),
           outlierId: getVal('selectedOutlierId'),

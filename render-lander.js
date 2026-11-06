@@ -92,8 +92,17 @@ function renderOfferLander(offer) {
     const candidateFiles = [
       `/videos/${offer.slug}-commercial.mp4`,
       `/videos/${offer.slug.replace(/-/g, '')}-commercial.mp4`,
-      `/videos/yusleep-commercial.mp4`
-    ];
+      `/videos/${offer.slug}-angle-1.mp4`,
+      offer.slug.includes('ai') ? `/videos/ai-visibility-engine-commercial.mp4` : null,
+      offer.slug.includes('ai') ? `/videos/ai-commercial.mp4` : null,
+      offer.slug.includes('traffic') || offer.slug.includes('matrix') ? `/videos/viral-traffic-matrix-commercial.mp4` : null,
+      offer.slug.includes('water') || offer.slug.includes('power') ? `/videos/power-commercial.mp4` : null,
+      offer.slug.includes('dog') ? `/videos/dog-enrichment-commercial.mp4` : null,
+      offer.slug.includes('card') || offer.slug.includes('bellver') ? `/videos/bellver-commercial.mp4` : null,
+      offer.slug.includes('trade') || offer.slug.includes('prop') ? `/videos/prop-trading-commercial.mp4` : null,
+      offer.slug.includes('sleep') ? `/videos/yusleep-commercial.mp4` : null,
+      `/videos/viral-traffic-matrix-commercial.mp4`
+    ].filter(Boolean);
     for (const c of candidateFiles) {
       if (fs.existsSync(path.join(__dirname, 'public', c))) {
         videoPreviewUrl = c;
@@ -924,6 +933,32 @@ function renderOfferLander(offer) {
             </div>
           </div>
         </div>
+
+        ${
+          videoPreviewUrl
+            ? `
+        <!-- Embedded Video Preview Card -->
+        <div class="mt-12 flex justify-center perspective-stage">
+          <div data-tilt-card class="tilt-card w-[290px] sm:w-[320px] rounded-[42px] p-3.5 bg-gradient-to-b from-white/20 via-white/5 to-white/10 border border-white/20 shadow-2xl relative">
+            <div class="w-full aspect-[9/16] rounded-[34px] overflow-hidden bg-black/90 relative flex flex-col justify-between p-4 border border-white/10 shadow-inner">
+              <div class="flex items-center justify-between z-20">
+                <span class="text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse"></span> PREVIEW
+                </span>
+                <span class="text-[10px] font-mono-code text-slate-400">Watch Breakdown</span>
+              </div>
+              <video id="heroPreviewVideo" autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover z-0">
+                <source src="${escapeHtml(videoPreviewUrl)}" type="video/mp4" />
+              </video>
+              <button type="button" onclick="const v=document.getElementById('heroPreviewVideo'); if(v){ v.muted=!v.muted; this.querySelector('span').textContent=v.muted?'🔇 Unmute':'🔊 Sound On'; }" class="absolute top-10 right-3 z-30 px-2.5 py-1 rounded-full bg-black/70 hover:bg-black/90 backdrop-blur-md border border-white/20 text-[10px] font-mono-code text-white flex items-center gap-1 cursor-pointer transition shadow-lg">
+                <span>🔇 Unmute</span>
+              </button>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 z-10 pointer-events-none"></div>
+            </div>
+          </div>
+        </div>`
+            : ''
+        }
 
         <!-- 3-Step Bento Grid -->
         <section class="mt-20 grid md:grid-cols-3 gap-6 perspective-stage">
