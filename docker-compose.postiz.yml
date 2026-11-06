@@ -40,8 +40,13 @@ services:
         condition: service_healthy
     networks:
       - postiz-network
+    expose:
+      - 5000
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.postiz.loadbalancer.server.port=5000"
     ports:
-      - "5000:3000"
+      - "5000:5000"
 
   postiz-postgres:
     image: postgres:16-alpine
