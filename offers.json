@@ -341,5 +341,20 @@
     "primaryColor": "amber",
     "status": "live",
     "createdAt": "2026-11-04T21:55:08.175Z"
+  },
+  "winter-freeze": {
+    "name": "Emergency Winter Heating & Frozen Pipe Defense",
+    "slug": "winter-freeze",
+    "affiliateUrl": "https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=enrev&tid=autopilot_winter-freeze",
+    "sponsorCode": "kmtwarrior",
+    "headlinePrefix": "Free Emergency Protocol:",
+    "headlineGradient": "How to Heat a Room Without Electricity & Prevent Frozen Pipes",
+    "headlineSuffix": "Without Expensive Contractors.",
+    "subheadline": "Sub-zero polar vortex storms shatter electrical grids. Home furnaces shut down because blowers need electricity. Within 18 hours, indoor temperatures drop below freezing, water pipes burst, and thousands of dollars in water damage ensue.",
+    "badge": "❄️ WINTER FREEZE",
+    "videoScript": "When the grid collapses in January, your home temperature hits freezing in under 18 hours. Here is the indoor-safe heating secret.",
+    "primaryColor": "amber",
+    "status": "live",
+    "createdAt": "2026-11-06T15:20:29.068Z"
   }
 }

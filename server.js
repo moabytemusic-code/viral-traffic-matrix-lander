@@ -739,6 +739,7 @@ Sitemap: https://${host}/sitemap.xml
         return res.end(JSON.stringify({ ok: false, error: 'URL is required' }));
       }
 
+      // Parse sponsor code from query params or iDevAffiliate path (e.g. 144-33-3-31.html)
       let targetUrl = url;
       let sponsorCode = '144';
       try {
@@ -751,6 +752,61 @@ Sitemap: https://${host}/sitemap.xml
           u.searchParams.get('aff') ||
           '144';
       } catch (_) {}
+
+      if (url.includes('idevaffiliate.com')) {
+        const idevMatch = url.match(/\/(\d+)-/);
+        if (idevMatch) sponsorCode = idevMatch[1];
+      }
+
+      // Specialized preset for 5 Dollar Friday Link 31: AI Visibility Engine (144-33-3-31.html)
+      if (url.includes('idevaffiliate.com') && (url.includes('33-3-31') || url.includes('31.html'))) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(
+          JSON.stringify({
+            ok: true,
+            title: 'AI Visibility Engine',
+            slug: 'ai-visibility-engine',
+            headlinePrefix: 'Rank #1 on AI Search:',
+            headlineGradient: 'ChatGPT, Perplexity & Gemini',
+            headlineSuffix: 'Recommendation Engine.',
+            subheadline:
+              'The all-in-one platform that tracks, fixes, and forces AI search engines to recommend your business first when millions of high-intent buyers skip Google entirely.',
+            affiliateUrl: url,
+            sponsorCode: sponsorCode || '144',
+            landerArchetype: 'matrix',
+            landerTheme: 'cyan',
+            channelPreset: 'Marketing & Traffic (9 Channels: 5 FB Pages + YT AI Profit Lab + TikTok + X + Threads)',
+            searchKeyword: 'ai search optimization',
+            searchNiche: 'Software & Technology',
+            searchTier: 'gold'
+          })
+        );
+      }
+
+      // Specialized preset for 5 Dollar Friday Link 32: Viral Traffic Matrix (144-34-3-32.html)
+      if (url.includes('idevaffiliate.com') && (url.includes('34-3-32') || url.includes('32.html'))) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(
+          JSON.stringify({
+            ok: true,
+            title: 'Viral Traffic Matrix',
+            slug: 'viral-traffic-matrix',
+            headlinePrefix: 'Unlock The 8x',
+            headlineGradient: 'Viral Traffic Matrix Multiplier',
+            headlineSuffix: 'In Just 4 Minutes.',
+            subheadline:
+              'Turn single visitors into compounding organic reach with automated viral giveaway funnels, 2-tier referral loops, and instant Brevo lead generation.',
+            affiliateUrl: url,
+            sponsorCode: sponsorCode || '144',
+            landerArchetype: 'matrix',
+            landerTheme: 'emerald',
+            channelPreset: 'Marketing & Traffic (9 Channels: 5 FB Pages + YT AI Profit Lab + TikTok + X + Threads)',
+            searchKeyword: 'viral traffic',
+            searchNiche: 'Affiliate Marketing',
+            searchTier: 'gold'
+          })
+        );
+      }
 
       // Specialized high-converting preset for Yu Sleep (Tart Cherry Sleep Trick)
       if (url.toLowerCase().includes('yusleep')) {
@@ -884,6 +940,23 @@ Sitemap: https://${host}/sitemap.xml
         .filter((t) => t.length > 25 && !t.includes('Cookie') && !t.includes('WordPress') && !t.includes('function('));
 
       const fullTitle = clean((metaTitleMatch && metaTitleMatch[1]) || (titleMatch && titleMatch[1]));
+
+      // Guard against Cloudflare challenge pages
+      if (
+        fullTitle.toLowerCase().includes('just a moment') ||
+        cleanHtml.includes('cf-mitigated') ||
+        cleanHtml.includes('challenges.cloudflare.com')
+      ) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(
+          JSON.stringify({
+            ok: false,
+            error:
+              'This affiliate tracking link is protected by Cloudflare bot challenge. Please enter the offer name and headline manually in Step 2, and use your link as the Affiliate URL.'
+          })
+        );
+      }
+
       const title = (fullTitle.split(/\s+[–—|]\s+|\s+-\s+/)[0] || fullTitle).trim();
       const headline = candidateTexts[0] || candidateTexts[1] || 'Viral Opportunity';
       const subheadline =

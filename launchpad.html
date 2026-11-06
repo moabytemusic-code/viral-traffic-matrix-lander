@@ -830,8 +830,12 @@
               document.getElementById('vidiqResearchBtn')?.click();
             }, 300);
           }
+        } else {
+          alert(data.error || 'Could not extract copy from this URL. Please fill in the fields in Step 2.');
         }
-      } catch (_) {}
+      } catch (err) {
+        alert('Network error: ' + err.message);
+      }
       btn.textContent = '✨ Auto-Extract Copy from URL';
     });
 

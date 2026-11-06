@@ -370,5 +370,50 @@
         "priceEstimate": "~$24 - $36"
       }
     ]
+  },
+  "how-to-stay-warm-power-outage-winter": {
+    "slug": "how-to-stay-warm-power-outage-winter",
+    "category": "Winter Freeze",
+    "categoryBadge": "❄️ WINTER FREEZE",
+    "title": "How to Heat Your Home During a Winter Power Outage (Indoor Safe)",
+    "subtitle": "Sub-zero polar vortex storms shatter electrical grids. Home furnaces shut down because blowers need electricity. Within 18 hours, indoor temperatures drop below freezing, water pipes burst, and thousands of dollars in water damage ensue.",
+    "publishedAt": "2026-11-06T15:20:29.068Z",
+    "readTime": "9 min read",
+    "author": {
+      "name": "Smart Home Resilience Engineering Desk",
+      "channel": "@SmartHomeResilience",
+      "channelUrl": "https://www.youtube.com/channel/UCy9DLRRHSPQ42do2q8Ookxw"
+    },
+    "offerSlug": "winter-freeze",
+    "videoUrl": "/videos/power-commercial.mp4",
+    "thumbnailUrl": "/thumbnails/power-thumbnail.jpg",
+    "clickbankUrl": "https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=enrev&tid=autopilot_winter-freeze",
+    "amazonTag": "santa101-20",
+    "hardwareComponents": [
+      {
+        "name": "Indoor-Safe Portable Propane Radiant Heater (Mr. Heater Buddy)",
+        "description": "Verified essential tool for winter freeze emergency preparedness.",
+        "searchQuery": "mr heater buddy indoor safe portable propane heater",
+        "priceEstimate": "~$79 - $119"
+      },
+      {
+        "name": "Digital Carbon Monoxide Detector with Battery Backup",
+        "description": "Verified essential tool for winter freeze emergency preparedness.",
+        "searchQuery": "digital carbon monoxide detector with battery readout",
+        "priceEstimate": "~$19 - $28"
+      },
+      {
+        "name": "Thermal Window Insulation Shrink Film Kit",
+        "description": "Verified essential tool for winter freeze emergency preparedness.",
+        "searchQuery": "thermal window insulation kit plastic shrink wrap",
+        "priceEstimate": "~$14 - $22"
+      },
+      {
+        "name": "12V Heated Electric Blanket for Lithium Power Banks",
+        "description": "Verified essential tool for winter freeze emergency preparedness.",
+        "searchQuery": "12v heated electric blanket low wattage for car rv camping",
+        "priceEstimate": "~$24 - $36"
+      }
+    ]
   }
 }
