@@ -5,6 +5,24 @@
 const fs = require('fs');
 const path = require('path');
 
+// Auto-load .env if running standalone
+const envPath = path.join(__dirname, '.env');
+if (fs.existsSync(envPath)) {
+  try {
+    const lines = fs.readFileSync(envPath, 'utf8').split('\n');
+    for (const line of lines) {
+      const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
+      if (match) {
+        const k = match[1];
+        let v = match[2] || '';
+        if (v.startsWith('"') && v.endsWith('"')) v = v.slice(1, -1);
+        if (v.startsWith("'") && v.endsWith("'")) v = v.slice(1, -1);
+        if (!process.env[k]) process.env[k] = v.trim();
+      }
+    }
+  } catch {}
+}
+
 const POSTIZ_BASE_URL = (process.env.POSTIZ_BASE_URL || 'https://social.aisimplesystem.com').replace(/\/+$/, '');
 const POSTIZ_API_KEY = process.env.POSTIZ_API_KEY || '';
 
