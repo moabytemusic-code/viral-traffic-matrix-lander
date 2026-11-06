@@ -2,7 +2,7 @@ version: '3.8'
 
 # ==============================================================================
 # Centralized Postiz Social Media Automation Stack for Coolify
-# Compatible with Postiz latest (Includes lightweight Temporal on SQLite)
+# Compatible with Postiz latest + lightweight Temporal on SQLite
 # Serves: https://social.aisimplesystem.com
 # ==============================================================================
 
@@ -45,9 +45,9 @@ services:
         condition: service_started
     networks:
       - postiz-network
-    ports:
-      - "3000:3000"
-      - "5000:5000"
+    expose:
+      - 3000
+      - 5000
 
   temporal:
     image: temporalio/temporal:latest
