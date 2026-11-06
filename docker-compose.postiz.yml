@@ -33,6 +33,12 @@ services:
       REDIS_URL: "redis://postiz-redis:6379"
       BACKEND_INTERNAL_URL: "http://localhost:3000"
       TEMPORAL_ADDRESS: "temporal:7233"
+      
+      # Social Provider Keys (Configured in Coolify Environment Variables)
+      YOUTUBE_CLIENT_ID: "${YOUTUBE_CLIENT_ID:-}"
+      YOUTUBE_CLIENT_SECRET: "${YOUTUBE_CLIENT_SECRET:-}"
+      TIKTOK_CLIENT_ID: "${TIKTOK_CLIENT_ID:-}"
+      TIKTOK_CLIENT_SECRET: "${TIKTOK_CLIENT_SECRET:-}"
     volumes:
       - postiz_config:/config/
       - postiz_uploads:/uploads/
