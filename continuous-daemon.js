@@ -9,6 +9,7 @@
 const fs = require('fs');
 const path = require('path');
 const autonomousCatalyst = require('./autonomous-catalyst');
+const cadenceEngine = require('./cadence-engine');
 
 const STATE_FILE = path.join(__dirname, 'continuous-state.json');
 let daemonTimer = null;
@@ -74,6 +75,19 @@ async function executeScheduledRun(triggerSource = 'scheduled') {
 
   try {
     const result = await autonomousCatalyst.runAutonomousPipeline();
+
+    // 2. Automatically advance and schedule next video angle in rotation
+    let videoScheduleResult = null;
+    try {
+      console.log(`🎬 [Continuous Daemon] Advancing next video angle across social channels...`);
+      videoScheduleResult = await cadenceEngine.advanceNextQueuedOffer();
+      if (videoScheduleResult && videoScheduleResult.ok) {
+        console.log(`✅ [Continuous Daemon] Video Angle Scheduled: "${videoScheduleResult.slug}" (Angle ${videoScheduleResult.angleId}) -> ${videoScheduleResult.scheduledAt}`);
+      }
+    } catch (videoErr) {
+      console.warn(`⚠️ [Continuous Daemon] Video cadence advance note:`, videoErr.message);
+    }
+
     const now = new Date();
     const intervalMs = (state.intervalHours || 24) * 3600 * 1000;
 
@@ -89,7 +103,14 @@ async function executeScheduledRun(triggerSource = 'scheduled') {
       status: result.ok ? 'success' : 'failed',
       articleUrl: result.deployedAssets?.articleUrl || '',
       landerUrl: result.deployedAssets?.landerUrl || '',
-      demandScore: result.quantitativeDemand?.overallScore || 0
+      demandScore: result.quantitativeDemand?.overallScore || 0,
+      videoScheduled: videoScheduleResult && videoScheduleResult.ok ? {
+        slug: videoScheduleResult.slug,
+        angleId: videoScheduleResult.angleId,
+        title: videoScheduleResult.angleTitle,
+        scheduledAt: videoScheduleResult.scheduledAt,
+        channelsCount: videoScheduleResult.channels?.length || 0
+      } : null
     });
 
     // Keep history capped at 30 entries

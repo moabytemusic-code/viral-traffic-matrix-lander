@@ -130,5 +130,230 @@
         "firstComment": "👉 Try Yu Sleep for 60 nights risk-free here: https://traffic.aisimplesystem.com/sleep"
       }
     ]
+  },
+  "offgrid-water": {
+    "name": "Emergency Clean Water System",
+    "slug": "offgrid-water",
+    "vanityPath": "/o/offgrid-water",
+    "friendlyLink": "https://traffic.aisimplesystem.com/o/offgrid-water",
+    "guideUrl": "https://traffic.aisimplesystem.com/guides/emergency-water-storage-blackout",
+    "angles": [
+      {
+        "angleId": 1,
+        "name": "The 48-Hour Dehydration Trap",
+        "title": "Why You Only Have 48 Hours In A Water Crisis 💧⚠️",
+        "script": "When municipal water mains break or contamination boil notices are issued, grocery store shelves are stripped completely clean in under thirty minutes. The average family runs out of drinkable water in forty-eight hours. Boiling contaminated water doesn't remove heavy metals or chemical runoff. You need a gravity-fed stainless steel filtration system that purifies rainwater, pond water, and tap water for less than two cents per gallon. Tap the link in the first comment to get the complete free off-grid water independence checklist.",
+        "hookTitle": "EMPTY GROCERY SHELVES IN 30 MINS",
+        "badgeText": "48-HOUR SURVIVAL PROTOCOL",
+        "features": ["Purifies Any Water Source", "No Electricity Needed", "2 Cents Per Gallon"],
+        "ctaText": "GET FREE CHECKLIST",
+        "postText": "When water mains burst or boil notices hit, stores sell out in minutes. Here is the gravity-fed protocol that purifies clean water for pennies a gallon. 💧🛡️\n\n👉 Free Guide: https://traffic.aisimplesystem.com/guides/emergency-water-storage-blackout",
+        "firstComment": "👉 Download the free Emergency Water Independence Checklist here: https://traffic.aisimplesystem.com/guides/emergency-water-storage-blackout"
+      },
+      {
+        "angleId": 2,
+        "name": "The Plastic Jug Storage Mistake",
+        "title": "Stop Storing Tap Water In Thin Plastic Jugs 💧🚫",
+        "script": "Storing tap water in cheap milk jugs or thin gallon plastic containers is a huge mistake. Within six months, microplastics leach into your water, and exposure to sunlight turns stagnant water into a breeding ground for harmful bacteria. Real emergency water security requires BPA-free food-grade stackable containers with chlorine dioxide stabilization. Don't drink bacteria in an emergency. Learn the right way to store and purify water at the link in the first comment.",
+        "hookTitle": "STOP STORING IN MILK JUGS",
+        "badgeText": "WATER STORAGE MISTAKE",
+        "features": ["No Microplastic Leaching", "Food-Grade BPA-Free", "5-Year Shelf Life"],
+        "ctaText": "LEARN SAFE STORAGE",
+        "postText": "Why storing emergency water in cheap plastic jugs is dangerous (and the food-grade stackable protocol you should use instead). 💧⚠️\n\n👉 Free Guide: https://traffic.aisimplesystem.com/guides/emergency-water-storage-blackout",
+        "firstComment": "👉 Claim the free Water Storage & Purification Guide here: https://traffic.aisimplesystem.com/guides/emergency-water-storage-blackout"
+      },
+      {
+        "angleId": 3,
+        "name": "The Gravity Filtration Blueprint",
+        "title": "How To Purify Any Water Source For Under $100 💧🛡️",
+        "script": "What if you could turn pond water, stream water, or murky pool water into hospital-grade drinking water with zero electricity? A dual-element gravity filtration system removes 99.99% of bacteria, parasites, and microplastics without pumps or filters to plug in. It runs silently on your kitchen counter during blackouts. Stop worrying about boil water notices forever. Grab the full DIY water independence schematic at the link in the first comment below.",
+        "hookTitle": "PURIFY ANY WATER SOURCE",
+        "badgeText": "ZERO ELECTRICITY NEEDED",
+        "features": ["Removes 99.99% Pathogens", "Countertop Gravity Flow", "Emergency Resilience"],
+        "ctaText": "GET DIY SCHEMATIC",
+        "postText": "How to purify rainwater, stream water, or pool water with zero electricity during an emergency grid collapse. 💧✨\n\n👉 Free Guide: https://traffic.aisimplesystem.com/guides/emergency-water-storage-blackout",
+        "firstComment": "👉 Get the complete Gravity Water Filtration Blueprint here: https://traffic.aisimplesystem.com/guides/emergency-water-storage-blackout"
+      }
+    ]
+  },
+  "blackout-power": {
+    "name": "Blackout Power Resilience",
+    "slug": "blackout-power",
+    "vanityPath": "/o/blackout-power",
+    "friendlyLink": "https://traffic.aisimplesystem.com/o/blackout-power",
+    "guideUrl": "https://traffic.aisimplesystem.com/guides/diy-home-power-blackout",
+    "angles": [
+      {
+        "angleId": 1,
+        "name": "The 4-Hour Food Spoil Danger Zone",
+        "title": "Your Refrigerator Hits The Danger Zone In 4 Hours ⚡⚠️",
+        "script": "When a storm knocks out the power grid, your refrigerator hits the FDA bacterial danger zone in exactly four hours. That is eight hundred dollars in meat, dairy, and life-saving medication ruined before the utility trucks even arrive. You do not need a noisy three thousand dollar gas generator. A silent one hundred amp-hour lithium battery and pure sine inverter keeps your fridge running cold for thirty-six hours indoors. Get the free wiring schematic at the first comment link.",
+        "hookTitle": "4 HOURS TILL FOOD SPOILS",
+        "badgeText": "FDA DANGER ZONE",
+        "features": ["Keeps Fridge Cold 36h", "Zero Gas or Carbon Monoxide", "Silent Bedroom Safe"],
+        "ctaText": "GET WIRING SCHEMATIC",
+        "postText": "Your fridge warms past 40°F in 4 hours during a blackout. Here is the $195 silent lithium fix that keeps food safe with zero gas or noise. ⚡🧊\n\n👉 Free Guide: https://traffic.aisimplesystem.com/guides/diy-home-power-blackout",
+        "firstComment": "👉 Calculate your blackout run-time and get the free wiring schematic: https://traffic.aisimplesystem.com/guides/diy-home-power-blackout"
+      },
+      {
+        "angleId": 2,
+        "name": "Why Modified Sine Inverters Burn Out Compressors",
+        "title": "Don't Make This $2,000 Inverter Mistake In A Blackout ⚡🚫",
+        "script": "Plugging your refrigerator into a cheap modified sine wave inverter during a blackout can permanently burn out the compressor motor. Refrigerators require clean, pure sine wave power to handle high-surge startup spikes. Avoid buying the wrong inverter and destroying your expensive appliances. We built a free calculator that sizes your inverter, battery bank, and wire gauge in sixty seconds. Check the first comment to get your free blueprint.",
+        "hookTitle": "DON'T BUY MODIFIED SINE",
+        "badgeText": "COMPRESSOR MOTOR WARNING",
+        "features": ["Avoid Motor Burnout", "Pure Sine Wave Only", "Free Sizing Tool"],
+        "ctaText": "RUN FREE CALCULATOR",
+        "postText": "Why cheap modified sine wave inverters destroy refrigerator motors (and what to buy instead). ⚡🔌\n\n👉 Free Guide: https://traffic.aisimplesystem.com/guides/diy-home-power-blackout",
+        "firstComment": "👉 Access the interactive battery & inverter sizing calculator: https://traffic.aisimplesystem.com/guides/diy-home-power-blackout"
+      },
+      {
+        "angleId": 3,
+        "name": "The $195 Silent DIY Lithium Build",
+        "title": "Build A Silent Home Battery Backup For Under $200 ⚡🔋",
+        "script": "Commercial power stations from Jackery and EcoFlow charge over two thousand dollars for basic battery capacity. You can build your own high-capacity LiFePO4 backup system with off-the-shelf components for under two hundred dollars. Four thousand charge cycles, completely safe to run in your bedroom, and zero gas fumes. Power your CPAP, internet router, and refrigerator silently. Tap the first comment link for the step-by-step schematic and shopping list.",
+        "hookTitle": "DIY BATTERY UNDER $200",
+        "badgeText": "BEATS $2,000 POWER STATIONS",
+        "features": ["4,000+ Life Cycles", "Safe Indoor Lithium", "Costs Under $200"],
+        "ctaText": "GET SHOPPING LIST",
+        "postText": "Stop paying $2,000 for brand-name solar generators. Here is how to build a 100Ah lithium backup for under $200 with zero contractor help. ⚡🛠️\n\n👉 Free Guide: https://traffic.aisimplesystem.com/guides/diy-home-power-blackout",
+        "firstComment": "👉 Get the complete $200 DIY Home Power Blueprint: https://traffic.aisimplesystem.com/guides/diy-home-power-blackout"
+      }
+    ]
+  },
+  "dog-enrichment": {
+    "name": "Practical Canine Enrichment",
+    "slug": "dog-enrichment",
+    "vanityPath": "/o/dog-enrichment",
+    "friendlyLink": "https://traffic.aisimplesystem.com/o/dog-enrichment",
+    "guideUrl": "https://traffic.aisimplesystem.com/guides/stop-dog-barking-mental-enrichment",
+    "angles": [
+      {
+        "angleId": 1,
+        "name": "The Doorbell & Window Reactivity Trigger",
+        "title": "Why Your Dog Barks At Every Doorbell & Window 🐕🚨",
+        "script": "If your dog barks uncontrollably at the doorbell, delivery drivers, or footsteps outside, they aren't being stubborn. They are trapped in a chronic cortisol loop caused by mental understimulation. A fifteen-minute mental enrichment puzzle tires out your dog's nervous system more effectively than a two-mile walk around the block. Stop the screaming and stress today. Download the free 7-day canine brain game protocol from the link in the first comment.",
+        "hookTitle": "STOP DOORBELL BARKING",
+        "badgeText": "CANINE CORTISOL LOOP",
+        "features": ["Calms Reactivity Fast", "Breaks Cortisol Cycle", "Tires Dogs in 15 Mins"],
+        "ctaText": "GET 7-DAY PROTOCOL",
+        "postText": "Why yelling at your barking dog makes the anxiety worse (and the 15-minute brain puzzle fix that calms them instantly). 🐕🧠\n\n👉 Free Guide: https://traffic.aisimplesystem.com/guides/stop-dog-barking-mental-enrichment",
+        "firstComment": "👉 Download the free 7-Day Canine Mental Enrichment Protocol: https://traffic.aisimplesystem.com/guides/stop-dog-barking-mental-enrichment"
+      },
+      {
+        "angleId": 2,
+        "name": "Why Shock Collars Backfire",
+        "title": "Why Shock & Bark Collars Make Reactivity Worse 🐕⚠️",
+        "script": "Using shock collars or citronella spray to stop barking treats the symptom while multiplying your dog's underlying fear. When a dog is punished for barking at triggers, they associate the trigger with physical pain, leading to sudden aggressive biting with zero warning growls. Professional canine behaviorists use dopamine-driven puzzle games to rewire their emotional response. Learn how to train your dog peacefully using the free guide linked in the first comment.",
+        "hookTitle": "NEVER USE SHOCK COLLARS",
+        "badgeText": "BEHAVIORAL WARNING",
+        "features": ["No Pain or Punishment", "Rewires Fear Triggers", "Vet-Behaviorist Proven"],
+        "ctaText": "SEE POSITIVE PROTOCOL",
+        "postText": "Why punishing barking dogs creates dangerous hidden aggression, and how to rewire their brain with positive enrichment. 🐾✨\n\n👉 Free Guide: https://traffic.aisimplesystem.com/guides/stop-dog-barking-mental-enrichment",
+        "firstComment": "👉 Claim the free Positive Canine Enrichment Guide here: https://traffic.aisimplesystem.com/guides/stop-dog-barking-mental-enrichment"
+      },
+      {
+        "angleId": 3,
+        "name": "The 15-Minute Lick Mat & Snuffle Game",
+        "title": "The 15-Minute Brain Game That Calms Any High-Energy Dog 🐕🧩",
+        "script": "Did you know that twenty minutes of active scent work and licking lowers a dog's heart rate and triggers the release of calming endorphins? Snuffle mats, lick bowls, and frozen enrichment games are the secret tools veterinary behaviorists use for hyperactive dogs. Keep your dog happy, calm, and quiet without expensive training facilities. Get the full printable enrichment guide and game ideas from the link in the first comment below.",
+        "hookTitle": "15-MIN BRAIN PUZZLE",
+        "badgeText": "VET RECOMMENDED",
+        "features": ["Lowers Canine Heart Rate", "Natural Calming Endorphins", "Easy DIY Setup"],
+        "ctaText": "CLAIM FREE BRAIN GAMES",
+        "postText": "The 15-minute brain enrichment games that tire out energetic dogs 5x faster than a long walk. 🐕🐾\n\n👉 Free Guide: https://traffic.aisimplesystem.com/guides/stop-dog-barking-mental-enrichment",
+        "firstComment": "👉 Access the free Canine Brain Game & Enrichment Checklist: https://traffic.aisimplesystem.com/guides/stop-dog-barking-mental-enrichment"
+      }
+    ]
+  },
+  "freeze-defense": {
+    "name": "Winter Pipe Freeze Defense",
+    "slug": "freeze-defense",
+    "vanityPath": "/o/freeze-defense",
+    "friendlyLink": "https://traffic.aisimplesystem.com/o/freeze-defense",
+    "guideUrl": "https://traffic.aisimplesystem.com/guides/prevent-frozen-pipes-blackout",
+    "angles": [
+      {
+        "angleId": 1,
+        "name": "The $15,000 Burst Pipe Disaster",
+        "title": "How A 20-Degree Night Destroys Your Home ❄️💥",
+        "script": "When sub-zero cold snaps hit and the power grid flickers, water inside exterior pipes freezes and expands with up to forty thousand pounds of hydraulic pressure. When the ice thaws, water floods your walls, causing fifteen thousand dollars in structural water damage and mold. A five-dollar freeze relief valve and low-watt heat tape protects your plumbing even during zero-power blackouts. Read the complete winter freeze defense guide at the first comment link.",
+        "hookTitle": "40,000 LBS ICE PRESSURE",
+        "badgeText": "AVOID $15,000 REPAIRS",
+        "features": ["Hydraulic Pressure Relief", "Protects Inside Sheetrock", "Zero Power Solutions"],
+        "ctaText": "GET FREE CHECKLIST",
+        "postText": "A frozen pipe doesn't burst where it freezes—it bursts from trapped hydraulic pressure. Here is how to protect your plumbing before the next freeze. ❄️🏠\n\n👉 Free Guide: https://traffic.aisimplesystem.com/guides/prevent-frozen-pipes-blackout",
+        "firstComment": "👉 Get the complete Winter Pipe Freeze Defense Checklist: https://traffic.aisimplesystem.com/guides/prevent-frozen-pipes-blackout"
+      },
+      {
+        "angleId": 2,
+        "name": "The Dripping Faucet Trap",
+        "title": "Why A Slow Faucet Drip Might Not Save Your Pipes ❄️🚫",
+        "script": "Everyone tells you to leave a slow faucet drip during a winter storm, but if the drain line freezes underneath your crawl space, that slow drip overflows your sink and floods your kitchen cabinets. You need passive insulation sleeves, targeted 12-volt heating cables, and shutoff protocols for outside spigots. Learn the three critical freeze defense steps most homeowners overlook in our free guide linked in the first comment.",
+        "hookTitle": "THE FAUCET DRIP TRAP",
+        "badgeText": "DRAIN LINE FREEZE RISK",
+        "features": ["Stops Crawl Space Freeze", "Outside Spigot Defense", "Passive Thermal Sleeves"],
+        "ctaText": "SEE 3 OVERLOOKED STEPS",
+        "postText": "Why just 'dripping the faucet' can still lead to disastrous winter freeze flooding (and what to do instead). ❄️🚰\n\n👉 Free Guide: https://traffic.aisimplesystem.com/guides/prevent-frozen-pipes-blackout",
+        "firstComment": "👉 Download the Emergency Winter Freeze Guide: https://traffic.aisimplesystem.com/guides/prevent-frozen-pipes-blackout"
+      },
+      {
+        "angleId": 3,
+        "name": "The Low-Draw 12V Heat Tape Protocol",
+        "title": "Prevent Frozen Pipes On Battery Power ❄️🔋",
+        "script": "Space heaters draw fifteen hundred watts and will drain an emergency battery backup in under thirty minutes. Self-regulating heat trace cable only draws six watts per foot and can be powered by a small lithium battery bank for days. Keep your well pump, water intake, and critical elbows above thirty-eight degrees on minimal power. Grab the free cold-weather wiring blueprint from the link in the first comment below.",
+        "hookTitle": "6-WATT HEAT CABLE HACK",
+        "badgeText": "LOW-DRAW BATTERY POWER",
+        "features": ["Only 6 Watts Per Foot", "Runs on Small Batteries", "Protects Critical Valves"],
+        "ctaText": "GET WIRING BLUEPRINT",
+        "postText": "How to keep water lines and well pumps from freezing using only 6 watts per foot on backup battery power. ❄️⚡\n\n👉 Free Guide: https://traffic.aisimplesystem.com/guides/prevent-frozen-pipes-blackout",
+        "firstComment": "👉 Get the Low-Draw Pipe Freeze Prevention Blueprint: https://traffic.aisimplesystem.com/guides/prevent-frozen-pipes-blackout"
+      }
+    ]
+  },
+  "prop-trading": {
+    "name": "Prop Trading Capital Funding",
+    "slug": "prop-trading",
+    "vanityPath": "/o/prop-trading",
+    "friendlyLink": "https://traffic.aisimplesystem.com/o/prop-trading",
+    "guideUrl": "https://traffic.aisimplesystem.com/guides/how-prop-trading-firms-work",
+    "angles": [
+      {
+        "angleId": 1,
+        "name": "The Blown Retail Account Trap",
+        "title": "Why 90% Of Retail Traders Blow Their Savings 📈💸",
+        "script": "Trading your own hard-earned savings is an emotional trap. A single bad day triggers revenge trading, and months of savings vanish in minutes. That is why professional traders use proprietary firm capital. You trade firm funds, risk zero personal dollars, and keep up to ninety percent of the profits you generate. Stop risking your mortgage money on volatile markets. Check the first comment link to learn how prop firm evaluations work.",
+        "hookTitle": "STOP RISKING YOUR SAVINGS",
+        "badgeText": "TRADE WITH FIRM CAPITAL",
+        "features": ["Risk Zero Personal Dollars", "Keep 90% Of Profits", "No Revenge Trading"],
+        "ctaText": "SEE HOW IT WORKS",
+        "postText": "Why risking your own savings in retail trading is a losing game, and how to get funded with $100k+ in capital instead. 📈💼\n\n👉 Free Guide: https://traffic.aisimplesystem.com/guides/how-prop-trading-firms-work",
+        "firstComment": "👉 Claim the free Prop Trading Evaluation Guide: https://traffic.aisimplesystem.com/guides/how-prop-trading-firms-work"
+      },
+      {
+        "angleId": 2,
+        "name": "Evaluation Traps & Trailing Drawdowns",
+        "title": "The Trailing Drawdown Rule That Fails 80% Of Traders 📈⚠️",
+        "script": "Most aspiring traders fail prop firm evaluations not because of bad setups, but because of trailing drawdown rules that calculate risk from unrealized peak profits. Knowing how to manage position sizing and contract limits is the secret to passing your evaluation on the first try. We put together a free risk calculator and evaluation checklist to help you pass. Access the free guide via the link in the first comment.",
+        "hookTitle": "THE TRAILING DRAWDOWN TRAP",
+        "badgeText": "PASS ON FIRST TRY",
+        "features": ["Master Intraday Drawdown", "Position Sizing Rules", "Free Risk Calculator"],
+        "ctaText": "GET RISK CALCULATOR",
+        "postText": "The #1 hidden rule that fails 80% of prop firm evaluation traders (and the risk management fix to pass). 📊🎯\n\n👉 Free Guide: https://traffic.aisimplesystem.com/guides/how-prop-trading-firms-work",
+        "firstComment": "👉 Get the free Prop Firm Risk Management Calculator: https://traffic.aisimplesystem.com/guides/how-prop-trading-firms-work"
+      },
+      {
+        "angleId": 3,
+        "name": "The $100K Funded Account Blueprint",
+        "title": "How To Trade A $100,000 Account With Zero Personal Risk 📈🚀",
+        "script": "Imagine having one hundred thousand dollars in buying power where your maximum personal downside is fifty dollars. Prop trading firms evaluate your disciplined execution and give you institutional leverage while taking on all the market risk. Keep eighty to ninety percent of every withdrawal directly into your bank account. Discover the top vetted prop firms and payout structures at the link in the first comment below.",
+        "hookTitle": "$100K BUYING POWER",
+        "badgeText": "KEEP 90% PROFITS",
+        "features": ["$100,000 Buying Power", "Vetted Payout Firms", "Direct Bank Withdrawals"],
+        "ctaText": "CLAIM FUNDING GUIDE",
+        "postText": "How modern prop trading firms provide $100,000 in buying power with 90% profit splits and zero personal downside. 📈💰\n\n👉 Free Guide: https://traffic.aisimplesystem.com/guides/how-prop-trading-firms-work",
+        "firstComment": "👉 Read the full $100k Prop Trading Firm Blueprint: https://traffic.aisimplesystem.com/guides/how-prop-trading-firms-work"
+      }
+    ]
   }
 }

@@ -1224,6 +1224,22 @@ Sitemap: https://${host}/sitemap.xml
     }
   }
 
+  // POST /api/cadence-advance-next -> Advance the next queued offer in video rotation
+  if (req.method === 'POST' && pathname === '/api/cadence-advance-next') {
+    try {
+      if (!cadenceEngine) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ ok: false, error: 'Cadence engine not initialized' }));
+      }
+      const result = await cadenceEngine.advanceNextQueuedOffer();
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: true, result }));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+  }
+
   // POST /api/subscribe -> Dynamic Multi-Offer Lead Capture + 4-Email Drip Queue
   if (req.method === 'POST' && pathname === '/api/subscribe') {
     try {

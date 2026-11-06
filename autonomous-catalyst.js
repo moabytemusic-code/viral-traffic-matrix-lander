@@ -162,6 +162,70 @@ async function runAutonomousPipeline(options = {}) {
     log(`ℹ️ Offer Lander "/o/${offerSlug}" already live.`);
   }
 
+  // Deploy 3-part video angle series to angles.json if not present
+  const ANGLES_PATH = path.join(__dirname, 'angles.json');
+  try {
+    let anglesData = {};
+    if (fs.existsSync(ANGLES_PATH)) {
+      anglesData = JSON.parse(fs.readFileSync(ANGLES_PATH, 'utf8') || '{}');
+    }
+    if (!anglesData[offerSlug]) {
+      log(`🎬 Generating 3-Part Video Angle Series for "${offerSlug}"...`);
+      const cleanTitle = catalyst.title.replace(/[^a-zA-Z0-9 ]/g, '').trim();
+      anglesData[offerSlug] = {
+        name: catalyst.title,
+        slug: offerSlug,
+        vanityPath: `/o/${offerSlug}`,
+        friendlyLink: `https://traffic.aisimplesystem.com/o/${offerSlug}`,
+        guideUrl: `https://traffic.aisimplesystem.com/guides/${articleSlug}`,
+        angles: [
+          {
+            angleId: 1,
+            name: "Acute Pain & Dread Hook",
+            title: `${cleanTitle.slice(0, 45)} (The Hidden Threat) ⚠️`,
+            script: `${catalyst.acuteProblem} Waiting until the emergency happens leaves you completely vulnerable. Tap the link in the first comment to get our free step-by-step diagnostic checklist and safety protocol.`,
+            hookTitle: "THE HIDDEN DANGER",
+            badgeText: "ACUTE EMERGENCY ALERT",
+            features: ["Immediate Action Step", "Avoid Costly Damage", "100% Free Blueprint"],
+            ctaText: "DOWNLOAD FREE GUIDE",
+            postText: `${catalyst.acuteProblem}\n\n👉 Free Guide: https://traffic.aisimplesystem.com/guides/${articleSlug}`,
+            firstComment: `👉 Download the free Emergency Action Guide: https://traffic.aisimplesystem.com/guides/${articleSlug}`
+          },
+          {
+            angleId: 2,
+            name: "Common Mistake / Trap",
+            title: `Stop Making This Costly Mistake With ${cleanTitle.slice(0, 30)} 🚫`,
+            script: `Most people try to solve this with expensive contractor visits or cheap band-aid fixes that fail when you need them most. In our free engineering breakdown, we reveal the common pitfalls that cost families thousands of dollars. Check the first comment link for the free guide.`,
+            hookTitle: "STOP MAKING THIS MISTAKE",
+            badgeText: "COMMON TRAP WARNING",
+            features: ["Avoid Contractor Traps", "Field-Tested Protocol", "Free Diagnostic Tools"],
+            ctaText: "AVOID THE MISTAKE",
+            postText: `The #1 mistake people make when trying to solve this issue (and what to do instead).\n\n👉 Free Guide: https://traffic.aisimplesystem.com/guides/${articleSlug}`,
+            firstComment: `👉 Read the full breakdown and warning: https://traffic.aisimplesystem.com/guides/${articleSlug}`
+          },
+          {
+            angleId: 3,
+            name: "The DIY Breakthrough & Solution",
+            title: `The Low-Cost DIY Protocol That Actually Works 🛠️✨`,
+            script: `Here is the step-by-step breakthrough protocol to solve this problem without spending thousands. Off-the-shelf components, clear schematics, and zero guesswork. Grab the full shopping list and interactive sizing calculator at the link in the first comment.`,
+            hookTitle: "THE LOW-COST PROTOCOL",
+            badgeText: "FIELD-TESTED BREAKTHROUGH",
+            features: ["Step-By-Step Schematics", "Low-Cost Hardware List", "Interactive Calculators"],
+            ctaText: "GET DIY BLUEPRINT",
+            postText: `The field-tested protocol to resolve this permanently with zero guesswork.\n\n👉 Free Guide: https://traffic.aisimplesystem.com/guides/${articleSlug}`,
+            firstComment: `👉 Access the interactive tools & blueprint: https://traffic.aisimplesystem.com/guides/${articleSlug}`
+          }
+        ]
+      };
+      fs.writeFileSync(ANGLES_PATH, JSON.stringify(anglesData, null, 2), 'utf8');
+      log(`✅ 3-Angle Video Series registered in angles.json for "${offerSlug}"`);
+    } else {
+      log(`ℹ️ 3-Angle Video Series already registered for "${offerSlug}".`);
+    }
+  } catch (angleErr) {
+    log(`⚠️ Note on registering angles: ${angleErr.message}`);
+  }
+
   // 6. Final Summary Report
   log(`🎉 Autonomous Pipeline Execution Complete in 100% Auto-Pilot mode!`);
 

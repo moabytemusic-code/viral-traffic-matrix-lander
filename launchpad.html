@@ -206,6 +206,38 @@
       </div>
     </section>
 
+    <!-- 3-Part Video Series & Cadence Pipeline -->
+    <section class="glass-surface rounded-3xl p-6 sm:p-8 space-y-6 border border-purple-500/30 bg-gradient-to-br from-purple-950/20 via-slate-950/80 to-indigo-950/20 shadow-2xl">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-500/40 text-purple-300 text-xs font-mono-code font-bold uppercase mb-2">
+            <span>🎬</span> SUBSEQUENT VIDEO CADENCE
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            3-Part Problem Video Series & Social Rotation
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-300 max-w-2xl mt-1 leading-relaxed">
+            Every problem is attacked across 3 psychological angles (Acute Dread ➔ The Trap ➔ DIY Breakthrough) rotated into ContentStudio every 24–48h.
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            id="advanceNextAngleBtn"
+            class="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 text-white text-xs font-bold transition shadow-lg shadow-purple-500/25 whitespace-nowrap cursor-pointer flex items-center gap-1.5"
+            title="Advance and schedule the next video angle in queue to ContentStudio"
+          >
+            <span>🚀</span> Advance Next Video In Rotation
+          </button>
+        </div>
+      </div>
+
+      <!-- Angles & Cadence Grid -->
+      <div id="cadenceOffersGrid" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="text-slate-400 text-xs font-mono-code">Loading Video Cadence Series...</div>
+      </div>
+    </section>
+
     <!-- Main 2-Column Workspace -->
     <div class="grid lg:grid-cols-12 gap-8 items-start">
 
@@ -1369,8 +1401,115 @@
       }
     });
 
+    // ==========================================
+    // 🎬 3-Part Video Series & Cadence Logic
+    // ==========================================
+    async function loadCadenceStatus() {
+      const grid = document.getElementById('cadenceOffersGrid');
+      if (!grid) return;
+      try {
+        const res = await fetch('/api/cadence-status');
+        const data = await res.json();
+        if (!data.ok || !data.angles) {
+          grid.innerHTML = '<div class="text-slate-400 text-xs">No video cadence data available.</div>';
+          return;
+        }
+
+        const state = data.state || {};
+        const anglesData = data.angles;
+
+        grid.innerHTML = Object.entries(anglesData).map(([slug, o]) => {
+          const currentInfo = state[slug] || { currentAngleId: 0, cycle: 1 };
+          const activeAngleId = currentInfo.currentAngleId || 1;
+          const activeAngle = (o.angles || []).find(a => a.angleId === activeAngleId) || o.angles[0];
+          const hasScheduled = Boolean(currentInfo.lastScheduledAt);
+
+          return `
+            <div class="p-4 rounded-2xl bg-black/50 border border-purple-500/20 hover:border-purple-500/40 transition space-y-3 flex flex-col justify-between">
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between">
+                  <span class="text-[10px] font-mono-code text-purple-400 uppercase font-bold tracking-wider">
+                    Cycle ${currentInfo.cycle || 1} • Angle ${activeAngleId}/3
+                  </span>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-mono-code ${hasScheduled ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-slate-800 text-slate-400'}">
+                    ${hasScheduled ? 'Scheduled' : 'Queued'}
+                  </span>
+                </div>
+                <h4 class="text-sm font-bold text-white leading-snug truncate" title="${o.name}">${o.name}</h4>
+                <p class="text-xs text-slate-300 font-mono-code truncate">🎯 "${activeAngle?.name || 'Angle 1'}"</p>
+                <div class="text-[11px] text-slate-400 leading-tight line-clamp-2 italic">
+                  "${activeAngle?.title || ''}"
+                </div>
+              </div>
+
+              <div class="space-y-2 pt-2 border-t border-white/5">
+                <div class="text-[10px] font-mono-code text-slate-400 truncate">
+                  📅 ${currentInfo.lastScheduledAt ? new Date(currentInfo.lastScheduledAt).toLocaleDateString() + ' ' + new Date(currentInfo.lastScheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Ready to Schedule'}
+                </div>
+                <button
+                  type="button"
+                  onclick="advanceCadenceForSlug('${slug}')"
+                  class="w-full py-1.5 px-3 rounded-lg text-xs font-mono-code font-bold bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 border border-purple-500/30 transition flex items-center justify-center gap-1 cursor-pointer"
+                >
+                  <span>🚀</span> Advance Angle
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (e) {
+        console.error('Error loading cadence status:', e);
+      }
+    }
+
+    window.advanceCadenceForSlug = async function(slug) {
+      if (!confirm(`Advance and schedule the next video angle for "${slug}" in ContentStudio?`)) return;
+      try {
+        const res = await fetch('/api/cadence-advance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          alert(`✅ Angle ${data.result.angleId} scheduled for ${data.result.scheduledAt}!`);
+          loadCadenceStatus();
+        } else {
+          alert('Error: ' + (data.error || 'Failed to schedule angle'));
+        }
+      } catch (e) {
+        alert('Network error: ' + e.message);
+      }
+    };
+
+    document.getElementById('advanceNextAngleBtn')?.addEventListener('click', async () => {
+      const btn = document.getElementById('advanceNextAngleBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳</span> Scheduling Next Angle...';
+      try {
+        const res = await fetch('/api/cadence-advance-next', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        const data = await res.json();
+        if (data.ok) {
+          alert(`✅ Advanced "${data.result.slug}" to Angle ${data.result.angleId}: "${data.result.angleTitle}"!\nScheduled for ${data.result.scheduledAt}`);
+          loadCadenceStatus();
+        } else {
+          alert('Error: ' + (data.error || 'Failed to advance angle'));
+        }
+      } catch (e) {
+        alert('Network error: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>🚀</span> Advance Next Video In Rotation';
+      }
+    });
+
     loadCatalysts();
     syncContinuousStatus();
+    loadCadenceStatus();
     setInterval(syncContinuousStatus, 30000);
     loadOffers();
     searchOutliers();
