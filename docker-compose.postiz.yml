@@ -53,9 +53,7 @@ services:
     image: temporalio/temporal:latest
     container_name: postiz-temporal
     restart: always
-    command: ["server", "start-dev", "--ip", "0.0.0.0", "--db-filename", "/data/temporal.db"]
-    volumes:
-      - postiz_temporal_data:/data
+    command: ["server", "start-dev", "--ip", "0.0.0.0", "--db-filename", "/tmp/temporal.db"]
     networks:
       - postiz-network
     expose:
@@ -98,7 +96,6 @@ volumes:
   postiz_uploads:
   postiz_pgdata:
   postiz_redisdata:
-  postiz_temporal_data:
 
 networks:
   postiz-network:
