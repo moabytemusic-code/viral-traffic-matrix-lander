@@ -313,6 +313,59 @@ function renderArticle(article, options = {}) {
   <meta property="og:url" content="https://${reqHost}/guides/${article.slug}">
   <meta name="twitter:card" content="summary_large_image">
 
+  <!-- Schema.org Structured Data for Googlebot Rapid Indexing -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "${article.title.replace(/"/g, '\\"')}",
+    "description": "${article.subtitle.replace(/"/g, '\\"')}",
+    "image": ["https://${reqHost}${article.thumbnailUrl}"],
+    "datePublished": "${article.publishedAt || '2026-11-04T00:00:00Z'}",
+    "dateModified": "${new Date().toISOString()}",
+    "author": {
+      "@type": "Organization",
+      "name": "Smart Home Resilience Engineering Desk",
+      "url": "https://www.youtube.com/channel/UCy9DLRRHSPQ42do2q8Ookxw"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Smart Home Resilience",
+      "url": "https://${reqHost}/guides"
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://${reqHost}/guides/${article.slug}"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://${reqHost}/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Resilience Guides",
+        "item": "https://${reqHost}/guides"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": "${article.title.replace(/"/g, '\\"')}",
+        "item": "https://${reqHost}/guides/${article.slug}"
+      }
+    ]
+  }
+  </script>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -479,6 +532,23 @@ function renderGuidesIndex(articles, options = {}) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Engineering Guides & Emergency Resilience Hub | Smart Home Resilience</title>
   <meta name="description" content="Field-tested blueprints, electrical wiring schematics, and hardware benchmarks for self-reliant homeowners.">
+  <link rel="canonical" href="https://${reqHost}/guides">
+
+  <!-- Schema.org CollectionPage for Hub Indexing -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Engineering Guides & Emergency Resilience Hub",
+    "description": "Field-tested blueprints, electrical wiring schematics, and hardware benchmarks for self-reliant homeowners.",
+    "url": "https://${reqHost}/guides",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Smart Home Resilience",
+      "url": "https://${reqHost}/guides"
+    }
+  }
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
