@@ -217,15 +217,27 @@
             3-Part Problem Video Series & Social Rotation
           </h2>
           <p class="text-xs sm:text-sm text-slate-300 max-w-2xl mt-1 leading-relaxed">
-            Every problem is attacked across 3 psychological angles (Acute Dread ➔ The Trap ➔ DIY Breakthrough) rotated into ContentStudio every 24–48h.
+            Every problem is attacked across 3 psychological angles (Acute Dread ➔ The Trap ➔ DIY Breakthrough) rotated into Postiz / ContentStudio on autopilot.
           </p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+          <div id="activeSocialProviderPill" class="px-3 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-mono-code font-bold flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
+            <span id="activeSocialProviderText">Engine: Auto</span>
+          </div>
+          <button
+            type="button"
+            id="openPostizHubBtn"
+            class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-white/10 text-white text-xs font-bold font-mono-code transition flex items-center gap-1.5 cursor-pointer shadow-md"
+            title="Manage Central Postiz Hub & Multi-Project Integration"
+          >
+            <span>🌐</span> Postiz Hub & Multi-Project
+          </button>
           <button
             type="button"
             id="advanceNextAngleBtn"
             class="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 text-white text-xs font-bold transition shadow-lg shadow-purple-500/25 whitespace-nowrap cursor-pointer flex items-center gap-1.5"
-            title="Advance and schedule the next video angle in queue to ContentStudio"
+            title="Advance and schedule the next video angle in queue"
           >
             <span>🚀</span> Advance Next Video In Rotation
           </button>
@@ -1423,6 +1435,19 @@
           return;
         }
 
+        // Update provider pill
+        const pill = document.getElementById('activeSocialProviderPill');
+        const txt = document.getElementById('activeSocialProviderText');
+        if (pill && txt) {
+          if (data.postizConfigured) {
+            pill.className = 'px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono-code font-bold flex items-center gap-1.5';
+            txt.innerHTML = `🟢 Postiz Hub (Self-Hosted)`;
+          } else {
+            pill.className = 'px-3 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-mono-code font-bold flex items-center gap-1.5';
+            txt.innerHTML = `🟣 ContentStudio (Fallback)`;
+          }
+        }
+
         const state = data.state || {};
         const anglesData = data.angles;
 
@@ -1431,6 +1456,7 @@
           const activeAngleId = currentInfo.currentAngleId || 1;
           const activeAngle = (o.angles || []).find(a => a.angleId === activeAngleId) || o.angles[0];
           const hasScheduled = Boolean(currentInfo.lastScheduledAt);
+          const provider = currentInfo.provider || data.provider || 'Auto';
 
           return `
             <div class="p-4 rounded-2xl bg-black/50 border border-purple-500/20 hover:border-purple-500/40 transition space-y-3 flex flex-col justify-between">
@@ -1440,7 +1466,7 @@
                     Cycle ${currentInfo.cycle || 1} • Angle ${activeAngleId}/3
                   </span>
                   <span class="px-2 py-0.5 rounded-full text-[10px] font-mono-code ${hasScheduled ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-slate-800 text-slate-400'}">
-                    ${hasScheduled ? 'Scheduled' : 'Queued'}
+                    ${hasScheduled ? (provider + ' Scheduled') : 'Queued'}
                   </span>
                 </div>
                 <h4 class="text-sm font-bold text-white leading-snug truncate" title="${o.name}">${o.name}</h4>
@@ -1515,6 +1541,117 @@
       }
     });
 
+    // ==========================================
+    // 🌐 Central Postiz Hub & Multi-Project Logic
+    // ==========================================
+    const postizModal = document.getElementById('postizHubModal');
+    const openPostizBtn = document.getElementById('openPostizHubBtn');
+    const closePostizBtn = document.getElementById('closePostizHubBtn');
+
+    openPostizBtn?.addEventListener('click', () => {
+      postizModal?.classList.remove('hidden');
+      loadPostizDetails();
+    });
+
+    closePostizBtn?.addEventListener('click', () => {
+      postizModal?.classList.add('hidden');
+    });
+
+    async function loadPostizDetails() {
+      const statusEl = document.getElementById('postizStatusIndicator');
+      const urlEl = document.getElementById('postizBaseUrlText');
+      const accountsList = document.getElementById('postizAccountsList');
+      if (!statusEl) return;
+
+      statusEl.innerHTML = '<span class="text-slate-400">Inspecting Postiz service...</span>';
+      try {
+        const res = await fetch('/api/postiz/status');
+        const data = await res.json();
+
+        if (urlEl) urlEl.innerText = data.baseUrl || 'https://social.aisimplesystem.com';
+
+        if (data.configured) {
+          statusEl.innerHTML = `
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-mono-code text-xs font-bold">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              Connected & Active (${data.accountCount || 0} Channels Detected)
+            </span>
+          `;
+        } else {
+          statusEl.innerHTML = `
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono-code text-xs font-bold">
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+              Fallback Active (ContentStudio) • Awaiting POSTIZ_API_KEY
+            </span>
+          `;
+        }
+
+        if (accountsList) {
+          if (data.accounts && data.accounts.length > 0) {
+            accountsList.innerHTML = data.accounts.map(acc => `
+              <div class="p-2.5 rounded-xl bg-slate-900 border border-white/10 flex items-center justify-between text-xs font-mono-code">
+                <span class="text-white font-bold">${acc.name}</span>
+                <span class="text-emerald-400 uppercase text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">${acc.platform}</span>
+              </div>
+            `).join('');
+          } else {
+            accountsList.innerHTML = `
+              <div class="text-slate-400 text-xs italic p-3 rounded-xl bg-slate-900/50 border border-white/5">
+                No external channels connected yet inside Postiz. Once your Coolify container is live at <code class="text-indigo-300">${data.baseUrl || 'https://social.aisimplesystem.com'}</code>, connect YouTube, TikTok, Meta & X inside the Postiz UI.
+              </div>
+            `;
+          }
+        }
+      } catch (e) {
+        statusEl.innerHTML = `<span class="text-rose-400 text-xs">Error: ${e.message}</span>`;
+      }
+    }
+
+    document.getElementById('copyPostizSnippetBtn')?.addEventListener('click', () => {
+      const snippet = `// 1. Copy 'postiz-client.js' into your project
+// 2. Add to your project .env:
+//    POSTIZ_BASE_URL=https://social.aisimplesystem.com
+//    POSTIZ_API_KEY=pos_xxxxxxxxxxxxxxxxxxxxxxxx
+
+const postiz = require('./postiz-client');
+
+async function broadcastNewLaunch() {
+  await postiz.schedulePost({
+    text: "🔥 New update is live!",
+    videoFilePath: "./public/videos/promo.mp4",
+    projectTag: "my-other-project"
+  });
+}`;
+      navigator.clipboard.writeText(snippet);
+      alert('📋 Multi-project integration snippet copied to clipboard!');
+    });
+
+    document.getElementById('runPostizTestBtn')?.addEventListener('click', async () => {
+      const btn = document.getElementById('runPostizTestBtn');
+      const testMsg = document.getElementById('postizTestMsgInput')?.value || '';
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳</span> Sending Test Dispatch...';
+
+      try {
+        const res = await fetch('/api/postiz/test-broadcast', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: testMsg, projectTag: 'launchpad-test' })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          alert('🚀 Postiz Broadcast Dispatched Successfully!\nScheduled across connected channels.');
+        } else {
+          alert('Notice: ' + (data.error || 'Check that POSTIZ_API_KEY is configured in your container environment'));
+        }
+      } catch (e) {
+        alert('Test error: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>⚡</span> Send Test Broadcast';
+      }
+    });
+
     loadCatalysts();
     syncContinuousStatus();
     loadCadenceStatus();
@@ -1523,5 +1660,104 @@
     searchOutliers();
     syncChannels();
   </script>
+
+  <!-- Central Postiz Hub & Multi-Project Modal -->
+  <div id="postizHubModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden">
+    <div class="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl bg-slate-950 border border-purple-500/30 p-6 sm:p-8 space-y-6 shadow-2xl">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-white/10 pb-4">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 text-xs font-mono-code font-bold uppercase mb-1">
+            <span>🌐</span> CENTRAL SOCIAL DISPATCH HUB
+          </div>
+          <h3 class="text-xl sm:text-2xl font-black text-white">Postiz Multi-Project Automation</h3>
+        </div>
+        <button type="button" id="closePostizHubBtn" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-white/10 transition text-lg cursor-pointer">
+          ✕
+        </button>
+      </div>
+
+      <!-- Live Service Status Card -->
+      <div class="p-5 rounded-2xl bg-black/60 border border-white/10 space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div class="text-xs font-mono-code text-slate-400">
+            Host Domain: <span id="postizBaseUrlText" class="text-indigo-300 font-bold">https://social.aisimplesystem.com</span>
+          </div>
+          <div id="postizStatusIndicator">
+            <span class="text-xs font-mono-code text-slate-400">Loading...</span>
+          </div>
+        </div>
+        <div class="text-xs text-slate-300">
+          This single open-source stack powers automated video short scheduling for <strong>Viral Traffic Matrix</strong> and <strong>any of your other websites or apps</strong> with $0 subscription costs.
+        </div>
+      </div>
+
+      <!-- Connected Channels in Postiz -->
+      <div class="space-y-2">
+        <h4 class="text-sm font-bold text-white uppercase tracking-wider font-mono-code text-purple-300 flex items-center gap-2">
+          <span>📡</span> Connected Social Channels
+        </h4>
+        <div id="postizAccountsList" class="space-y-2">
+          <div class="text-slate-400 text-xs">Inspecting channels...</div>
+        </div>
+      </div>
+
+      <!-- Multi-Project Sharing Blueprint -->
+      <div class="p-5 rounded-2xl bg-purple-950/20 border border-purple-500/20 space-y-3">
+        <div class="flex items-center justify-between">
+          <h4 class="text-sm font-bold text-white flex items-center gap-2">
+            <span>🔌</span> How to Include Your Other Projects
+          </h4>
+          <button
+            type="button"
+            id="copyPostizSnippetBtn"
+            class="px-3 py-1.5 rounded-lg bg-purple-500/30 hover:bg-purple-500/40 text-purple-200 text-xs font-mono-code font-bold transition flex items-center gap-1 cursor-pointer"
+          >
+            <span>📋</span> Copy Code Snippet
+          </button>
+        </div>
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Every project shares the same Postiz container. In any other website or tool, simply copy <code class="text-indigo-300 bg-black/40 px-1 py-0.5 rounded">postiz-client.js</code> and invoke it with that project's tag:
+        </p>
+        <pre class="p-3 rounded-xl bg-black/80 border border-white/10 text-emerald-400 font-mono-code text-xs overflow-x-auto leading-relaxed"><code>const postiz = require('./postiz-client');
+
+// Broadcast from any of your other websites / projects:
+await postiz.schedulePost({
+  text: "🔥 Breakthrough Guide: How to deploy autonomous AI agents.",
+  videoFilePath: "./promo.mp4",
+  projectTag: "project-2" // Isolates posts per brand
+});</code></pre>
+      </div>
+
+      <!-- Quick Test Dispatch -->
+      <div class="p-5 rounded-2xl bg-black/50 border border-white/10 space-y-3">
+        <h4 class="text-sm font-bold text-white flex items-center gap-2">
+          <span>⚡</span> Quick Test Dispatch
+        </h4>
+        <div class="flex gap-2">
+          <input
+            type="text"
+            id="postizTestMsgInput"
+            value="🔥 Launchpad Test: Multi-project social dispatch working seamlessly!"
+            class="flex-1 px-4 py-2 rounded-xl bg-black/70 border border-white/10 text-white text-xs font-mono-code focus:outline-none focus:border-purple-500"
+            placeholder="Type a test broadcast message..."
+          />
+          <button
+            type="button"
+            id="runPostizTestBtn"
+            class="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 text-white text-xs font-bold font-mono-code transition cursor-pointer whitespace-nowrap"
+          >
+            <span>⚡</span> Send Test Broadcast
+          </button>
+        </div>
+      </div>
+
+      <!-- Coolify Deploy Reference -->
+      <div class="text-[11px] font-mono-code text-slate-400 bg-slate-900/60 p-3 rounded-xl border border-white/5 flex items-center justify-between">
+        <span>📦 Coolify Stack Ready: <code class="text-indigo-300">docker-compose.postiz.yml</code> (Root directory)</span>
+        <span class="text-slate-400">PostgreSQL 16 + Redis 7 + Postiz App</span>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

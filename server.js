@@ -12,6 +12,12 @@ try {
 } catch (e) {
   console.warn('[Server] Cadence engine notice:', e.message);
 }
+let postizClient = null;
+try {
+  postizClient = require('./postiz-client');
+} catch (e) {
+  console.warn('[Server] Postiz client notice:', e.message);
+}
 const { renderOfferLander } = require('./render-lander');
 const { renderArticle, renderGuidesIndex } = require('./render-article');
 const catalystEngine = require('./catalyst-engine');
@@ -1272,8 +1278,73 @@ Sitemap: https://${host}/sitemap.xml
       }
       const state = cadenceEngine.loadState();
       const angles = cadenceEngine.loadAngles();
+      const isPostizReady = postizClient ? postizClient.isConfigured() : false;
+      const provider = isPostizReady ? 'Postiz' : 'ContentStudio';
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify({ ok: true, state, angles }));
+      return res.end(JSON.stringify({
+        ok: true,
+        state,
+        angles,
+        provider,
+        postizConfigured: isPostizReady,
+        postizUrl: postizClient ? postizClient.POSTIZ_BASE_URL : null
+      }));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+  }
+
+  // GET /api/postiz/status -> Returns Postiz health, base URL, and connected channels
+  if (req.method === 'GET' && pathname === '/api/postiz/status') {
+    try {
+      if (!postizClient) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ ok: true, configured: false, error: 'Postiz client not initialized' }));
+      }
+      const configured = postizClient.isConfigured();
+      let accounts = [];
+      if (configured) {
+        accounts = await postizClient.getConnectedAccounts();
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({
+        ok: true,
+        configured,
+        baseUrl: postizClient.POSTIZ_BASE_URL,
+        accounts,
+        accountCount: accounts.length
+      }));
+    } catch (err) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({
+        ok: false,
+        configured: postizClient ? postizClient.isConfigured() : false,
+        baseUrl: postizClient ? postizClient.POSTIZ_BASE_URL : null,
+        error: err.message
+      }));
+    }
+  }
+
+  // POST /api/postiz/test-broadcast -> Quick broadcast test across all or specific connected Postiz channels
+  if (req.method === 'POST' && pathname === '/api/postiz/test-broadcast') {
+    try {
+      if (!postizClient || !postizClient.isConfigured()) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ ok: false, error: 'Postiz is not configured. Add POSTIZ_API_KEY to your environment.' }));
+      }
+      const body = await readJsonBody(req);
+      const text = body.text || '🔥 Launchpad Live Test: Multi-project social dispatch working seamlessly!';
+      const projectTag = body.projectTag || 'viral-traffic-matrix';
+
+      const result = await postizClient.schedulePost({
+        text,
+        projectTag,
+        scheduledAt: new Date(Date.now() + 180 * 1000).toISOString() // 3 mins from now
+      });
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: true, result }));
     } catch (err) {
       res.writeHead(500, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify({ ok: false, error: err.message }));
