@@ -39,6 +39,8 @@ services:
       YOUTUBE_CLIENT_SECRET: "${YOUTUBE_CLIENT_SECRET:-}"
       TIKTOK_CLIENT_ID: "${TIKTOK_CLIENT_ID:-}"
       TIKTOK_CLIENT_SECRET: "${TIKTOK_CLIENT_SECRET:-}"
+      FACEBOOK_APP_ID: "${FACEBOOK_APP_ID:-}"
+      FACEBOOK_APP_SECRET: "${FACEBOOK_APP_SECRET:-}"
     volumes:
       - postiz_config:/config/
       - postiz_uploads:/uploads/
