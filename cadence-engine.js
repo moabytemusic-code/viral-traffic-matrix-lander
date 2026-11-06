@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 const csClient = require('./contentstudio-client');
+const postizClient = require('./postiz-client');
 
 const ANGLES_FILE = fs.existsSync(path.join(__dirname, 'angles.json'))
   ? path.join(__dirname, 'angles.json')
@@ -302,16 +303,38 @@ async function advanceAndSchedule(slug) {
   }
   const scheduledAt = csClient.getNextOptimalSlot(offsetDays);
 
-  // 4. Schedule post to ContentStudio with friendly first-comment link
-  console.log(`📅 [ContentStudio] Scheduling to ${eligibleIds.length} channels for ${scheduledAt}...`);
-  const schedRes = await csClient.schedulePostWithFirstComment({
-    text: angle.postText,
-    videoFilePath: videoPath,
-    title: angle.title,
-    accountIds: eligibleIds,
-    scheduledAt,
-    firstCommentMessage: angle.firstComment
-  });
+  // 4. Schedule post via Postiz (if configured) or fallback to ContentStudio
+  let schedRes = null;
+  let providerName = 'ContentStudio';
+
+  if (postizClient.isConfigured()) {
+    try {
+      console.log(`📅 [Postiz] Scheduling via self-hosted Postiz for ${scheduledAt}...`);
+      schedRes = await postizClient.schedulePost({
+        text: angle.postText,
+        videoFilePath: videoPath,
+        title: angle.title,
+        scheduledAt,
+        firstCommentMessage: angle.firstComment,
+        projectTag: slug
+      });
+      providerName = 'Postiz';
+    } catch (postizErr) {
+      console.warn(`⚠️ [Cadence Engine] Postiz attempt note: ${postizErr.message} (Using ContentStudio fallback)`);
+    }
+  }
+
+  if (!schedRes) {
+    console.log(`📅 [ContentStudio] Scheduling to ${eligibleIds.length} channels for ${scheduledAt}...`);
+    schedRes = await csClient.schedulePostWithFirstComment({
+      text: angle.postText,
+      videoFilePath: videoPath,
+      title: angle.title,
+      accountIds: eligibleIds,
+      scheduledAt,
+      firstCommentMessage: angle.firstComment
+    });
+  }
 
   // 5. Update state
   state[slug] = {
@@ -319,7 +342,8 @@ async function advanceAndSchedule(slug) {
     cycle: nextCycle,
     lastScheduledAt: scheduledAt,
     lastPostId: schedRes.data?.id,
-    lastPostUrl: schedRes.data?.post_url,
+    lastPostUrl: schedRes.data?.post_url || (providerName === 'Postiz' ? `${postizClient.POSTIZ_BASE_URL}` : null),
+    provider: providerName,
     angleTitle: angle.title
   };
   saveState(state);

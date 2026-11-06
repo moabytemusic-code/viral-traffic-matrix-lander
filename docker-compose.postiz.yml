@@ -1,0 +1,87 @@
+version: '3.8'
+
+# ==============================================================================
+# Centralized Postiz Social Media Automation Stack for Coolify
+# Can be shared across ALL of your projects (Viral Traffic Matrix, client apps, etc.)
+# Host this at a domain like: https://postiz.aisimplesystem.com or https://social.aisimplesystem.com
+# ==============================================================================
+
+services:
+  postiz:
+    image: ghcr.io/gitroomhq/postiz-app:latest
+    container_name: postiz-app
+    restart: always
+    environment:
+      # Set this to your public domain mapped in Coolify (e.g. https://social.aisimplesystem.com)
+      MAIN_URL: "${MAIN_URL:-https://social.aisimplesystem.com}"
+      FRONTEND_URL: "${FRONTEND_URL:-https://social.aisimplesystem.com}"
+      NEXT_PUBLIC_BACKEND_URL: "${MAIN_URL:-https://social.aisimplesystem.com}/api"
+      
+      # Secure JWT Secret (Coolify will generate or you can replace with random 32+ char string)
+      JWT_SECRET: "${JWT_SECRET:-super_secret_jwt_postiz_token_key_aisimplesystem_2026}"
+      
+      # Internal Database Connections (managed by docker network)
+      DATABASE_URL: "postgresql://postiz:postiz_secure_pass_2026@postiz-postgres:5432/postiz"
+      REDIS_URL: "redis://postiz-redis:6379"
+      BACKEND_INTERNAL_URL: "http://localhost:3000"
+      
+      # Core Settings
+      IS_GENERAL: "true"
+      STORAGE_PROVIDER: "local"
+      UPLOAD_DIRECTORY: "/uploads"
+      NEXT_PUBLIC_UPLOAD_DIRECTORY: "/uploads"
+    volumes:
+      - postiz_config:/config/
+      - postiz_uploads:/uploads/
+    depends_on:
+      postiz-postgres:
+        condition: service_healthy
+      postiz-redis:
+        condition: service_healthy
+    networks:
+      - postiz-network
+    ports:
+      - "5000:3000"
+
+  postiz-postgres:
+    image: postgres:16-alpine
+    container_name: postiz-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postiz
+      POSTGRES_PASSWORD: postiz_secure_pass_2026
+      POSTGRES_DB: postiz
+    volumes:
+      - postiz_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postiz"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - postiz-network
+
+  postiz-redis:
+    image: redis:7-alpine
+    container_name: postiz-redis
+    restart: always
+    command: redis-server --appendonly yes
+    volumes:
+      - postiz_redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - postiz-network
+
+volumes:
+  postiz_config:
+  postiz_uploads:
+  postiz_pgdata:
+  postiz_redisdata:
+
+networks:
+  postiz-network:
+    driver: bridge
