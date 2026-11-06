@@ -2,36 +2,37 @@ version: '3.8'
 
 # ==============================================================================
 # Centralized Postiz Social Media Automation Stack for Coolify
-# Can be shared across ALL of your projects (Viral Traffic Matrix, client apps, etc.)
-# Host this at a domain like: https://postiz.aisimplesystem.com or https://social.aisimplesystem.com
+# Compatible with Postiz latest (Includes lightweight Temporal on SQLite)
+# Serves: https://social.aisimplesystem.com
 # ==============================================================================
 
 services:
   postiz:
-    image: ghcr.io/gitroomhq/postiz-app:2.11.3
+    image: ghcr.io/gitroomhq/postiz-app:latest
     container_name: postiz-app
     restart: always
     environment:
-      # Set this to your public domain mapped in Coolify (e.g. https://social.aisimplesystem.com)
-      MAIN_URL: "${MAIN_URL:-https://social.aisimplesystem.com}"
-      FRONTEND_URL: "${FRONTEND_URL:-https://social.aisimplesystem.com}"
-      NEXT_PUBLIC_BACKEND_URL: "${MAIN_URL:-https://social.aisimplesystem.com}/api"
-      PORT: "3000"
-      
-      # Secure JWT Secret
-      JWT_SECRET: "${JWT_SECRET:-super_secret_jwt_postiz_token_key_aisimplesystem_2026}"
-      
-      # Internal Database Connections (PostgreSQL + Redis BullMQ - No Temporal required)
-      DATABASE_URL: "postgresql://postiz:postiz_secure_pass_2026@postiz-postgres:5432/postiz?schema=public"
-      REDIS_URL: "redis://postiz-redis:6379"
-      BACKEND_INTERNAL_URL: "http://localhost:3000"
+      # Public Domains
+      MAIN_URL: "https://social.aisimplesystem.com"
+      FRONTEND_URL: "https://social.aisimplesystem.com"
+      NEXT_PUBLIC_BACKEND_URL: "https://social.aisimplesystem.com/api"
       
       # Core Settings
+      PORT: "3000"
+      JWT_SECRET: "super_secret_jwt_postiz_token_key_aisimplesystem_2026"
       IS_GENERAL: "true"
       DISABLE_REGISTRATION: "false"
+      
+      # Storage Settings
       STORAGE_PROVIDER: "local"
       UPLOAD_DIRECTORY: "/uploads"
       NEXT_PUBLIC_UPLOAD_DIRECTORY: "/uploads"
+      
+      # Internal Service Connections
+      DATABASE_URL: "postgresql://postiz:postiz_secure_pass_2026@postiz-postgres:5432/postiz?schema=public"
+      REDIS_URL: "redis://postiz-redis:6379"
+      BACKEND_INTERNAL_URL: "http://localhost:3000"
+      TEMPORAL_ADDRESS: "temporal:7233"
     volumes:
       - postiz_config:/config/
       - postiz_uploads:/uploads/
@@ -40,10 +41,25 @@ services:
         condition: service_healthy
       postiz-redis:
         condition: service_healthy
+      temporal:
+        condition: service_started
     networks:
       - postiz-network
     ports:
       - "3000:3000"
+      - "5000:5000"
+
+  temporal:
+    image: temporalio/temporal:latest
+    container_name: postiz-temporal
+    restart: always
+    command: ["server", "start-dev", "--ip", "0.0.0.0", "--db-filename", "/data/temporal.db"]
+    volumes:
+      - postiz_temporal_data:/data
+    networks:
+      - postiz-network
+    expose:
+      - 7233
 
   postiz-postgres:
     image: postgres:16-alpine
@@ -55,34 +71,34 @@ services:
       POSTGRES_DB: postiz
     volumes:
       - postiz_pgdata:/var/lib/postgresql/data
+    networks:
+      - postiz-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postiz"]
       interval: 5s
       timeout: 5s
       retries: 5
-    networks:
-      - postiz-network
 
   postiz-redis:
     image: redis:7-alpine
     container_name: postiz-redis
     restart: always
-    command: redis-server --appendonly yes
     volumes:
       - postiz_redisdata:/data
+    networks:
+      - postiz-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 5s
       retries: 5
-    networks:
-      - postiz-network
 
 volumes:
   postiz_config:
   postiz_uploads:
   postiz_pgdata:
   postiz_redisdata:
+  postiz_temporal_data:
 
 networks:
   postiz-network:
