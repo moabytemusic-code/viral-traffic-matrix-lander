@@ -201,18 +201,64 @@ function renderAngleVideo(slug, angleId) {
     }
   }
 
-  // 4. Universal fallback: pick any valid mp4 in VIDEOS_DIR
-  try {
-    const files = fs.readdirSync(VIDEOS_DIR).filter(f => f.endsWith('.mp4'));
-    if (files.length > 0) {
-      return path.join(VIDEOS_DIR, files[0]);
-    }
-  } catch {}
-
-  throw new Error(`No video asset found for ${slug} Angle ${angleId}`);
+  // 4. Strict Niche Guardrail: NEVER use an unrelated MP4 from another niche!
+  // If no category-specific or offer-specific video exists, fail cleanly rather than publishing wrong content.
+  throw new Error(`[Video Integrity Guardrail] No approved video asset found matching niche "${slug}" Angle ${angleId}. Random fallback prohibited.`);
 }
 
-// Dynamic account matching across all 28 ContentStudio profiles
+// Dynamic account matching across all Postiz channels (Strict Niche Isolation)
+function getEligiblePostizAccountsForOffer(accounts, slug) {
+  const s = slug.toLowerCase();
+
+  const eligible = accounts.filter((a) => {
+    if (a.validity !== 'valid') return false;
+    const name = (a.name || '').toLowerCase();
+
+    // AI Marketing / Traffic / Clicks / Visibility
+    if (s.includes('traffic') || s.includes('matrix') || s.includes('profit') || s.includes('aurum') || s.includes('clicks') || s.includes('perpetual') || s.includes('visibility') || s.startsWith('ai-') || s.includes('marketing')) {
+      return name.includes('profit') || name.includes('market') || name.includes('insider') || name.includes('aurum');
+    }
+
+    // Santa Circle / Holiday / Secret Santa
+    if (s.includes('santa')) {
+      return name.includes('santa') || name.includes('storytime') || name.includes('erica');
+    }
+    // Kids / Storytime
+    if (s.includes('story') || s.includes('kid')) {
+      return name.includes('storytime') || name.includes('erica');
+    }
+    // Dog / Pet Enrichment (explicit word boundary to avoid matching "perpetual")
+    if (s.includes('dog') || s.includes('canine') || s.includes('puppy') || /(^|-)pet(-|$)/.test(s)) {
+      return name.includes('dog') || name.includes('enrichment');
+    }
+    // Finance / Trading / Cards / Bellver / Crypto / Wealth
+    if (s.includes('card') || s.includes('bellver') || s.includes('trad') || s.includes('financ') || s.includes('crypto')) {
+      return name.includes('walletwise');
+    }
+    // Mind / Sleep / Health / Yu Sleep / Liver / Tinnitus / Joints
+    if (s.includes('sleep') || s.includes('mind') || s.includes('liver') || s.includes('tinnitus') || s.includes('joint') || s.includes('gut') || s.includes('insomnia')) {
+      return name.includes('everyday mind') || name.includes('nightdocs');
+    }
+    // Power / Water / Freeze / Resilience / Home
+    if (s.includes('power') || s.includes('water') || s.includes('freeze') || s.includes('resilience') || s.includes('blackout')) {
+      return name.includes('resilience') || name.includes('science');
+    }
+    // Dedicated Freebies & Deals
+    if (s.includes('freebie') || s.includes('deal') || s.includes('glitch')) {
+      return name.includes('freebie');
+    }
+    // Music / Delta Blues / Raybo Williams
+    if (s.includes('raybo') || s.includes('music') || s.includes('blues')) {
+      return name.includes('raybo');
+    }
+
+    return false;
+  });
+
+  return eligible;
+}
+
+// Dynamic account matching across all ContentStudio profiles (Strict Niche Isolation)
 function getEligibleAccountsForOffer(csAccounts, slug) {
   const s = slug.toLowerCase();
 
@@ -224,37 +270,30 @@ function getEligibleAccountsForOffer(csAccounts, slug) {
 
     // Dog / Pet
     if (s.includes('dog')) {
-      return name.includes('dog') || name.includes('enrichment') || name.includes('freebie');
+      return name.includes('dog') || name.includes('enrichment');
     }
     // Holiday / Santa
     if (s.includes('santa')) {
-      return name.includes('storytime') || name.includes('erica') || name.includes('freebie') || name.includes('everyday');
+      return name.includes('storytime') || name.includes('erica') || name.includes('santa');
     }
     // Finance / Trading / Cards
     if (s.includes('card') || s.includes('bellver') || s.includes('trad') || s.includes('financ')) {
-      return name.includes('walletwise') || name.includes('market') || name.includes('profit') || name.includes('signal');
+      return name.includes('walletwise');
     }
     // Sleep / Health / Mind
     if (s.includes('sleep')) {
-      return name.includes('everyday mind') || name.includes('freebie') || name.includes('marketing resource') || name.includes('profit');
+      return name.includes('everyday mind');
     }
     // Power / Water / Freeze / Resilience / Home
     if (s.includes('power') || s.includes('water') || s.includes('freeze') || s.includes('blackout')) {
-      return name.includes('signal') || name.includes('freebie') || name.includes('trafficpros') || name.includes('practical') || name.includes('resource') || name.includes('lead');
+      return name.includes('resilience') || name.includes('science');
     }
-
-    // Default fallback
-    return name.includes('freebie') || name.includes('signal') || name.includes('lead') || name.includes('resource') || name.includes('trafficpros');
+    // Dedicated Freebies
+    if (s.includes('freebie')) {
+      return name.includes('freebie');
+    }
+    return false;
   });
-
-  // If specific filters yielded 0, return all non-aurum valid accounts
-  if (eligible.length === 0) {
-    return csAccounts.filter((a) => {
-      if (a.validity !== 'valid') return false;
-      const name = (a.account_name || a.name || '').toLowerCase();
-      return !name.includes('aurum') && name !== 'ken davis';
-    });
-  }
 
   return eligible;
 }
@@ -282,15 +321,7 @@ async function advanceAndSchedule(slug) {
   // 1. Ensure video exists (render or use category fallback)
   const videoPath = renderAngleVideo(slug, nextAngleId);
 
-  // 2. Determine target channels based on offer
-  const csAccounts = await csClient.getConnectedAccounts();
-  const eligibleAccounts = getEligibleAccountsForOffer(csAccounts, slug);
-  const eligibleIds = eligibleAccounts.map((a) => a.id);
-  if (eligibleIds.length === 0) {
-    throw new Error(`No eligible ContentStudio channels found for ${slug}`);
-  }
-
-  // 3. Calculate next optimal peak time slot (spaced 48 hours after last post)
+  // 2. Calculate next optimal peak time slot (spaced 48 hours after last post)
   let offsetDays = 0;
   if (currentInfo.lastScheduledAt) {
     const lastDate = new Date(currentInfo.lastScheduledAt);
@@ -301,30 +332,63 @@ async function advanceAndSchedule(slug) {
       offsetDays = diffDays + 2;
     }
   }
-  const scheduledAt = csClient.getNextOptimalSlot(offsetDays);
 
-  // 4. Schedule post via Postiz (if configured) or fallback to ContentStudio
+  // 3. Schedule post via Postiz (Primary) or fallback to ContentStudio
   let schedRes = null;
   let providerName = 'ContentStudio';
+  let dispatchedChannels = [];
+  let scheduledAt = null;
+
+  // Locate best available high-CTR thumbnail (vidIQ AI or custom visual)
+  const THUMBNAILS_DIR = path.join(__dirname, 'public', 'thumbnails');
+  const thumbCandidates = [
+    path.join(THUMBNAILS_DIR, `${slug}-vidiq-thumbnail.png`),
+    path.join(THUMBNAILS_DIR, `${slug}-thumbnail.jpg`),
+    path.join(THUMBNAILS_DIR, `${slug}-thumbnail.png`),
+    path.join(THUMBNAILS_DIR, 'vidiq-water-thumbnail.png'),
+    path.join(THUMBNAILS_DIR, 'power-thumbnail.jpg')
+  ];
+  const thumbnailFilePath = thumbCandidates.find(f => fs.existsSync(f)) || null;
 
   if (postizClient.isConfigured()) {
     try {
-      console.log(`📅 [Postiz] Scheduling via self-hosted Postiz for ${scheduledAt}...`);
+      scheduledAt = postizClient.getNextOptimalSlot(offsetDays);
+      const postizAccounts = await postizClient.getConnectedAccounts();
+      const eligibleAccounts = getEligiblePostizAccountsForOffer(postizAccounts, slug);
+      const eligibleIds = eligibleAccounts.map((a) => a.id);
+
+      if (eligibleIds.length === 0) {
+        throw new Error(`[Niche Isolation Guardrail] No Postiz accounts matched for offer slug "${slug}". Scheduling skipped to protect channel integrity.`);
+      }
+
+      console.log(`📅 [Postiz] Scheduling across ${eligibleAccounts.length} matched channels for ${scheduledAt}...`);
       schedRes = await postizClient.schedulePost({
         text: angle.postText,
         videoFilePath: videoPath,
+        thumbnailFilePath,
         title: angle.title,
+        accountIds: eligibleIds,
         scheduledAt,
         firstCommentMessage: angle.firstComment,
-        projectTag: slug
+        projectTag: slug,
+        youtubeTags: angle.youtubeTags || [slug, ...(angle.features || []).map(f => f.toLowerCase())]
       });
       providerName = 'Postiz';
+      dispatchedChannels = schedRes.targets || eligibleAccounts.map((a) => `${a.name} (${a.platform})`);
     } catch (postizErr) {
       console.warn(`⚠️ [Cadence Engine] Postiz attempt note: ${postizErr.message} (Using ContentStudio fallback)`);
     }
   }
 
   if (!schedRes) {
+    scheduledAt = csClient.getNextOptimalSlot(offsetDays);
+    const csAccounts = await csClient.getConnectedAccounts();
+    const eligibleAccounts = getEligibleAccountsForOffer(csAccounts, slug);
+    const eligibleIds = eligibleAccounts.map((a) => a.id);
+    if (eligibleIds.length === 0) {
+      throw new Error(`No eligible channels found for ${slug}`);
+    }
+
     console.log(`📅 [ContentStudio] Scheduling to ${eligibleIds.length} channels for ${scheduledAt}...`);
     schedRes = await csClient.schedulePostWithFirstComment({
       text: angle.postText,
@@ -334,15 +398,16 @@ async function advanceAndSchedule(slug) {
       scheduledAt,
       firstCommentMessage: angle.firstComment
     });
+    dispatchedChannels = eligibleAccounts.map((a) => `${a.account_name} (${a.platform || a.type})`);
   }
 
-  // 5. Update state
+  // 4. Update state
   state[slug] = {
     currentAngleId: nextAngleId,
     cycle: nextCycle,
     lastScheduledAt: scheduledAt,
-    lastPostId: schedRes.data?.id,
-    lastPostUrl: schedRes.data?.post_url || (providerName === 'Postiz' ? `${postizClient.POSTIZ_BASE_URL}` : null),
+    lastPostId: schedRes.data?.id || (Array.isArray(schedRes.data) ? schedRes.data[0]?.postId : null),
+    lastPostUrl: providerName === 'Postiz' ? `${postizClient.POSTIZ_BASE_URL}/launches` : (schedRes.data?.post_url || null),
     provider: providerName,
     angleTitle: angle.title
   };
@@ -355,8 +420,8 @@ async function advanceAndSchedule(slug) {
     angleTitle: angle.title,
     cycle: nextCycle,
     scheduledAt,
-    channels: eligibleAccounts.map((a) => `${a.account_name} (${a.platform || a.type})`),
-    postUrl: schedRes.data?.post_url
+    channels: dispatchedChannels,
+    postUrl: state[slug].lastPostUrl
   };
 }
 
@@ -395,5 +460,6 @@ module.exports = {
   saveState,
   renderAngleVideo,
   advanceAndSchedule,
-  advanceNextQueuedOffer
+  advanceNextQueuedOffer,
+  getEligiblePostizAccountsForOffer
 };
