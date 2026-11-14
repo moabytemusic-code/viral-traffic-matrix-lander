@@ -71,6 +71,100 @@
       <div id="activeOffersGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </section>
 
+    <!-- ======================================================== -->
+    <!-- PREDICTION-TO-PROFIT AFFILIATE INTELLIGENCE ENGINE -->
+    <!-- ======================================================== -->
+    <section class="glass-surface rounded-3xl p-6 sm:p-8 space-y-6 border border-purple-500/40 bg-gradient-to-br from-purple-950/30 via-slate-950/90 to-indigo-950/30 shadow-2xl relative overflow-hidden">
+      <!-- Glow ambient backdrop -->
+      <div class="absolute -top-24 -right-24 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <!-- Top Header & Action Controls -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-500/40 text-purple-300 text-xs font-mono-code font-bold uppercase mb-2">
+            <span>🔮</span> PREDICTION-TO-PROFIT INTELLIGENCE
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            Prediction Market Opportunity Engine
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-300 max-w-2xl mt-1 leading-relaxed">
+            Monitors real-time Polymarket & Kalshi trading momentum, extracts genuine consumer buying hypotheses, validates against live search volume, and prepares unpublished multi-channel campaigns.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            id="scanPredictionMarketsBtn"
+            onclick="scanPredictionMarketsNow()"
+            class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 hover:brightness-110 text-white text-xs font-black transition shadow-lg shadow-purple-500/25 whitespace-nowrap cursor-pointer flex items-center gap-2"
+          >
+            <span>⚡</span> Scan Markets Now
+          </button>
+        </div>
+      </div>
+
+      <!-- Metric KPI Counter Strip -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10">
+          <span class="text-[11px] font-mono-code text-slate-400 block uppercase">Events Ingested</span>
+          <span id="polyEventsCount" class="text-2xl font-black text-white">0</span>
+        </div>
+        <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10">
+          <span class="text-[11px] font-mono-code text-slate-400 block uppercase">Ranked Opportunities</span>
+          <span id="polyOppsCount" class="text-2xl font-black text-purple-300">0</span>
+        </div>
+        <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10">
+          <span class="text-[11px] font-mono-code text-slate-400 block uppercase">Priority Candidates</span>
+          <span id="polyPriorityCount" class="text-2xl font-black text-emerald-400">0</span>
+        </div>
+        <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10">
+          <span class="text-[11px] font-mono-code text-slate-400 block uppercase">Campaign Drafts</span>
+          <span id="polyDraftsCount" class="text-2xl font-black text-indigo-300">0</span>
+        </div>
+      </div>
+
+      <!-- View Navigation Tabs -->
+      <div class="flex items-center gap-2 border-b border-white/10 pb-3 text-xs font-mono-code">
+        <button id="tabOppsBtn" type="button" onclick="switchPredictionTab('opps')" class="px-3.5 py-1.5 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold transition">
+          Ranked Opportunities (<span id="tabOppsBadge">0</span>)
+        </button>
+        <button id="tabCampaignsBtn" type="button" onclick="switchPredictionTab('campaigns')" class="px-3.5 py-1.5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10 transition">
+          Campaign Drafts Queue (<span id="tabDraftsBadge">0</span>)
+        </button>
+        <button id="tabSettingsBtn" type="button" onclick="switchPredictionTab('settings')" class="px-3.5 py-1.5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10 transition">
+          Config & Scoring Weights
+        </button>
+      </div>
+
+      <!-- Panel 1: Ranked Opportunities -->
+      <div id="predictionOppsPanel" class="space-y-4">
+        <div id="predictionOppsList" class="space-y-3">
+          <div class="p-8 text-center text-slate-400 font-mono-code text-xs">
+            Loading prediction intelligence state...
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 2: Campaign Drafts Queue -->
+      <div id="predictionCampaignsPanel" class="hidden space-y-4">
+        <div id="predictionCampaignsList" class="space-y-4"></div>
+      </div>
+
+      <!-- Panel 3: Configuration & Scoring Weights -->
+      <div id="predictionConfigPanel" class="hidden p-5 rounded-2xl bg-black/40 border border-white/10 space-y-4 text-xs font-mono-code">
+        <div class="font-bold text-white uppercase tracking-wider text-sm">Opportunity Scoring Engine Formula</div>
+        <div class="grid sm:grid-cols-2 gap-3 text-slate-300">
+          <div class="p-3 rounded-xl bg-white/5 border border-white/10">Prediction Momentum: <strong>20%</strong></div>
+          <div class="p-3 rounded-xl bg-white/5 border border-white/10">Verified Search Demand: <strong>20%</strong></div>
+          <div class="p-3 rounded-xl bg-white/5 border border-white/10">Commercial Buyer Intent: <strong>25%</strong></div>
+          <div class="p-3 rounded-xl bg-white/5 border border-white/10">Affiliate Offer Relevance: <strong>20%</strong></div>
+          <div class="p-3 rounded-xl bg-white/5 border border-white/10">Commission Economics: <strong>10%</strong></div>
+          <div class="p-3 rounded-xl bg-white/5 border border-white/10">Evidence Confidence: <strong>5%</strong></div>
+        </div>
+      </div>
+    </section>
+
     <!-- Problem-First Niche Catalyst Engine -->
     <section class="glass-surface rounded-3xl p-6 sm:p-8 space-y-6 border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-slate-950/80 to-purple-950/20 shadow-2xl">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
@@ -352,7 +446,7 @@
               <div class="flex items-center justify-between">
                 <span class="font-bold text-purple-300 flex items-center gap-1.5">
                   <span class="w-2 h-2 rounded-full bg-purple-400 animate-ping"></span>
-                  vidIQ High-Score Keywords (Click any to search 9 Figure Buddy):
+                  vidIQ Keyword Demand Intel (Ranked by Score):
                 </span>
                 <button type="button" onclick="document.getElementById('vidiqLiveResults').classList.add('hidden')" class="text-slate-400 hover:text-white text-[11px]">✕</button>
               </div>
@@ -514,35 +608,18 @@
               </div>
             </div>
 
-            <!-- ViralForge Auto-Render & Auto-Schedule Toggle -->
-            <div class="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-400/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <!-- Postiz Automated Multi-Channel Dispatch & First-Comment Link -->
+            <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-400/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <label class="flex items-start gap-3 cursor-pointer">
-                <input id="autoRenderViralForge" type="checkbox" checked class="mt-1 accent-emerald-400 w-4 h-4 rounded" />
-                <div>
-                  <div class="text-xs font-bold text-white">⚡ Auto-Render in ViralForge AI &amp; Auto-Schedule When Ready</div>
-                  <div class="text-[11px] text-slate-300">Submits directly to ViralForge SwapEngine (`Blueprint #464`), polls rendering every 20s in the background, and automatically schedules each finished video across Days 1–3 onto your selected Channel Stack.</div>
-                </div>
-              </label>
-              <div class="flex items-center gap-2 shrink-0">
-                <span class="text-[11px] font-mono-code text-indigo-200">Videos:</span>
-                <select id="variantCount" class="px-2.5 py-1.5 rounded-lg bg-black/60 border border-white/15 text-xs text-white font-mono-code">
-                  <option value="1">1 Video</option>
-                  <option value="2" selected>2 Videos</option>
-                  <option value="3">3 Videos</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- ContentStudio Auto-Publish & First-Comment Affiliate Link -->
-            <div class="p-4 rounded-2xl bg-sky-500/10 border border-sky-400/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <label class="flex items-start gap-3 cursor-pointer">
-                <input id="autoContentStudio" type="checkbox" checked class="mt-1 accent-sky-400 w-4 h-4 rounded" />
+                <input id="autoPostiz" type="checkbox" checked class="mt-1 accent-emerald-400 w-4 h-4 rounded" />
                 <div>
                   <div class="text-xs font-bold text-white flex items-center gap-2">
-                    <span>💬 ContentStudio Auto-Publish + First-Comment Affiliate Link</span>
-                    <span class="px-2 py-0.5 rounded-full text-[9px] font-mono-code bg-sky-400/20 text-sky-300 border border-sky-400/40">API Connected</span>
+                    <span>📡 Postiz Automated Multi-Channel Dispatch + First-Comment Link</span>
+                    <span class="px-2 py-0.5 rounded-full text-[9px] font-mono-code bg-emerald-400/20 text-emerald-300 border border-emerald-400/40">Self-Hosted Active</span>
                   </div>
-                  <div class="text-[11px] text-slate-300">Automatically dispatches completed video shorts to your connected ContentStudio channels (Market Ranger FB, AI Simple System YT, System &amp; Signal YT, Smart Hustler Marketing) and drops your affiliate/offer link in the <strong>First Comment</strong> for max reach.</div>
+                  <div class="text-[11px] text-slate-300 mt-1">
+                    Automatically syncs and schedules across your connected Postiz channels (YouTube, TikTok, Facebook Pages) on <a href="https://social.aisimplesystem.com" target="_blank" class="underline text-emerald-300">social.aisimplesystem.com</a> and automatically drops your offer link in the <strong>First Comment</strong> for maximum reach.
+                  </div>
                 </div>
               </label>
             </div>
@@ -554,7 +631,7 @@
               type="submit"
               class="cta-beam w-full py-4 px-6 rounded-2xl font-display font-bold text-sm text-white flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>🚀 Launch Lander + Brevo 4-Day Drip + Auto-Render &amp; Schedule in ViralForge</span>
+              <span>🚀 Launch Lander + Brevo 4-Day Drip + Postiz Multi-Channel Sync</span>
             </button>
           </form>
         </div>
@@ -667,17 +744,22 @@
         const res = await fetch(`/api/vidiq/research?keyword=${encodeURIComponent(kw)}`);
         const data = await res.json();
         if (data.ok && Array.isArray(data.related) && data.related.length > 0) {
-          list.innerHTML = data.related.map(k => `
+          const sorted = [...data.related].sort((a,b) => (b.overallScore || 0) - (a.overallScore || 0));
+          list.innerHTML = sorted.map(k => {
+            const score = k.overallScore || 0;
+            const scoreColor = score >= 50 ? 'text-emerald-400 border-emerald-500/30' : (score > 20 ? 'text-amber-400 border-amber-500/30' : 'text-slate-400 border-white/10 opacity-60');
+            const badgeLabel = score >= 50 ? '🔥 High Demand' : (score > 0 ? '⚡ Low/Moderate' : '⚠️ Zero Score');
+            return `
             <button
               type="button"
               onclick="document.getElementById('nfbQuery').value = '${k.keyword.replace(/'/g, "\\'")}'; searchOutliers();"
-              class="px-2.5 py-1 rounded-lg bg-black/60 hover:bg-purple-600/30 border border-purple-400/30 text-[11px] text-purple-200 cursor-pointer transition text-left"
+              class="px-2.5 py-1 rounded-lg bg-black/60 hover:bg-purple-600/30 border ${scoreColor} text-[11px] text-purple-200 cursor-pointer transition text-left flex items-center gap-1.5"
             >
               <span class="font-bold">${k.keyword}</span>
-              <span class="ml-1 text-[10px] text-emerald-400 font-mono-code">Score: ${k.overallScore}</span>
-              <span class="text-[10px] text-slate-400">(${k.monthlySearches} searches/mo)</span>
+              <span class="ml-1 text-[10px] font-mono-code ${score >= 50 ? 'text-emerald-400' : 'text-slate-400'}">Score: ${score} (${badgeLabel})</span>
+              <span class="text-[10px] text-slate-400">(${k.monthlySearches || '<750'} searches/mo)</span>
             </button>
-          `).join('');
+          `}).join('');
         } else {
           list.innerHTML = `<span class="text-slate-400">No related keywords found for "${kw}".</span>`;
         }
@@ -883,9 +965,7 @@
           landerArchetype: getVal('landerArchetype', 'matrix'),
           landerTheme: getVal('landerTheme', 'emerald'),
           outlierId: getVal('selectedOutlierId'),
-          autoRenderViralForge: document.getElementById('autoRenderViralForge')?.checked ?? true,
-          autoContentStudio: document.getElementById('autoContentStudio')?.checked ?? true,
-          variantCount: Number(getVal('variantCount', '2'))
+          autoPostiz: document.getElementById('autoPostiz')?.checked ?? true
         };
 
         const res = await fetch('/api/launch-offer', {
@@ -1241,10 +1321,13 @@
       logList.innerHTML = '<div class="text-emerald-400">📡 Scanning for highest scoring human problems with vidIQ Overall Score 60+...</div>';
 
       try {
+        const activeCat = allCatalysts[activeCatalystId];
+        const payload = activeCat ? { catalystKey: activeCatalystId, category: activeCat.badge || activeCat.title, seed: activeCat.title } : {};
+
         const res = await fetch('/api/catalyst/autopilot', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({})
+          body: JSON.stringify(payload)
         });
         const data = await res.json();
 
@@ -1659,6 +1742,214 @@ async function broadcastNewLaunch() {
     loadOffers();
     searchOutliers();
     syncChannels();
+    loadPredictionState();
+
+    // ==========================================
+    // PREDICTION-TO-PROFIT CLIENT LOGIC
+    // ==========================================
+    let predictionData = { opportunities: [], campaignDrafts: [] };
+
+    async function loadPredictionState() {
+      try {
+        const res = await fetch('/api/prediction/state');
+        const json = await res.json();
+        if (json.ok && json.state) {
+          predictionData = json.state;
+          renderPredictionOverview();
+          renderPredictionOpps();
+          renderPredictionDrafts();
+        }
+      } catch (err) {
+        console.error('Failed to load prediction state:', err);
+      }
+    }
+
+    function renderPredictionOverview() {
+      document.getElementById('polyEventsCount').textContent = predictionData.totalEventsIngested || (predictionData.opportunities ? predictionData.opportunities.length : 0);
+      document.getElementById('polyOppsCount').textContent = predictionData.opportunities ? predictionData.opportunities.length : 0;
+      document.getElementById('polyPriorityCount').textContent = predictionData.priorityOpportunitiesCount || 0;
+      document.getElementById('polyDraftsCount').textContent = predictionData.campaignDrafts ? predictionData.campaignDrafts.length : 0;
+      document.getElementById('tabOppsBadge').textContent = predictionData.opportunities ? predictionData.opportunities.length : 0;
+      document.getElementById('tabDraftsBadge').textContent = predictionData.campaignDrafts ? predictionData.campaignDrafts.length : 0;
+    }
+
+    function switchPredictionTab(tab) {
+      document.getElementById('predictionOppsPanel').classList.toggle('hidden', tab !== 'opps');
+      document.getElementById('predictionCampaignsPanel').classList.toggle('hidden', tab !== 'campaigns');
+      document.getElementById('predictionConfigPanel').classList.toggle('hidden', tab !== 'settings');
+
+      document.getElementById('tabOppsBtn').className = tab === 'opps'
+        ? 'px-3.5 py-1.5 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold transition'
+        : 'px-3.5 py-1.5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10 transition';
+
+      document.getElementById('tabCampaignsBtn').className = tab === 'campaigns'
+        ? 'px-3.5 py-1.5 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold transition'
+        : 'px-3.5 py-1.5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10 transition';
+
+      document.getElementById('tabSettingsBtn').className = tab === 'settings'
+        ? 'px-3.5 py-1.5 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold transition'
+        : 'px-3.5 py-1.5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10 transition';
+    }
+
+    function renderPredictionOpps() {
+      const container = document.getElementById('predictionOppsList');
+      if (!predictionData.opportunities || predictionData.opportunities.length === 0) {
+        container.innerHTML = `<div class="p-8 text-center text-slate-400 font-mono-code text-xs">No active prediction opportunities recorded yet. Click 'Scan Markets Now' above.</div>`;
+        return;
+      }
+
+      container.innerHTML = predictionData.opportunities.map(opp => {
+        const e = opp.event;
+        const h = opp.hypothesis;
+        const m = opp.offerMatch;
+        const scr = opp.scoreResult;
+        const isPriority = scr.tier === 'PRIORITY';
+        const isStrong = scr.tier === 'STRONG';
+        const tierBadge = isPriority ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : (isStrong ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40' : 'bg-purple-500/20 text-purple-300 border-purple-500/40');
+        const statusBadge = opp.status === 'APPROVED' ? 'bg-emerald-500 text-black font-black' : (opp.status === 'REJECTED' ? 'bg-rose-500 text-white' : 'bg-amber-500/20 text-amber-300 border border-amber-500/40');
+
+        return `
+          <div class="p-5 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-purple-500/30 transition space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-mono-code font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${tierBadge} border">
+                    ${scr.tier} OPPORTUNITY • ${scr.opportunityScore}/100
+                  </span>
+                  <span class="text-xs font-mono-code px-2 py-0.5 rounded-full ${statusBadge}">
+                    ${opp.status}
+                  </span>
+                </div>
+                <h3 class="text-base font-bold text-white mt-1">${e.title}</h3>
+                <div class="text-[11px] font-mono-code text-slate-400">
+                  Category: <span class="text-slate-200">${e.category}</span> • 24h Vol: <span class="text-emerald-400">$${(e.volume24h || 0).toLocaleString()}</span> • Market Odds: <span class="text-purple-300">${e.probability}%</span>
+                </div>
+              </div>
+
+              <!-- Admin Action Buttons -->
+              <div class="flex items-center gap-2 flex-shrink-0">
+                <button type="button" onclick="reviewOpportunity('${opp.opportunityId}', 'APPROVE')" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs transition cursor-pointer shadow-sm">
+                  ✓ Approve
+                </button>
+                <button type="button" onclick="reviewOpportunity('${opp.opportunityId}', 'REJECT')" class="px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-xs font-bold transition cursor-pointer">
+                  ✕ Reject
+                </button>
+              </div>
+            </div>
+
+            <!-- Buyer Intent & Matched Offer Grid -->
+            <div class="grid sm:grid-cols-2 gap-3 text-xs font-mono-code">
+              <div class="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-1.5">
+                <span class="text-[10px] text-purple-400 uppercase font-bold block">Buyer Intent Discovery</span>
+                <div><strong>Audience:</strong> ${h.affectedConsumerGroup}</div>
+                <div><strong>Core Problem:</strong> ${h.coreProblem}</div>
+                <div><strong>Demand Status:</strong> <span class="text-emerald-400 font-bold">${h.verificationStatus}</span> (Query: "${h.demandEvidence?.queryPhrase || 'N/A'}")</div>
+              </div>
+              <div class="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-1.5">
+                <span class="text-[10px] text-emerald-400 uppercase font-bold block">Matched Affiliate Product</span>
+                <div><strong>Product:</strong> ${m.productName}</div>
+                <div><strong>Network:</strong> ${m.network}</div>
+                <div><strong>Economics:</strong> ${m.commissionStructure}</div>
+              </div>
+            </div>
+
+            <div class="text-[11px] font-mono-code text-slate-400 italic">
+              Audit Breakdown: ${scr.explanation}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderPredictionDrafts() {
+      const container = document.getElementById('predictionCampaignsList');
+      if (!predictionData.campaignDrafts || predictionData.campaignDrafts.length === 0) {
+        container.innerHTML = `<div class="p-8 text-center text-slate-400 font-mono-code text-xs">No unpublished campaign drafts queued.</div>`;
+        return;
+      }
+
+      container.innerHTML = predictionData.campaignDrafts.map((draft, idx) => {
+        const short1 = draft.shortsScripts?.[0] || {};
+        const email1 = draft.emailSequence?.[0] || {};
+        return `
+          <div class="p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-4">
+            <div class="flex items-center justify-between border-b border-white/10 pb-3">
+              <div>
+                <span class="text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 uppercase font-bold">
+                  Campaign Draft #${idx + 1} • Status: ${draft.status}
+                </span>
+                <h3 class="text-base font-bold text-white mt-1">${draft.title}</h3>
+                <div class="text-[11px] font-mono-code text-slate-400">Target Keyword: <span class="text-emerald-400 font-bold">${draft.seoStrategy.primaryKeyword}</span></div>
+              </div>
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-3 text-xs font-mono-code">
+              <div class="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-2">
+                <span class="text-[10px] text-indigo-400 uppercase font-bold block">YouTube Short / TikTok Script Angle</span>
+                <div class="text-slate-200 font-bold">"${short1.scriptHook || ''}"</div>
+                <div class="text-slate-400 text-[11px] leading-relaxed">${short1.scriptBody || ''}</div>
+                <div class="text-emerald-400 font-bold text-[11px]">CTA: ${short1.scriptCta || ''}</div>
+              </div>
+              <div class="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-2">
+                <span class="text-[10px] text-amber-400 uppercase font-bold block">4-Day Email Drip Preview (Day 1)</span>
+                <div class="text-slate-200 font-bold">Subject: ${email1.subject || ''}</div>
+                <div class="text-slate-400 text-[11px] leading-relaxed whitespace-pre-line">${email1.body || ''}</div>
+              </div>
+            </div>
+
+            <div class="p-3 rounded-xl bg-purple-950/20 border border-purple-500/20 text-[11px] font-mono-code text-slate-400 flex items-center justify-between">
+              <span>🛡️ FTC Disclosure: ${draft.ftcDisclosure}</span>
+              <span class="text-emerald-400">Tracking: santa101-20 + kmtwarrior</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function reviewOpportunity(opportunityId, action) {
+      try {
+        const res = await fetch('/api/prediction/review', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ opportunityId, action, notes: `Reviewed by admin at ${new Date().toISOString()}` })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          await loadPredictionState();
+        } else {
+          alert('Error updating review: ' + data.error);
+        }
+      } catch (err) {
+        alert('Review request failed: ' + err.message);
+      }
+    }
+
+    async function scanPredictionMarketsNow() {
+      const btn = document.getElementById('scanPredictionMarketsBtn');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<span>⏳</span> Scanning Live Markets...`;
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/prediction/scan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ limit: 15, processLimit: 6 })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          await loadPredictionState();
+          alert('Scan complete! Fresh prediction intelligence opportunities and campaign drafts ready for review.');
+        } else {
+          alert('Scan error: ' + data.error);
+        }
+      } catch (err) {
+        alert('Scan request failed: ' + err.message);
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }
   </script>
 
   <!-- Central Postiz Hub & Multi-Project Modal -->

@@ -20,10 +20,48 @@ try {
 }
 const { renderOfferLander } = require('./render-lander');
 const { renderArticle, renderGuidesIndex } = require('./render-article');
+const { renderBioPage } = require('./render-bio');
+const { renderPrivacyPolicy, renderTermsOfService } = require('./legal-pages');
 const catalystEngine = require('./catalyst-engine');
 const autonomousCatalyst = require('./autonomous-catalyst');
 const continuousDaemon = require('./continuous-daemon');
+const predictionPipeline = require('./prediction-pipeline');
 const ARTICLES_PATH = path.join(__dirname, 'articles.json');
+const BIOS_PATH = path.join(__dirname, 'bios.json');
+const PREDICTION_STATE_PATH = path.join(__dirname, 'prediction-state.json');
+
+function loadBios() {
+  try {
+    if (fs.existsSync(BIOS_PATH)) {
+      return JSON.parse(fs.readFileSync(BIOS_PATH, 'utf8'));
+    }
+  } catch (e) {
+    console.error('Error loading bios.json:', e);
+  }
+  return {};
+}
+
+function escapeHtml(str = '') {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function findBioBySlug(biosList, rawSlug) {
+  if (!rawSlug) return null;
+  const clean = rawSlug
+    .toLowerCase()
+    .replace(/[),.;"']+$/, '')
+    .trim();
+  if (biosList[clean]) return biosList[clean];
+  for (const bio of Object.values(biosList)) {
+    if (bio.slug === clean) return bio;
+    if (Array.isArray(bio.aliases) && bio.aliases.includes(clean)) return bio;
+  }
+  return null;
+}
 
 function loadArticles() {
   try {
@@ -80,6 +118,8 @@ const VANITY_ALIASES = {
   dog: 'dog-enrichment',
   puppy: 'dog-enrichment',
   braintraining: 'dog-enrichment',
+  'brain-training-dogs': 'dog-enrichment',
+  'dog-enrichment': 'dog-enrichment',
   ai: 'ai-vault',
   vault: 'ai-vault',
   prompts: 'ai-vault',
@@ -89,14 +129,28 @@ const VANITY_ALIASES = {
   prop: 'prop-trading',
   funded: 'prop-trading',
   power: 'home-power',
+  'blackout-power': 'home-power',
+  blackout: 'home-power',
+  'home-power': 'home-power',
   solar: 'home-power',
   offgrid: 'home-power',
   energy: 'home-power',
   battery: 'home-power',
+  water: 'offgrid-water',
+  'offgrid-water': 'offgrid-water',
+  freeze: 'winter-freeze',
+  'winter-freeze': 'winter-freeze',
   matrix: 'viral-traffic-matrix',
   viral: 'viral-traffic-matrix',
   traffic: 'viral-traffic-matrix',
-  free: 'viral-traffic-matrix'
+  free: 'viral-traffic-matrix',
+  'liver-reset': 'liver-reset',
+  liver: 'liver-reset',
+  autophagy: 'liver-reset',
+  'visceral-fat': 'liver-reset',
+  visceral: 'liver-reset',
+  'blood-sugar': 'liver-reset',
+  metabolic: 'liver-reset'
 };
 
 function resolveOfferSlug(raw) {
@@ -435,6 +489,20 @@ const server = http.createServer(async (req, res) => {
     return res.end(JSON.stringify({ status: 'ok', uptime: process.uptime() }));
   }
 
+  // GET /privacy -> TikTok, Meta & Google Developer Compliant Privacy Policy
+  if ((req.method === 'GET' || req.method === 'HEAD') && (pathname === '/privacy' || pathname === '/privacy-policy')) {
+    const host = req.headers.host || 'traffic.aisimplesystem.com';
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    return res.end(renderPrivacyPolicy(host));
+  }
+
+  // GET /terms -> TikTok, Meta & Google Developer Compliant Terms of Service
+  if ((req.method === 'GET' || req.method === 'HEAD') && (pathname === '/terms' || pathname === '/terms-of-service')) {
+    const host = req.headers.host || 'traffic.aisimplesystem.com';
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    return res.end(renderTermsOfService(host));
+  }
+
   // GET /robots.txt -> Standard Search Engine & AI Crawler Directives
   if ((req.method === 'GET' || req.method === 'HEAD') && pathname === '/robots.txt') {
     const host = req.headers.host || 'traffic.aisimplesystem.com';
@@ -494,10 +562,48 @@ Sitemap: https://${host}/sitemap.xml
       }
     }
 
+    // Include Legal & Platform Compliance Pages
+    xml += `
+  <url>
+    <loc>https://${host}/privacy</loc>
+    <lastmod>${now}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://${host}/terms</loc>
+    <lastmod>${now}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>`;
+
+    // Include Channel Links-in-Bio
+    try {
+      const biosList = loadBios();
+      for (const bSlug of Object.keys(biosList)) {
+        xml += `
+  <url>
+    <loc>https://${host}/bio/${bSlug}</loc>
+    <lastmod>${now}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+      }
+    } catch (bioErr) {
+      console.error('Error adding bios to sitemap:', bioErr);
+    }
+
     xml += `
 </urlset>`;
     res.writeHead(200, { 'Content-Type': 'application/xml; charset=utf-8' });
     return res.end(xml);
+  }
+
+  // GET /google:hash.html -> Instant Google Search Console HTML verification handler
+  if ((req.method === 'GET' || req.method === 'HEAD') && /^\/google[a-zA-Z0-9_-]+\.html$/.test(pathname)) {
+    const filename = path.basename(pathname);
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    return res.end(`google-site-verification: ${filename}`);
   }
 
   // GET /launchpad -> Serve the Offer Launchpad OS Dashboard
@@ -531,6 +637,25 @@ Sitemap: https://${host}/sitemap.xml
     return res.end('Video not found');
   }
 
+  // GET /downloads/:file -> Stream downloadable cheat sheets, PDFs, and guides
+  if ((req.method === 'GET' || req.method === 'HEAD') && pathname.startsWith('/downloads/')) {
+    const fileName = path.basename(pathname);
+    const dlFile = path.join(__dirname, 'public', 'downloads', fileName);
+    if (fs.existsSync(dlFile)) {
+      const stat = fs.statSync(dlFile);
+      const ext = path.extname(dlFile).toLowerCase();
+      const contentType = ext === '.pdf' ? 'application/pdf' : 'application/octet-stream';
+      res.writeHead(200, {
+        'Content-Type': contentType,
+        'Content-Length': stat.size,
+        'Content-Disposition': `inline; filename="${fileName}"`
+      });
+      return fs.createReadStream(dlFile).pipe(res);
+    }
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    return res.end('Download asset not found');
+  }
+
   // GET /guides -> Render Guides Hub Directory
   if ((req.method === 'GET' || req.method === 'HEAD') && (pathname === '/guides' || pathname === '/guides/')) {
     const articlesList = loadArticles();
@@ -558,6 +683,47 @@ Sitemap: https://${host}/sitemap.xml
       res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
       return res.end(`<h1>Guide Not Found</h1><p><a href="/guides">Browse All Resilience Guides</a></p>`);
     }
+  }
+
+  // GET /bio/:slug or /b/:slug or /links/:slug -> Render mobile Link-in-Bio creator hub
+  if (
+    (req.method === 'GET' || req.method === 'HEAD') &&
+    (pathname.startsWith('/bio/') ||
+      pathname.startsWith('/b/') ||
+      pathname.startsWith('/links/') ||
+      pathname === '/bio' ||
+      pathname === '/b' ||
+      pathname === '/links')
+  ) {
+    const biosList = loadBios();
+    let rawSlug = pathname
+      .replace(/^\/(bio|b|links)\/?/, '')
+      .replace(/\/$/, '')
+      .replace(/[),.;"']+$/, '')
+      .trim();
+    if (!rawSlug) {
+      // Default /bio index page
+      rawSlug = 'dog'; // fallback or show first
+    }
+    const bio = findBioBySlug(biosList, rawSlug);
+    if (bio) {
+      const host = req.headers.host || 'traffic.aisimplesystem.com';
+      const query = Object.fromEntries(parsedUrl.searchParams.entries());
+      const html = renderBioPage(bio, host, query);
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      return res.end(html);
+    }
+    res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
+    const available = Object.keys(biosList)
+      .map((k) => `<li><a href="/bio/${k}" style="color:#06b6d4">/bio/${k}</a> — ${biosList[k].channelName}</li>`)
+      .join('');
+    return res.end(`
+      <body style="background:#020617;color:#f8fafc;font-family:sans-serif;padding:40px;text-align:center">
+        <h1>Bio Page "${escapeHtml(rawSlug)}" Not Found</h1>
+        <p style="color:#94a3b8">Active creator bio hubs:</p>
+        <ul style="list-style:none;padding:0;line-height:2">${available}</ul>
+      </body>
+    `);
   }
 
   // GET /o/:slug or Friendly Short Root (e.g. /santa, /card, /sleep, /matrix) -> Render dynamic lander
@@ -695,6 +861,81 @@ Sitemap: https://${host}/sitemap.xml
     }
   }
 
+  // ==========================================
+  // PREDICTION-TO-PROFIT AFFILIATE INTELLIGENCE API
+  // ==========================================
+
+  // GET /api/prediction/state -> Return live prediction intelligence state
+  if (req.method === 'GET' && pathname === '/api/prediction/state') {
+    try {
+      if (fs.existsSync(PREDICTION_STATE_PATH)) {
+        const state = JSON.parse(fs.readFileSync(PREDICTION_STATE_PATH, 'utf8'));
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ ok: true, state }));
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: true, state: { opportunities: [], campaignDrafts: [] } }));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+  }
+
+  // POST /api/prediction/scan -> Run real-time prediction market intelligence pipeline
+  if (req.method === 'POST' && pathname === '/api/prediction/scan') {
+    try {
+      const body = await readJsonBody(req).catch(() => ({}));
+      const result = await predictionPipeline.runPredictionPipeline(body);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: true, result }));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+  }
+
+  // POST /api/prediction/review -> Admin decision on opportunity (APPROVE / REJECT / REVISION)
+  if (req.method === 'POST' && pathname === '/api/prediction/review') {
+    try {
+      const body = await readJsonBody(req);
+      const { opportunityId, action, notes } = body || {};
+      if (!opportunityId || !['APPROVE', 'REJECT', 'REVISION'].includes(action)) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ ok: false, error: 'Valid opportunityId and action required' }));
+      }
+
+      if (!fs.existsSync(PREDICTION_STATE_PATH)) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ ok: false, error: 'No prediction state found' }));
+      }
+
+      const state = JSON.parse(fs.readFileSync(PREDICTION_STATE_PATH, 'utf8'));
+      const opp = state.opportunities.find(o => o.opportunityId === opportunityId);
+      if (!opp) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ ok: false, error: 'Opportunity not found' }));
+      }
+
+      opp.status = action === 'APPROVE' ? 'APPROVED' : (action === 'REJECT' ? 'REJECTED' : 'PENDING_REVIEW');
+      opp.adminNotes = notes || null;
+      opp.reviewedAt = new Date().toISOString();
+
+      // If approved, mark associated campaign draft as APPROVED
+      const draft = state.campaignDrafts.find(d => d.opportunityId === opportunityId);
+      if (draft && action === 'APPROVE') {
+        draft.status = 'APPROVED';
+      }
+
+      fs.writeFileSync(PREDICTION_STATE_PATH, JSON.stringify(state, null, 2), 'utf8');
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: true, opportunity: opp, draft }));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+  }
+
   // GET /api/vf/job-status?slug=... -> Check live ViralForge render + auto-schedule state
   if (req.method === 'GET' && pathname === '/api/vf/job-status') {
     const slug = parsedUrl.searchParams.get('slug') || '';
@@ -719,6 +960,59 @@ Sitemap: https://${host}/sitemap.xml
       res.writeHead(200, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify({ ok: false, error: err.message }));
     }
+  }
+
+  // POST /api/vidiq/thumbnail -> Generate high-CTR YouTube thumbnail via vidIQ AI
+  if (req.method === 'POST' && pathname === '/api/vidiq/thumbnail') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', async () => {
+      try {
+        const payload = JSON.parse(body || '{}');
+        const title = payload.title || 'Secret Traffic Matrix';
+        const description = payload.description || '';
+        const userQuery = payload.userQuery || '';
+        const slug = payload.slug || 'traffic';
+        const targetFilename = `${slug}-vidiq-thumbnail.png`;
+
+        const thumb = await vidiqClient.generateThumbnail({
+          title,
+          description,
+          userQuery,
+          orientation: payload.orientation || 'landscape',
+          targetFilename
+        });
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ ok: true, ...thumb }));
+      } catch (err) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ ok: false, error: err.message }));
+      }
+    });
+    return;
+  }
+
+  // POST /api/vidiq/score-thumbnail -> Score YouTube thumbnail CTR potential
+  if (req.method === 'POST' && pathname === '/api/vidiq/score-thumbnail') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', async () => {
+      try {
+        const payload = JSON.parse(body || '{}');
+        const scoreData = await vidiqClient.scoreThumbnail({
+          title: payload.title || 'Untitled',
+          videoId: payload.videoId || 'dQw4w9WgXcQ',
+          image: payload.image
+        });
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ ok: true, ...scoreData }));
+      } catch (err) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ ok: false, error: err.message }));
+      }
+    });
+    return;
   }
 
   // GET /api/nfb/search -> Search 9 Figure Buddy Outliers via MCP
@@ -759,9 +1053,46 @@ Sitemap: https://${host}/sitemap.xml
           '144';
       } catch (_) {}
 
+      // Extract WarriorPlus affiliate ID
+      const wplusSponsorMatch = url.match(/warriorplus\.com\/o2?\/a\/([a-zA-Z0-9_-]+)/i);
+      if (wplusSponsorMatch) {
+        sponsorCode = wplusSponsorMatch[1];
+      }
+
+      // Extract ClickBank affiliate ID
+      const cbSponsorMatch = url.match(/(?:https?:\/\/)?([a-zA-Z0-9_-]+)\.([a-zA-Z0-9_-]+)\.hop\.clickbank\.net/i);
+      if (cbSponsorMatch) {
+        sponsorCode = cbSponsorMatch[1];
+      }
+
       if (url.includes('idevaffiliate.com')) {
         const idevMatch = url.match(/\/(\d+)-/);
         if (idevMatch) sponsorCode = idevMatch[1];
+      }
+
+      // Specialized preset for Perpetual Clicks (WarriorPlus hylcw0f or perpetualclicks.club)
+      if (url.includes('hylcw0f') || url.toLowerCase().includes('perpetualclicks')) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(
+          JSON.stringify({
+            ok: true,
+            title: 'Perpetual Clicks',
+            slug: 'perpetual-clicks',
+            headlinePrefix: 'Never Chase',
+            headlineGradient: 'Traffic Again...',
+            headlineSuffix: 'Put Offers in Front of Proven Buyers Daily.',
+            subheadline:
+              'Put your offers in front of verified, high-intent buyers every single day without chasing leads, burning money on solo ads, or building complex funnels.',
+            affiliateUrl: url,
+            sponsorCode: sponsorCode || 'hylcw0f',
+            landerArchetype: 'matrix',
+            landerTheme: 'emerald',
+            channelPreset: 'Marketing & Traffic (9 Channels: 5 FB Pages + YT AI Profit Lab + TikTok + X + Threads)',
+            searchKeyword: 'buyer traffic',
+            searchNiche: 'Affiliate Marketing',
+            searchTier: 'gold'
+          })
+        );
       }
 
       // Specialized preset for 5 Dollar Friday Link 31: AI Visibility Engine (144-33-3-31.html)
@@ -897,6 +1228,80 @@ Sitemap: https://${host}/sitemap.xml
         targetUrl = 'https://5dollarfriday.com/viral-traffic-matrix/';
       }
 
+      // Universal WarriorPlus redirect handler (handles cookie jar, nonce token, and 302 hop)
+      if (/warriorplus\.com\/o2?\/a\//i.test(url)) {
+        try {
+          let cookieJar = {};
+          const updateCookies = (res) => {
+            const raw = res.headers.getSetCookie ? res.headers.getSetCookie() : [res.headers.get('set-cookie')].filter(Boolean);
+            for (const c of raw) {
+              if (!c) continue;
+              const parts = c.split(';')[0].split('=');
+              if (parts[0]) cookieJar[parts[0].trim()] = parts.slice(1).join('=').trim();
+            }
+          };
+          const getCookieHeader = () => Object.entries(cookieJar).map(([k, v]) => `${k}=${v}`).join('; ');
+
+          let wpRes = await fetch(url, {
+            headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36' }
+          });
+          updateCookies(wpRes);
+          let wpHtml = await wpRes.text();
+
+          let nonceMatch = wpHtml.match(/url=['"](.*?\?nonce=.*?)['"]/i) || wpHtml.match(/content=['"][^'"]*?url=(.*?)['"]/i);
+          let nextWpUrl = url;
+          if (nonceMatch) {
+            nextWpUrl = new URL(nonceMatch[1], url).href;
+            wpRes = await fetch(nextWpUrl, {
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+                Cookie: getCookieHeader()
+              },
+              redirect: 'manual'
+            });
+            updateCookies(wpRes);
+
+            if (wpRes.status === 302 || wpRes.status === 301) {
+              const loc = wpRes.headers.get('location');
+              nextWpUrl = new URL(loc, nextWpUrl).href;
+              wpRes = await fetch(nextWpUrl, {
+                headers: {
+                  'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+                  Cookie: getCookieHeader()
+                }
+              });
+              wpHtml = await wpRes.text();
+            }
+          }
+
+          let destMatch =
+            wpHtml.match(/content=['"]\d+;\s*(https?:\/\/[^'"]+)['"]/i) ||
+            wpHtml.match(/window\.location\s*=\s*['"](https?:\/\/[^'"]+)['"]/i) ||
+            wpHtml.match(/<meta\s+property=['"]og:url['"]\s+content=['"](https?:\/\/[^'"]+)['"]/i);
+
+          if (destMatch && destMatch[1]) {
+            targetUrl = destMatch[1];
+          } else if (nextWpUrl && !nextWpUrl.includes('warriorplus.com')) {
+            targetUrl = nextWpUrl;
+          }
+        } catch (wpErr) {
+          console.warn('[WarriorPlus] Auto-resolve warning:', wpErr.message);
+        }
+      }
+
+      // Universal ClickBank HopLink resolver
+      if (/hop\.clickbank\.net/i.test(url)) {
+        try {
+          const cbRes = await fetch(url, {
+            headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36' },
+            redirect: 'follow'
+          });
+          if (cbRes.url && !cbRes.url.includes('clickbank.net')) {
+            targetUrl = cbRes.url;
+          }
+        } catch (_) {}
+      }
+
       const htmlRes = await fetch(targetUrl, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
@@ -934,6 +1339,7 @@ Sitemap: https://${host}/sitemap.xml
         html.match(/<meta\s+name=["']description["']\s+content=["'](.*?)["']/i) ||
         html.match(/<meta\s+property=["']og:description["']\s+content=["'](.*?)["']/i);
       const metaTitleMatch = html.match(/<meta\s+property=["']og:title["']\s+content=["'](.*?)["']/i);
+      const schemaNameMatch = html.match(/["']name["']\s*:\s*["']([^"']{3,100})["']/i);
 
       const clean = (s) =>
         (s || '')
@@ -941,14 +1347,35 @@ Sitemap: https://${host}/sitemap.xml
           .replace(/&#8211;/g, '-')
           .replace(/&amp;/g, '&')
           .replace(/&nbsp;/g, ' ')
+          .replace(/[\r\n\t]+/g, ' ')
           .replace(/\s+/g, ' ')
           .trim();
 
-      const candidateTexts = [...cleanHtml.matchAll(/<(?:p|div|span|h[1-6])[^>]*>([\s\S]{25,260}?)<\/(?:p|div|span|h[1-6])>/gi)]
+      const candidateTexts = [...cleanHtml.matchAll(/<(?:p|div|span|h[1-6])[^>]*>([\s\S]{20,260}?)<\/(?:p|div|span|h[1-6])>/gi)]
         .map((m) => clean(m[1]))
-        .filter((t) => t.length > 25 && !t.includes('Cookie') && !t.includes('WordPress') && !t.includes('function('));
+        .filter((t) => t.length > 20 && !t.includes('Cookie') && !t.includes('WordPress') && !t.includes('function(') && !t.includes('{') && !t.includes('}'));
 
-      const fullTitle = clean((metaTitleMatch && metaTitleMatch[1]) || (titleMatch && titleMatch[1]));
+      const headings = [...cleanHtml.matchAll(/<h[1-3][^>]*>([\s\S]*?)<\/h[1-3]>/gi)]
+        .map((m) => clean(m[1]))
+        .filter((t) => t.length > 3 && !t.includes('{') && !t.includes('}'));
+
+      let fullTitle = clean((metaTitleMatch && metaTitleMatch[1]) || (titleMatch && titleMatch[1]));
+      if (!fullTitle || fullTitle.toLowerCase() === 'home' || fullTitle.length < 3) {
+        if (schemaNameMatch && schemaNameMatch[1] && schemaNameMatch[1].length > 3 && schemaNameMatch[1].length < 60) {
+          fullTitle = clean(schemaNameMatch[1]);
+        } else {
+          try {
+            const host = new URL(targetUrl).hostname.replace(/^www\./, '').split('.')[0];
+            let brand = host.replace(/[-_]/g, ' ');
+            if (!brand.includes(' ')) {
+              brand = brand.replace(/(perpetual)(clicks)/i, '$1 $2')
+                           .replace(/(traffic)(matrix)/i, '$1 $2')
+                           .replace(/([a-z])([A-Z])/g, '$1 $2');
+            }
+            fullTitle = brand.replace(/\b\w/g, (c) => c.toUpperCase());
+          } catch (_) {}
+        }
+      }
 
       // Guard against Cloudflare challenge pages
       if (
@@ -966,11 +1393,34 @@ Sitemap: https://${host}/sitemap.xml
         );
       }
 
-      const title = (fullTitle.split(/\s+[–—|]\s+|\s+-\s+/)[0] || fullTitle).trim();
-      const headline = candidateTexts[0] || candidateTexts[1] || 'Viral Opportunity';
+      let title = (fullTitle.split(/\s+[–—|]\s+|\s+-\s+/)[0] || fullTitle).trim();
+
+      // Better headline selection (combines stacked subheadings if present)
+      let headline = '';
+      if (headings.length >= 2 && headings[0].length < 30 && headings[1].length < 40 && !headings[0].toLowerCase().includes('welcome')) {
+        headline = `${headings[0]} ${headings[1]}`.trim();
+      } else {
+        headline = headings.find((h) => h.length > 15) || candidateTexts[0] || 'Viral Opportunity';
+      }
+
+      // If title is too long or identical to headline, derive brand from domain
+      if (title.length > 40 || title.toLowerCase() === headline.toLowerCase()) {
+        try {
+          const host = new URL(targetUrl).hostname.replace(/^www\./, '').split('.')[0];
+          let brand = host.replace(/[-_]/g, ' ');
+          if (!brand.includes(' ')) {
+            brand = brand.replace(/(perpetual)(clicks)/i, '$1 $2')
+                         .replace(/(traffic)(matrix)/i, '$1 $2')
+                         .replace(/([a-z])([A-Z])/g, '$1 $2');
+          }
+          title = brand.replace(/\b\w/g, (c) => c.toUpperCase());
+        } catch (_) {}
+      }
+
       const subheadline =
         clean(metaDescMatch && metaDescMatch[1]) ||
-        candidateTexts.find((t) => t.length > 50 && t !== headline) ||
+        headings.find((h) => h !== headline && !headline.includes(h) && h.length > 20) ||
+        candidateTexts.find((t) => t.length > 40 && t !== headline) ||
         candidateTexts[1] ||
         candidateTexts[0] ||
         '';
@@ -980,35 +1430,42 @@ Sitemap: https://${host}/sitemap.xml
       let headlineGradient = headline;
       let headlineSuffix = 'Today.';
       const words = headline.split(' ');
-      if (words.length >= 6) {
+      if (words.length >= 4) {
         headlinePrefix = words.slice(0, 2).join(' ');
-        headlineGradient = words.slice(2, Math.min(words.length - 2, 8)).join(' ');
-        headlineSuffix = words.slice(Math.min(words.length - 2, 8)).join(' ');
+        headlineGradient = words.slice(2, Math.min(words.length - 1, 6)).join(' ');
+        headlineSuffix = words.slice(Math.min(words.length - 1, 6)).join(' ');
       }
 
       // Derive smart searchKeyword & searchNiche for 9 Figure Buddy & vidIQ
       const combinedText = `${title} ${headline} ${subheadline}`.toLowerCase();
-      let searchNiche = '';
+      let searchNiche = 'Tech & AI';
+      let channelPreset = 'Marketing & Traffic (9 Channels: 5 FB Pages + YT AI Profit Lab + TikTok + X + Threads)';
       if (/finance|money|crypto|invest|trade|card|bank|loan|wealth/i.test(combinedText)) {
         searchNiche = 'Personal Finance';
+        channelPreset = 'Finance & Crypto (TikTok WalletWise + YT 60x Daily + X Marketranger)';
       } else if (/health|sleep|diet|supplement|weight|fitness|wellness|doctor/i.test(combinedText)) {
         searchNiche = 'Health & Nutrition';
-      } else if (/tech|ai|software|traffic|automation|marketing|code|lead/i.test(combinedText)) {
-        searchNiche = 'Tech & AI';
+        channelPreset = 'Parenting & Kids (YT Storytime With Ms. Erica + IG)';
+      } else if (/traffic|clicks|leads|buyer|subscriber|affiliate|marketing|solo ad/i.test(combinedText)) {
+        searchNiche = 'Affiliate Marketing';
+        channelPreset = 'Marketing & Traffic (9 Channels: 5 FB Pages + YT AI Profit Lab + TikTok + X + Threads)';
       } else if (/mind|habit|psychology|discipline|success|focus/i.test(combinedText)) {
         searchNiche = 'Psychology & Self-Help';
       }
 
       // Extract 1-2 prominent non-stop words as search keyword
-      const stopWords = new Set(['the', 'and', 'for', 'with', 'this', 'that', 'from', 'your', 'you', 'get', 'how', 'why', 'what', 'free', 'best', 'more', 'all']);
+      const stopWords = new Set(['the', 'and', 'for', 'with', 'this', 'that', 'from', 'your', 'you', 'get', 'how', 'why', 'what', 'free', 'best', 'more', 'all', 'never', 'again']);
       const titleWords = title.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter((w) => w.length > 2 && !stopWords.has(w));
-      const searchKeyword = titleWords.slice(0, 2).join(' ') || 'viral';
+      const searchKeyword = titleWords.slice(0, 2).join(' ') || (searchNiche === 'Affiliate Marketing' ? 'buyer traffic' : 'viral');
+
+      const slug = (title || 'partner-offer').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
       return res.end(
         JSON.stringify({
           ok: true,
           title: title || 'Partner Offer',
+          slug,
           headline,
           headlinePrefix,
           headlineGradient,
@@ -1016,9 +1473,12 @@ Sitemap: https://${host}/sitemap.xml
           subheadline,
           affiliateUrl: url,
           sponsorCode,
+          channelPreset,
           searchKeyword,
           searchNiche,
-          searchTier: 'gold'
+          searchTier: 'gold',
+          landerArchetype: 'matrix',
+          landerTheme: 'emerald'
         })
       );
     } catch (err) {
@@ -1057,7 +1517,7 @@ Sitemap: https://${host}/sitemap.xml
         affiliateUrl: body.affiliateUrl,
         sponsorCode: body.sponsorCode || '144',
         channelPreset: body.channelPreset || 'Marketing & Traffic (9 Channels)',
-        autoContentStudio: body.autoContentStudio !== false,
+        autoPostiz: body.autoPostiz !== false,
         landerArchetype: body.landerArchetype || 'matrix',
         landerTheme: body.landerTheme || 'emerald',
         selectedAccountIds: Array.isArray(body.selectedAccountIds) ? body.selectedAccountIds : null,
