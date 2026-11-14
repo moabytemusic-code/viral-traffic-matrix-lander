@@ -16,6 +16,17 @@ function generateSqlInserts() {
 
   sqlStatements.push('BEGIN;');
 
+  // Purge any legacy demonstration or mock fixtures from PostgreSQL
+  sqlStatements.push(`
+    DELETE FROM campaign_draft WHERE opportunity_id IN ('opp_winter_storm_2026', 'opp_drought_2026');
+    DELETE FROM affiliate_opportunity WHERE id IN ('opp_winter_storm_2026', 'opp_drought_2026');
+    DELETE FROM affiliate_offer_match WHERE id IN ('mat_home_power_2026', 'mat_offgrid_water_2026');
+    DELETE FROM demand_evidence WHERE id IN ('evi_winter_storm_2026', 'evi_drought_2026');
+    DELETE FROM buyer_intent_hypothesis WHERE id IN ('hyp_winter_storm_2026', 'hyp_drought_2026');
+    DELETE FROM prediction_signal WHERE id IN ('sig_winter_storm_2026', 'sig_drought_2026');
+    DELETE FROM prediction_event WHERE id IN ('poly_winter_storm_2026', 'poly_drought_2026');
+  `);
+
   for (const opp of state.opportunities) {
     const e = opp.event;
     const s = opp.signal;

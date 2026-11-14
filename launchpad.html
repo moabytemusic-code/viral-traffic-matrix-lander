@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Offer Launchpad — 9FigureBuddy × ViralForge × Brevo Automation</title>
+  <title>Offer Launchpad: 9FigureBuddy × ViralForge × Brevo Automation</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1036,7 +1036,7 @@
 
         const out = document.getElementById('campaignOutput');
         out.classList.remove('hidden');
-        document.getElementById('outputTitle').textContent = `${data.offer.name} — Live & Provisioned!`;
+        document.getElementById('outputTitle').textContent = `${data.offer.name}: Live & Provisioned!`;
         const landerLink = document.getElementById('outputLanderUrl');
         landerLink.href = `/o/${data.offer.slug}`;
         landerLink.textContent = `Open /o/${data.offer.slug} ↗`;
@@ -1077,7 +1077,7 @@
       const badge = document.getElementById('vfMonitorBadge');
       const list = document.getElementById('vfMonitorVideos');
       box.classList.remove('hidden');
-      list.innerHTML = `<div class="text-slate-300">⏳ ViralForge Project #${projectId} started — waiting for video variants to render...</div>`;
+      list.innerHTML = `<div class="text-slate-300">⏳ ViralForge Project #${projectId} started: waiting for video variants to render...</div>`;
 
       if (vfPollInterval) clearInterval(vfPollInterval);
       vfPollInterval = setInterval(async () => {
@@ -2024,14 +2024,14 @@ async function broadcastNewLaunch() {
                     ${opp.status}
                   </span>
                   <a href="${e.sourceUrl}" target="_blank" class="text-[11px] font-mono-code text-purple-300 hover:text-purple-200 underline">
-                    Polymarket #${e.externalId} ↗
+                    Polymarket: ${e.slug || ('#' + e.externalId)} ↗
                   </a>
                 </div>
 
                 <h3 class="text-base font-bold text-white mt-1.5">${e.title}</h3>
 
                 <div class="text-[11px] font-mono-code text-slate-400 pt-0.5">
-                  Category: <span class="text-slate-200">${e.category}</span> • 24h Vol: <span class="text-emerald-400">$${(e.volume24h || 0).toLocaleString()}</span> • Acceleration: <span class="text-purple-300">${e.signal?.volumeAcceleration || 1.0}x</span> • Observed: <span class="text-slate-300">${new Date(opp.lastEvaluatedAt || opp.createdAt).toLocaleTimeString()}</span>
+                  Category: <span class="text-slate-200">${e.category}</span> • 24h Vol: <span class="text-emerald-400">$${(e.volume24h || 0).toLocaleString()}</span> • Acceleration: <span class="text-purple-300">${e.historicalComparison?.accelerationDisplay || e.signal?.accelerationDisplay || (e.signal?.volumeAcceleration ? e.signal.volumeAcceleration + 'x' : '1.0x (Unmeasured)')}</span> • Observed: <span class="text-slate-300">${new Date(opp.lastEvaluatedAt || opp.createdAt).toLocaleTimeString()}</span>
                 </div>
 
                 ${contractsRow}
@@ -2053,7 +2053,7 @@ async function broadcastNewLaunch() {
 
             <!-- Evidence Chain 2-Column Grid -->
             <div class="grid sm:grid-cols-2 gap-3 text-xs font-mono-code">
-              <!-- Left Column: Buyer Intent -->
+              <!-- Left Column: Buyer Intent & Traceable Demand Evidence -->
               <div class="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-1.5">
                 <div class="flex items-center justify-between">
                   <span class="text-[10px] text-purple-400 uppercase font-bold">1. Buyer Intent Discovery</span>
@@ -2061,16 +2061,36 @@ async function broadcastNewLaunch() {
                 </div>
                 <div><strong>Audience:</strong> ${h.affectedConsumerGroup}</div>
                 <div><strong>Core Problem:</strong> ${h.coreProblem}</div>
-                ${h.searchPhrases && h.searchPhrases.length > 0 ? `
-                  <div><strong>Search Intent:</strong> <span class="text-slate-300">"${h.searchPhrases[0]}"</span></div>
+                ${h.primarySearchPhrase ? `
+                  <div><strong>Search Intent:</strong> <span class="text-slate-300">"${h.primarySearchPhrase}"</span></div>
                 ` : ''}
+
+                <!-- Demand Evidence Provenance Block -->
+                ${h.demandEvidence ? `
+                  <div class="mt-2 pt-2 border-t border-white/5 space-y-1 text-[10px] text-slate-400">
+                    <div><strong>Provider:</strong> <span class="text-slate-300">${h.demandEvidence.provider || 'vidIQ Keyword API'}</span> (${h.demandEvidence.searchPlatform || 'YouTube Search Index'})</div>
+                    <div><strong>Geography:</strong> <span class="text-slate-300">${h.demandEvidence.geography || 'US'}</span> • <strong>Period:</strong> <span class="text-slate-300">${h.demandEvidence.measurementPeriod || '30-Day Baseline'}</span></div>
+                    <div><strong>Monthly Searches:</strong> <span class="text-emerald-400 font-bold">${h.demandEvidence.volumeDisplay || '<750'}</span> • <strong>Opportunity Score:</strong> <span class="text-purple-300">${h.demandEvidence.opportunityScore ?? 'N/A'}/100</span></div>
+                    ${h.demandEvidence.relatedTopQuery ? `
+                      <div><strong>Related High-Volume Query:</strong> "${h.demandEvidence.relatedTopQuery.keyword}" (${h.demandEvidence.relatedTopQuery.monthlySearches} searches/mo)</div>
+                    ` : ''}
+                    ${h.demandEvidence.supportingLinks?.[0] ? `
+                      <div><a href="${h.demandEvidence.supportingLinks[0].url}" target="_blank" class="text-emerald-400 underline">View Google Trends Verification ↗</a></div>
+                    ` : ''}
+                  </div>
+                ` : `
+                  <div class="mt-2 pt-2 border-t border-white/5 text-[10px] text-orange-400">
+                    ⚡ Search demand unverified: Independent search volume provider was unavailable or unmeasured.
+                  </div>
+                `}
               </div>
 
-              <!-- Right Column: Matched Offer -->
+              <!-- Right Column: Matched Offer & Form Alignment -->
               <div class="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-1.5">
                 <span class="text-[10px] text-emerald-400 uppercase font-bold block">2. Matched Affiliate Product</span>
                 ${m.approvalStatus === 'approved' ? `
                   <div><strong>Product:</strong> <a href="${m.destinationUrl}" target="_blank" class="text-emerald-300 underline font-bold">${m.productName} ↗</a></div>
+                  <div><strong>Form:</strong> <span class="text-slate-200 font-bold">${m.productForm || 'DIGITAL_COURSE'}</span> (Intent required: <span class="text-slate-300">${h.requiredProductForm || 'DIGITAL_COURSE'}</span>)</div>
                   <div><strong>Merchant:</strong> ${m.merchant} • ${m.network}</div>
                   <div><strong>Commission:</strong> <span class="text-emerald-400 font-bold">${m.commissionStructure}</span> (${m.cookieDuration})</div>
                 ` : `
@@ -2089,14 +2109,17 @@ async function broadcastNewLaunch() {
               </div>
 
               <div id="auditDrawer_${opp.opportunityId}" class="hidden mt-3 p-3 rounded-xl bg-black/60 border border-white/10 space-y-2 text-[11px] font-mono-code">
-                <div class="font-bold text-slate-300 uppercase text-[10px] pb-1 border-b border-white/10">Audit Factor Breakdown (Weights & Confidence)</div>
+                <div class="font-bold text-slate-300 uppercase text-[10px] pb-1 border-b border-white/10">Mathematically Auditable Factor Breakdown (Score × Weight = Points)</div>
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-slate-300">
-                  <div>Momentum (20%): <strong>${scr.scoreBreakdown?.momentumScore?.score ?? 'N/A'}/100</strong></div>
-                  <div>Verified Demand (20%): <strong>${scr.scoreBreakdown?.verifiedDemandScore?.score ?? 'N/A'}/100</strong></div>
-                  <div>Buyer Intent (25%): <strong>${scr.scoreBreakdown?.intentScore?.score ?? 'N/A'}/100</strong></div>
-                  <div>Product Fit (20%): <strong>${scr.scoreBreakdown?.relevanceScore?.score ?? 'N/A'}/100</strong></div>
-                  <div>Economics (10%): <strong>${scr.scoreBreakdown?.economicsScore?.score ?? 'N/A'}/100</strong></div>
-                  <div>Confidence (5%): <strong>${scr.scoreBreakdown?.confidenceScore?.score ?? 'N/A'}/100</strong></div>
+                  <div>Momentum (20%): <strong>${scr.scoreBreakdown?.momentumScore?.score ?? 'N/A'}/100</strong> (+${scr.scoreBreakdown?.momentumScore?.weighted ?? 0} pts)</div>
+                  <div>Verified Demand (20%): <strong>${scr.scoreBreakdown?.verifiedDemandScore?.score ?? 'N/A'}/100</strong> (+${scr.scoreBreakdown?.verifiedDemandScore?.weighted ?? 0} pts)</div>
+                  <div>Buyer Intent (25%): <strong>${scr.scoreBreakdown?.intentScore?.score ?? 'N/A'}/100</strong> (+${scr.scoreBreakdown?.intentScore?.weighted ?? 0} pts)</div>
+                  <div>Product Fit (20%): <strong>${scr.scoreBreakdown?.relevanceScore?.score ?? 'N/A'}/100</strong> (+${scr.scoreBreakdown?.relevanceScore?.weighted ?? 0} pts)</div>
+                  <div>Economics (10%): <strong>${scr.scoreBreakdown?.economicsScore?.score ?? 'N/A'}/100</strong> (+${scr.scoreBreakdown?.economicsScore?.weighted ?? 0} pts)</div>
+                  <div>Confidence (5%): <strong>${scr.scoreBreakdown?.confidenceScore?.score ?? 'N/A'}/100</strong> (+${scr.scoreBreakdown?.confidenceScore?.weighted ?? 0} pts)</div>
+                  <div class="pt-1.5 border-t border-white/10 text-emerald-300 font-bold col-span-2 sm:col-span-3">
+                    Exact Weighted Sum: ${scr.scoreBreakdown?.weightedSum ?? scr.opportunityScore} pts → Composite Score: ${scr.opportunityScore}/100 (${scr.tier})
+                  </div>
                 </div>
                 <div class="text-slate-400 text-[10px] pt-1">
                   Compliance Gates: Valid Source: ${scr.eligibility?.validDataSource ? '✓' : '✕'} • Category: ${scr.eligibility?.categoryCommercial ? '✓' : '✕'} • Product Match: ${scr.eligibility?.relevantProductMatch ? '✓' : '✕'}

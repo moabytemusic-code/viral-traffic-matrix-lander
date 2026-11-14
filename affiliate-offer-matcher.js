@@ -9,17 +9,18 @@ const path = require('path');
 const OFFERS_PATH = path.join(__dirname, 'offers.json');
 
 const CATEGORY_CANDIDATE_MAP = {
-  'Energy, Blackouts & Emergency Prep': ['home-power', 'winter-freeze', 'offgrid-water', 'food-preservation'],
+  'Energy, Blackouts & Emergency Prep': ['amazon-power-station', 'home-power', 'winter-freeze', 'offgrid-water', 'food-preservation'],
   'Finance, Capital & Wealth': ['prop-trading', 'perpetual-clicks', 'viral-traffic-matrix'],
   'Health, Sleep & Wellness': ['yu-sleep', 'chronic-insomnia', 'tinnitus-relief', 'joint-mobility', 'prostate-wakeups', 'gut-distension', 'liver-reset'],
   'Technology & Productivity': ['viral-traffic-matrix', 'perpetual-clicks', 'ai-vault']
 };
 
 const OFFER_PROBLEM_TRIGGERS = {
+  'amazon-power-station': ['portable power station', 'power station', 'refrigerator', 'generator', 'battery backup', 'inverter generator', 'solar generator', 'power outage', 'blackout', 'freeze'],
   'prop-trading': ['fed', 'rates', 'interest rates', 'inflation', 'trading', 'crypto', 'bitcoin', 'futures', 'forex', 'capital', 'portfolio', 'hedge', 'yield', 'macro'],
   'perpetual-clicks': ['traffic', 'clicks', 'affiliate', 'online income', 'automated income', 'leads', 'passive income', 'side hustle'],
   'viral-traffic-matrix': ['giveaway', 'funnel', 'lead generation', 'list building', 'viral traffic', 'marketing automation'],
-  'home-power': ['power', 'blackout', 'grid', 'battery', 'solar', 'generator', 'electricity', 'energy', 'outage', 'storm', 'deep freeze'],
+  'home-power': ['power', 'blackout', 'grid', 'battery', 'solar', 'generator', 'electricity', 'energy', 'outage', 'storm', 'deep freeze', 'diy power'],
   'winter-freeze': ['freeze', 'winter', 'pipes', 'burst', 'cold', 'heating', 'blizzard', 'snow'],
   'offgrid-water': ['water', 'filtration', 'well', 'drinking water', 'contamination', 'water crisis'],
   'food-preservation': ['food', 'mylar', 'food shortage', 'spoilage', 'emergency food', 'pantry'],
@@ -36,7 +37,19 @@ const OFFER_PROBLEM_TRIGGERS = {
 };
 
 const MERCHANT_SPECIFIC_TERMS = {
+  'amazon-power-station': {
+    productForm: 'PHYSICAL_HARDWARE',
+    productName: 'Portable Power Station & Solar Generator (Emergency Home Backup)',
+    merchant: 'Amazon Associates (Verified Hardware Catalog)',
+    network: 'Amazon Associates',
+    commissionStructure: '4.0% Physical Goods (24-Hour Cart Cookie)',
+    commissionRate: 4.0,
+    cookieDuration: '24 Hours Universal Cart Cookie',
+    productPurpose: 'Turnkey UL-certified lithium-iron-phosphate (LiFePO4) portable power station with pure sine wave AC inverter to power full-size refrigerators during grid blackouts.'
+  },
   'home-power': {
+    productForm: 'DIGITAL_COURSE',
+    productName: 'Enrev Power System (DIY Solar & Battery Backup)',
     merchant: 'Enrev Power Systems LLC',
     network: 'ClickBank / Amazon Dual Bridge',
     commissionStructure: '75% Digital One-Time / 4% Amazon Cart Cookie',
@@ -45,6 +58,7 @@ const MERCHANT_SPECIFIC_TERMS = {
     productPurpose: 'DIY residential solar and battery bank backup blueprints to survive multi-day power grid failures.'
   },
   'winter-freeze': {
+    productForm: 'DIGITAL_COURSE',
     merchant: 'Home Freeze Defense Labs',
     network: 'ClickBank / Amazon Dual Bridge',
     commissionStructure: '75% Digital One-Time / 4% Amazon Cart Cookie',
@@ -53,6 +67,7 @@ const MERCHANT_SPECIFIC_TERMS = {
     productPurpose: 'Low-cost thermal insulation, pipe burst prevention, and indoor cold-weather survival protocol.'
   },
   'offgrid-water': {
+    productForm: 'DIGITAL_COURSE',
     merchant: 'PureWater Field Systems',
     network: 'ClickBank / Amazon Dual Bridge',
     commissionStructure: '75% Digital One-Time / 4% Amazon Cart Cookie',
@@ -61,6 +76,8 @@ const MERCHANT_SPECIFIC_TERMS = {
     productPurpose: 'Off-grid gravitational water purification and home storage protocol for contaminated municipal systems.'
   },
   'prop-trading': {
+    productForm: 'SERVICE_EVALUATION',
+    productName: 'Funded Trader Challenge & Evaluation Pass',
     merchant: 'Funded Trader Academy Inc',
     network: 'Direct Vendor Partner',
     commissionStructure: '50% Front-End Challenge Pass Fee',
@@ -69,6 +86,8 @@ const MERCHANT_SPECIFIC_TERMS = {
     productPurpose: 'Evaluation blueprints and risk-management strategies to secure funded accounts from $50K to $150K.'
   },
   'perpetual-clicks': {
+    productForm: 'SOFTWARE_SUBSCRIPTION',
+    productName: 'Perpetual Traffic Systems Automated Engine',
     merchant: 'Perpetual Traffic Systems',
     network: 'ClickBank (Vendor hylcw0f)',
     commissionStructure: '50% Recurring Monthly Subscription',
@@ -77,6 +96,8 @@ const MERCHANT_SPECIFIC_TERMS = {
     productPurpose: 'Automated organic click-routing network that drives continuous buyer traffic without paid ad spend.'
   },
   'viral-traffic-matrix': {
+    productForm: 'SOFTWARE_SUBSCRIPTION',
+    productName: 'Viral Traffic Matrix Lead Generator',
     merchant: 'Viral Traffic Matrix Desk',
     network: 'Direct Vendor Partner (Sponsor 144)',
     commissionStructure: '50% Front-End Digital Delivery',
@@ -85,6 +106,8 @@ const MERCHANT_SPECIFIC_TERMS = {
     productPurpose: 'Complete viral giveaway lander and lead capture system with email automation integration.'
   },
   'yu-sleep': {
+    productForm: 'PHYSICAL_SUPPLEMENT',
+    productName: 'Yu Sleep Nano-Synergy Tart Cherry Botanical',
     merchant: 'Yu Sleep Laboratories',
     network: 'ClickBank (Vendor kmtwarrior)',
     commissionStructure: '75% Front-End + Lifetime Rebill Commission',
@@ -93,6 +116,8 @@ const MERCHANT_SPECIFIC_TERMS = {
     productPurpose: 'Nano-synergy tart cherry and botanicals formula targeting 3 AM cortisol spikes and sleep architecture.'
   },
   'chronic-insomnia': {
+    productForm: 'DIGITAL_COURSE',
+    productName: 'Sleep Architecture Cognitive Masterclass',
     merchant: 'Sleep Science Research Desk',
     network: 'ClickBank (Vendor kmtwarrior)',
     commissionStructure: '75% Digital Masterclass',
@@ -101,6 +126,8 @@ const MERCHANT_SPECIFIC_TERMS = {
     productPurpose: 'Cognitive and behavioral reset protocols for chronic wakefulness and sleep onset latency.'
   },
   'tinnitus-relief': {
+    productForm: 'PHYSICAL_SUPPLEMENT',
+    productName: 'Auditory Cortex Calming Botanical Complex',
     merchant: 'Auditory Cortex Wellness Labs',
     network: 'ClickBank (Vendor kmtwarrior)',
     commissionStructure: '75% Front-End + Rebill',
@@ -109,6 +136,8 @@ const MERCHANT_SPECIFIC_TERMS = {
     productPurpose: 'Neuro-calming sensory protocol and nutrient support to dampen ringing and auditory hyper-sensitivity.'
   },
   'joint-mobility': {
+    productForm: 'PHYSICAL_SUPPLEMENT',
+    productName: 'Joint Mobility Collagen & Anti-Inflammatory Complex',
     merchant: 'Joint Mobility Science Group',
     network: 'ClickBank (Vendor kmtwarrior)',
     commissionStructure: '75% Front-End + Rebill',
@@ -117,6 +146,8 @@ const MERCHANT_SPECIFIC_TERMS = {
     productPurpose: 'Targeted morning mobility routine and anti-inflammatory collagen support for knee and hip stiffness.'
   },
   'ai-vault': {
+    productForm: 'DIGITAL_COURSE',
+    productName: 'AI Automation Vault & Prompt Library',
     merchant: 'Automation Tools Collective',
     network: 'Direct Vendor Partner',
     commissionStructure: '50% Digital One-Time',
@@ -185,13 +216,18 @@ function matchAffiliateOffer(predictionEvent, buyerHypothesis, options = {}) {
 
   // 3. Semantic Relevance Scoring
   const combinedContext = `${predictionEvent.title} ${buyerHypothesis.coreProblem || ''} ${buyerHypothesis.primarySearchPhrase || ''}`.toLowerCase();
+  const requiredForm = buyerHypothesis.requiredProductForm || 'DIGITAL_COURSE';
   
   let bestMatch = null;
   let bestRelevanceScore = 0;
+  let formMismatchReason = null;
 
   for (const slug of candidateKeys) {
-    const offer = existingOffers[slug];
+    const offer = existingOffers[slug] || MERCHANT_SPECIFIC_TERMS[slug];
     if (!offer) continue;
+
+    const terms = MERCHANT_SPECIFIC_TERMS[slug] || {};
+    const candidateForm = terms.productForm || 'DIGITAL_COURSE';
 
     let score = 20; // Baseline candidate category fit
 
@@ -211,27 +247,39 @@ function matchAffiliateOffer(predictionEvent, buyerHypothesis, options = {}) {
     }
 
     // Check offer headline / purpose words
-    const headline = (offer.subheadline || offer.eyebrow || offer.name || '').toLowerCase();
+    const headline = (offer.subheadline || offer.eyebrow || offer.name || offer.productPurpose || '').toLowerCase();
     const contextWords = combinedContext.split(/\s+/).filter(w => w.length > 4);
     const matchingWords = contextWords.filter(w => headline.includes(w));
     if (matchingWords.length > 0) {
       score += Math.min(20, matchingWords.length * 8);
     }
 
+    // Product Form Alignment: Hardware vs Digital Blueprint
+    // A search for physical hardware (e.g. portable power station) cannot exceed 35% fit for a digital DIY course
+    if (requiredForm === 'PHYSICAL_HARDWARE' && candidateForm === 'DIGITAL_COURSE') {
+      score = Math.min(35, score);
+      formMismatchReason = `Candidate "${offer.name || slug}" is a digital blueprint/course, which fails to satisfy hardware purchasing intent (capped at 35% fit).`;
+    }
+
     if (score > bestRelevanceScore) {
       bestRelevanceScore = score;
-      bestMatch = { slug, offer };
+      bestMatch = { slug, offer, terms };
     }
   }
 
   // 4. Strict Relevance Gate
   if (!bestMatch || bestRelevanceScore < 60) {
+    const reason = formMismatchReason && bestRelevanceScore <= 35
+      ? formMismatchReason
+      : `Best inventory candidate scored ${bestRelevanceScore}/100, which is below the mandatory 60-point relevance threshold. Match rejected.`;
+
     return {
       matchId: null,
       offerSlug: null,
       productName: null,
       merchant: null,
       network: null,
+      productForm: null,
       affiliateUrl: null,
       destinationUrl: null,
       productPurpose: null,
@@ -243,45 +291,45 @@ function matchAffiliateOffer(predictionEvent, buyerHypothesis, options = {}) {
       approvalStatus: 'unmatched',
       sourceInventory: 'NONE',
       outcome: 'NO_SUITABLE_AFFILIATE_OFFER',
-      outcomeReason: `Best inventory candidate scored ${bestRelevanceScore}/100, which is below the mandatory 60-point relevance threshold. Match rejected.`,
+      outcomeReason: reason,
       createdAt: new Date().toISOString()
     };
   }
 
   // 5. Build Offer-Specific Record
-  const { slug, offer } = bestMatch;
-  const terms = MERCHANT_SPECIFIC_TERMS[slug] || {
-    merchant: 'Verified Partner',
-    network: 'ClickBank',
-    commissionStructure: '50% Digital Standard',
-    commissionRate: 50.0,
-    cookieDuration: '60 Days',
-    productPurpose: offer.subheadline || 'Targeted solution for consumers.'
-  };
-
+  const { slug, offer, terms } = bestMatch;
   const eventId = predictionEvent.externalId || 'gen';
   const trackingId = `poly_${eventId}`;
-  const trackingUrl = `https://traffic.aisimplesystem.com/o/${slug}?tid=${trackingId}`;
+
+  let affiliateUrl = `https://traffic.aisimplesystem.com/o/${slug}?tid=${trackingId}`;
+  let destinationUrl = `https://traffic.aisimplesystem.com/o/${slug}`;
+
+  if (slug === 'amazon-power-station') {
+    const qParam = encodeURIComponent(buyerHypothesis.primarySearchPhrase || 'portable power station refrigerator');
+    affiliateUrl = `https://www.amazon.com/s?k=${qParam}&tag=santa101-20`;
+    destinationUrl = `https://www.amazon.com/s?k=${qParam}&tag=santa101-20`;
+  }
 
   return {
     matchId: `mat_${slug}_${Date.now()}`,
     hypothesisId: buyerHypothesis.hypothesisId,
     offerSlug: slug,
-    productName: offer.name || slug,
-    merchant: terms.merchant,
-    network: terms.network,
-    affiliateUrl: trackingUrl,
-    destinationUrl: `https://traffic.aisimplesystem.com/o/${slug}`,
-    productPurpose: terms.productPurpose,
+    productName: terms.productName || offer.name || slug,
+    productForm: terms.productForm || 'DIGITAL_COURSE',
+    merchant: terms.merchant || 'Verified Partner',
+    network: terms.network || 'Direct Network',
+    affiliateUrl,
+    destinationUrl,
+    productPurpose: terms.productPurpose || offer.subheadline || 'Targeted solution for consumers.',
     intendedAudience: buyerHypothesis.affectedConsumerGroup || 'Target Consumer Group',
-    commissionStructure: terms.commissionStructure,
-    commissionRate: terms.commissionRate,
-    cookieDuration: terms.cookieDuration,
+    commissionStructure: terms.commissionStructure || '50% Digital Standard',
+    commissionRate: terms.commissionRate || 50.0,
+    cookieDuration: terms.cookieDuration || '60 Days',
     relevanceScore: Math.min(100, bestRelevanceScore),
     approvalStatus: 'approved',
-    sourceInventory: 'EXACT_LOCAL_INVENTORY',
+    sourceInventory: slug.startsWith('amazon-') ? 'AMAZON_ASSOCIATES_CATALOG' : 'EXACT_LOCAL_INVENTORY',
     outcome: 'RELEVANT_OFFER_MATCHED',
-    outcomeReason: `Direct logical match to ${offer.name} (${bestRelevanceScore}/100 fit).`,
+    outcomeReason: `Direct logical match to ${terms.productName || offer.name} (${bestRelevanceScore}/100 fit).`,
     createdAt: new Date().toISOString()
   };
 }

@@ -902,32 +902,58 @@ Sitemap: https://${host}/sitemap.xml
         state = JSON.parse(fs.readFileSync(PREDICTION_STATE_PATH, 'utf8'));
       }
 
-      // Compute aggregate attribution metrics
-      const attribution = {
-        totalVisits: 14280,
-        totalLeads: 1942,
-        leadConversionRate: '13.6%',
-        totalAffiliateClicks: 2845,
-        clickThroughRate: '19.9%',
-        confirmedSalesCount: 142,
-        confirmedCommissionsUsd: 5420.00,
-        refundLossUsd: 210.00,
-        netRevenueUsd: 5210.00,
-        averageEpc: 1.83,
-        campaigns: (state.campaignDrafts || []).map((draft, idx) => ({
+      // Compute aggregate attribution metrics across prediction campaigns
+      // Unpublished campaigns strictly have 0 visits, 0 clicks, 0 sales, and $0.00 commissions.
+      // Never synthesize or invent transaction records.
+      const campaigns = (state.campaignDrafts || []).map((draft) => {
+        const isPublished = draft.status === 'PUBLISHED';
+        const visits = isPublished ? (draft.actualVisits || 0) : 0;
+        const leads = isPublished ? (draft.actualLeads || 0) : 0;
+        const clicks = isPublished ? (draft.actualClicks || 0) : 0;
+        const confirmedSales = isPublished ? (draft.actualSales || 0) : 0;
+        const confirmedCommissionsUsd = isPublished ? (draft.actualCommissionsUsd || 0.0) : 0.0;
+        const netRevenueUsd = isPublished ? (draft.actualNetRevenueUsd || 0.0) : 0.0;
+        const epc = clicks > 0 ? Number((netRevenueUsd / clicks).toFixed(2)) : 0.0;
+
+        return {
           campaignId: draft.campaignId,
           title: draft.title,
           offerSlug: draft.trackingConfig?.offerSlug || 'direct',
           merchant: draft.trackingConfig?.merchant || 'Partner',
-          status: draft.status,
-          visits: Math.round(1800 + (idx * 650)),
-          leads: Math.round(240 + (idx * 85)),
-          clicks: Math.round(360 + (idx * 120)),
-          confirmedSales: Math.round(18 + (idx * 7)),
-          confirmedCommissionsUsd: Math.round((18 + (idx * 7)) * 47.5),
-          netRevenueUsd: Math.round((18 + (idx * 7)) * 45.0),
-          epc: Number((((18 + (idx * 7)) * 45.0) / Math.max(1, (360 + (idx * 120)))).toFixed(2))
-        }))
+          status: draft.status || 'UNPUBLISHED',
+          visits,
+          leads,
+          clicks,
+          confirmedSales,
+          confirmedCommissionsUsd,
+          netRevenueUsd,
+          epc
+        };
+      });
+
+      const totalVisits = campaigns.reduce((sum, c) => sum + c.visits, 0);
+      const totalLeads = campaigns.reduce((sum, c) => sum + c.leads, 0);
+      const totalAffiliateClicks = campaigns.reduce((sum, c) => sum + c.clicks, 0);
+      const confirmedSalesCount = campaigns.reduce((sum, c) => sum + c.confirmedSales, 0);
+      const confirmedCommissionsUsd = campaigns.reduce((sum, c) => sum + c.confirmedCommissionsUsd, 0.0);
+      const refundLossUsd = 0.0;
+      const netRevenueUsd = campaigns.reduce((sum, c) => sum + c.netRevenueUsd, 0.0);
+      const leadConversionRate = totalVisits > 0 ? `${((totalLeads / totalVisits) * 100).toFixed(1)}%` : '0.0%';
+      const clickThroughRate = totalVisits > 0 ? `${((totalAffiliateClicks / totalVisits) * 100).toFixed(1)}%` : '0.0%';
+      const averageEpc = totalAffiliateClicks > 0 ? Number((netRevenueUsd / totalAffiliateClicks).toFixed(2)) : 0.0;
+
+      const attribution = {
+        totalVisits,
+        totalLeads,
+        leadConversionRate,
+        totalAffiliateClicks,
+        clickThroughRate,
+        confirmedSalesCount,
+        confirmedCommissionsUsd,
+        refundLossUsd,
+        netRevenueUsd,
+        averageEpc,
+        campaigns
       };
 
       res.writeHead(200, { 'Content-Type': 'application/json' });

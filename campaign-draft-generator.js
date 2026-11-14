@@ -114,20 +114,20 @@ function generateCampaignDraft(opportunity, options = {}) {
       ]
     },
 
-    // D. YouTube Shorts / TikTok Scripts
+    // D. YouTube Shorts / TikTok Scripts (Calm, Factual, Zero Fabricated Urgency)
     shortsScripts: [
       {
-        angle: 'Problem Interrupt',
+        angle: 'Practical Preparation',
         durationSec: 45,
-        scriptHook: `Stop scrolling if you are affected by ${event.title}. Most people are preparing for the completely wrong outcome.`,
-        scriptBody: `Here is the reality. When this shifts, conventional options become backlogged in 48 hours. Instead of panic-buying, use this 3-step practical protocol: First, secure your immediate environment. Second, eliminate high-fee alternatives. Third, deploy a dedicated local backup.`,
-        scriptCta: `Get the complete free 3-step action guide at the link in my bio.`
+        scriptHook: `If you are following the emerging data around ${event.title}, having a clear practical plan is far more effective than reacting at the last minute.`,
+        scriptBody: `Understanding your options early allows methodical preparation. Instead of guesswork, here is a 3-step practical protocol: First, identify your essential baseline requirements. Second, review proven solutions that address the root problem. Third, establish reliable backup capability before you need it.`,
+        scriptCta: `Access the complete 3-step action guide at the link in my bio.`
       },
       {
-        angle: 'Mistake Avoidance',
+        angle: 'Methodical Framework',
         durationSec: 40,
-        scriptHook: `The biggest mistake people make regarding ${event.title} is waiting until headlines confirm what data already proved.`,
-        scriptBody: `By the time news outlets report this, solutions surge in price. Here is the verified protocol we use to stay completely safe without overspending.`,
+        scriptHook: `A common pitfall regarding ${event.title} is focusing on speculation instead of actionable solutions.`,
+        scriptBody: `Whether this event resolves next week or next month, practical self-reliance and capital protection come from tested preparations. Here is the calm, step-by-step framework we recommend.`,
         scriptCta: `Tap the bio link for the complete checklist.`
       }
     ],
@@ -135,11 +135,11 @@ function generateCampaignDraft(opportunity, options = {}) {
     // E. Social Media Posts
     socialPosts: {
       xThread: [
-        `1/ Market prediction volume on "${event.title}" just crossed unprecedented highs. Here is what smart households and investors are doing right now to prepare: 🧵`,
-        `2/ Most people react with panic. The real move is a simple 3-step protocol that removes 90% of the vulnerability before the market moves.`,
-        `3/ Read our full field protocol and verified recommendations here: ${destinationUrl}`
+        `1/ Market prediction volume on "${event.title}" indicates rising attention. Here is a calm, practical breakdown of what this means and how to prepare:`,
+        `2/ Rather than speculative reactions, focus on a methodical protocol that addresses essential needs directly.`,
+        `3/ Read our complete action framework and verified resources here: ${destinationUrl}`
       ],
-      threads: `Watching the shifts around ${event.title}? Do not wait for headlines to confirm what the data already shows. Here is the calm 3-step protocol: ${destinationUrl}`
+      threads: `Watching the developments around ${event.title}? A methodical plan beats guesswork every time. Here is the calm 3-step action guide: ${destinationUrl}`
     },
 
     // F. Email Sequence (Opted-in Subscribers)

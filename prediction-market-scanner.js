@@ -160,6 +160,7 @@ function normalizePredictionEvents(events = []) {
       : [];
 
     const volume24h = Math.round(parseFloat(e.volume24hr || e.volume || 0));
+    const volume1wk = Math.round(parseFloat(e.volume1wk || 0));
     const liquidity = Math.round(parseFloat(e.liquidity || 0));
 
     // Parse multi-outcome contracts
@@ -201,14 +202,21 @@ function normalizePredictionEvents(events = []) {
     // Categorize event with word boundary protection
     const catResult = categorizeEvent(e.title, e.description, tags);
 
-    // Baseline volume acceleration indicator
-    // High acceleration when volume exceeds 50% of available liquidity
+    // Empirical Volume Acceleration against 7-Day Daily Baseline
+    // Daily baseline = volume1wk / 7. Acceleration = volume24h / daily baseline.
     let volumeAcceleration = 1.0;
-    if (liquidity > 0) {
-      const ratio = volume24h / liquidity;
-      volumeAcceleration = Number(Math.min(5.0, Math.max(0.5, 1.0 + (ratio * 0.8))).toFixed(2));
-    } else if (volume24h > 500000) {
-      volumeAcceleration = 2.1;
+    let accelerationStatus = 'NO_HISTORICAL_BASELINE';
+    let accelerationDisplay = '1.0x (Baseline Unmeasured)';
+    let baselineDaily = 0;
+
+    if (volume1wk > 0) {
+      baselineDaily = Math.round(volume1wk / 7);
+      if (baselineDaily > 0) {
+        const factor = Number((volume24h / baselineDaily).toFixed(2));
+        volumeAcceleration = Math.max(0.01, factor);
+        accelerationStatus = 'EMPIRICAL_7D_BASELINE';
+        accelerationDisplay = `${volumeAcceleration.toFixed(2)}x (7-day baseline: $${baselineDaily.toLocaleString()}/day)`;
+      }
     }
 
     // Determine signal confidence based on liquidity depth and live observation
@@ -225,11 +233,13 @@ function normalizePredictionEvents(events = []) {
       source: 'polymarket',
       provider: 'polymarket',
       externalId: String(e.id),
+      slug: e.slug || String(e.id),
       title: e.title.trim(),
       description: (e.description || e.title).trim(),
       category: catResult.category,
       tags,
       volume24h,
+      volume1wk,
       liquidity,
       marketStatus: e.closed ? 'closed' : 'open',
       probability: primaryProbability,
@@ -241,6 +251,14 @@ function normalizePredictionEvents(events = []) {
       sourceUrl,
       observationTime,
       firstSeenTime: e.createdAt || observationTime,
+      historicalComparison: {
+        volume24h,
+        volume1wk,
+        baselineDaily,
+        accelerationFactor: volumeAcceleration,
+        accelerationStatus,
+        accelerationDisplay
+      },
       signal: {
         signalId: `sig_${e.id}_${Date.now()}`,
         category: catResult.category,
@@ -250,6 +268,8 @@ function normalizePredictionEvents(events = []) {
         probability: primaryProbability,
         probabilityChange24h: 0,
         volumeAcceleration,
+        accelerationStatus,
+        accelerationDisplay,
         signalConfidence,
         dataFreshness: 'LIVE_STREAM',
         isCommerciallyViable: catResult.isCommerciallyViable,

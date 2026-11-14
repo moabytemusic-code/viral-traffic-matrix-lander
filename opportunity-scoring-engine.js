@@ -57,16 +57,30 @@ function scoreAffiliateOpportunity(predictionSignal, buyerHypothesis, offerMatch
   }
 
   // Factor 1: Prediction Momentum (0 - 100)
+  // Distinguishes growth from absolute volume. 1x acceleration or unmeasured baseline does not establish growth.
   const volume = predictionSignal.volume24h || predictionSignal.tradingVolume || 0;
   const acceleration = predictionSignal.signal?.volumeAcceleration || 1.0;
+  const accelStatus = predictionSignal.signal?.accelerationStatus || 'NO_HISTORICAL_BASELINE';
+  const hasProvenAcceleration = accelStatus === 'EMPIRICAL_7D_BASELINE' && acceleration > 1.05;
+
   let momentumScore = 15;
-  if (volume > 1000000 && acceleration > 1.5) momentumScore = 95;
-  else if (volume > 500000) momentumScore = 85;
-  else if (volume > 100000) momentumScore = 75;
-  else if (volume > 25000) momentumScore = 60;
-  else if (volume > 5000) momentumScore = 40;
+  if (!hasProvenAcceleration) {
+    // Unmeasured or flat acceleration caps momentum at 50 max
+    if (volume > 1000000) momentumScore = 50;
+    else if (volume > 100000) momentumScore = 40;
+    else if (volume > 25000) momentumScore = 30;
+    else momentumScore = 15;
+  } else {
+    // Verified empirical historical acceleration
+    if (volume > 1000000 && acceleration >= 2.0) momentumScore = 95;
+    else if (volume > 500000 && acceleration >= 1.5) momentumScore = 85;
+    else if (volume > 100000 && acceleration >= 1.2) momentumScore = 75;
+    else if (volume > 25000 && acceleration >= 1.1) momentumScore = 60;
+    else momentumScore = 45;
+  }
 
   // Factor 2: Independently Verified Demand (0 - 100)
+  // Unverified demand or unavailable provider scores 0. Never substitutes invented volume.
   let verifiedDemandScore = 0;
   let demandExplanation = 'Unchecked';
 
@@ -77,13 +91,14 @@ function scoreAffiliateOpportunity(predictionSignal, buyerHypothesis, offerMatch
     const opp = buyerHypothesis.demandEvidence?.opportunityScore || 65;
     verifiedDemandScore = Math.min(100, Math.max(50, opp));
     const volStr = buyerHypothesis.demandEvidence?.volumeDisplay || '10,000+';
-    demandExplanation = `Verified relevant search demand (${volStr}/mo, score ${opp})`;
+    const providerStr = buyerHypothesis.demandEvidence?.provider || 'Search Index';
+    demandExplanation = `Verified relevant search demand (${volStr}/mo via ${providerStr}, score ${opp})`;
   } else if (buyerHypothesis.verificationStatus === 'MEASURED_LOW_DEMAND') {
     verifiedDemandScore = 15;
     demandExplanation = 'Measured low search demand (<750 searches/mo)';
   } else if (buyerHypothesis.verificationStatus === 'PROVIDER_UNAVAILABLE') {
-    verifiedDemandScore = 10;
-    demandExplanation = 'Demand provider unavailable (unverified)';
+    verifiedDemandScore = 0;
+    demandExplanation = 'Demand provider unavailable (unverified demand)';
   }
 
   // Factor 3: Commercial Buyer Intent (0 - 100)
@@ -118,16 +133,19 @@ function scoreAffiliateOpportunity(predictionSignal, buyerHypothesis, offerMatch
     confidenceScore = Math.max(15, confidenceScore - 25);
   }
 
+  // Mathematically auditable weighted contributions
+  const wMomentum = Number((momentumScore * weights.predictionMomentum).toFixed(2));
+  const wDemand = Number((verifiedDemandScore * weights.verifiedDemand).toFixed(2));
+  const wIntent = Number((intentScore * weights.commercialBuyerIntent).toFixed(2));
+  const wRelevance = Number((relevanceScore * weights.productRelevance).toFixed(2));
+  const wEconomics = Number((economicsScore * weights.commissionEconomics).toFixed(2));
+  const wConfidence = Number((confidenceScore * weights.evidenceConfidence).toFixed(2));
+
+  const weightedSum = Number((wMomentum + wDemand + wIntent + wRelevance + wEconomics + wConfidence).toFixed(2));
+  const rawComposite = Math.round(weightedSum);
+
   // 2. Disqualified Early Return
   if (!passedAllGates) {
-    const rawComposite = Math.round(
-      (momentumScore * weights.predictionMomentum) +
-      (verifiedDemandScore * weights.verifiedDemand) +
-      (intentScore * weights.commercialBuyerIntent) +
-      (relevanceScore * weights.productRelevance) +
-      (economicsScore * weights.commissionEconomics) +
-      (confidenceScore * weights.evidenceConfidence)
-    );
     const cappedScore = Math.min(35, rawComposite);
 
     let outcome = 'REJECTED_UNRELATED_OR_UNSUPPORTED';
@@ -147,26 +165,20 @@ function scoreAffiliateOpportunity(predictionSignal, buyerHypothesis, offerMatch
       eligibility,
       scoreBreakdown: {
         total: cappedScore,
-        momentumScore: { score: momentumScore, weight: weights.predictionMomentum, weighted: Math.round(momentumScore * weights.predictionMomentum) },
-        verifiedDemandScore: { score: verifiedDemandScore, weight: weights.verifiedDemand, weighted: Math.round(verifiedDemandScore * weights.verifiedDemand) },
-        intentScore: { score: intentScore, weight: weights.commercialBuyerIntent, weighted: Math.round(intentScore * weights.commercialBuyerIntent) },
-        relevanceScore: { score: relevanceScore, weight: weights.productRelevance, weighted: Math.round(relevanceScore * weights.productRelevance) },
-        economicsScore: { score: economicsScore, weight: weights.commissionEconomics, weighted: Math.round(economicsScore * weights.commissionEconomics) },
-        confidenceScore: { score: confidenceScore, weight: weights.evidenceConfidence, weighted: Math.round(confidenceScore * weights.evidenceConfidence) }
+        weightedSum,
+        momentumScore: { score: momentumScore, weight: weights.predictionMomentum, weighted: Number(wMomentum.toFixed(1)) },
+        verifiedDemandScore: { score: verifiedDemandScore, weight: weights.verifiedDemand, weighted: Number(wDemand.toFixed(1)) },
+        intentScore: { score: intentScore, weight: weights.commercialBuyerIntent, weighted: Number(wIntent.toFixed(1)) },
+        relevanceScore: { score: relevanceScore, weight: weights.productRelevance, weighted: Number(wRelevance.toFixed(1)) },
+        economicsScore: { score: economicsScore, weight: weights.commissionEconomics, weighted: Number(wEconomics.toFixed(1)) },
+        confidenceScore: { score: confidenceScore, weight: weights.evidenceConfidence, weighted: Number(wConfidence.toFixed(1)) }
       },
       explanation
     };
   }
 
-  // 3. Eligible Composite Score
-  const compositeScore = Math.round(
-    (momentumScore * weights.predictionMomentum) +
-    (verifiedDemandScore * weights.verifiedDemand) +
-    (intentScore * weights.commercialBuyerIntent) +
-    (relevanceScore * weights.productRelevance) +
-    (economicsScore * weights.commissionEconomics) +
-    (confidenceScore * weights.evidenceConfidence)
-  );
+  // 3. Eligible Composite Score (Auditably sums to rounded weighted total)
+  const compositeScore = rawComposite;
 
   let tier = 'WATCHLIST';
   let outcome = 'WATCHLIST_MORE_EVIDENCE_NEEDED';
@@ -204,12 +216,13 @@ function scoreAffiliateOpportunity(predictionSignal, buyerHypothesis, offerMatch
     eligibility,
     scoreBreakdown: {
       total: compositeScore,
-      momentumScore: { score: momentumScore, weight: weights.predictionMomentum, weighted: Math.round(momentumScore * weights.predictionMomentum) },
-      verifiedDemandScore: { score: verifiedDemandScore, weight: weights.verifiedDemand, weighted: Math.round(verifiedDemandScore * weights.verifiedDemand) },
-      intentScore: { score: intentScore, weight: weights.commercialBuyerIntent, weighted: Math.round(intentScore * weights.commercialBuyerIntent) },
-      relevanceScore: { score: relevanceScore, weight: weights.productRelevance, weighted: Math.round(relevanceScore * weights.productRelevance) },
-      economicsScore: { score: economicsScore, weight: weights.commissionEconomics, weighted: Math.round(economicsScore * weights.commissionEconomics) },
-      confidenceScore: { score: confidenceScore, weight: weights.evidenceConfidence, weighted: Math.round(confidenceScore * weights.evidenceConfidence) }
+      weightedSum,
+      momentumScore: { score: momentumScore, weight: weights.predictionMomentum, weighted: Number(wMomentum.toFixed(1)) },
+      verifiedDemandScore: { score: verifiedDemandScore, weight: weights.verifiedDemand, weighted: Number(wDemand.toFixed(1)) },
+      intentScore: { score: intentScore, weight: weights.commercialBuyerIntent, weighted: Number(wIntent.toFixed(1)) },
+      relevanceScore: { score: relevanceScore, weight: weights.productRelevance, weighted: Number(wRelevance.toFixed(1)) },
+      economicsScore: { score: economicsScore, weight: weights.commissionEconomics, weighted: Number(wEconomics.toFixed(1)) },
+      confidenceScore: { score: confidenceScore, weight: weights.evidenceConfidence, weighted: Number(wConfidence.toFixed(1)) }
     },
     explanation
   };

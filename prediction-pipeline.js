@@ -31,8 +31,10 @@ async function runPredictionPipeline(options = {}) {
       const prevState = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
       if (Array.isArray(prevState.opportunities)) {
         for (const opp of prevState.opportunities) {
-          if (opp.event?.externalId) {
-            existingOpportunities.set(opp.event.externalId, opp);
+          const extId = String(opp.event?.externalId || '');
+          // Strictly reject legacy demonstration fixtures or mock IDs
+          if (extId && !extId.includes('winter_storm') && !extId.includes('drought') && !extId.includes('mock')) {
+            existingOpportunities.set(extId, opp);
           }
         }
       }
