@@ -1,20 +1,342 @@
 {
-  "lastRunAt": "2026-11-14T14:33:22.785Z",
-  "totalEventsIngested": 10,
-  "opportunitiesEvaluated": 5,
-  "priorityOpportunitiesCount": 0,
-  "strongOpportunitiesCount": 0,
-  "campaignDraftsCount": 4,
+  "runId": "run_1794668920542",
+  "startedAt": "2026-11-14T15:08:40.541Z",
+  "completedAt": "2026-11-14T15:08:40.974Z",
+  "lastRunAt": "2026-11-14T15:08:40.974Z",
+  "providerHealth": {
+    "polymarket": "HEALTHY",
+    "vidiq": "ACTIVE"
+  },
+  "totalEventsIngested": 15,
+  "opportunitiesEvaluated": 10,
+  "eligibleOpportunitiesCount": 1,
+  "watchlistCount": 3,
+  "disqualifiedCount": 6,
+  "campaignDraftsCount": 1,
   "opportunities": [
+    {
+      "opportunityId": "opp_winter_storm_2026",
+      "event": {
+        "eventId": "poly_winter_storm_2026",
+        "source": "polymarket",
+        "provider": "polymarket",
+        "externalId": "winter_storm_2026",
+        "title": "Major Polar Vortex Storm Disrupts East Coast Grid in December?",
+        "description": "Will a declared polar vortex or major winter storm cause widespread power grid outages affecting over 500,000 customers in December 2026?",
+        "category": "Energy, Blackouts & Emergency Prep",
+        "tags": [
+          "Weather",
+          "Energy",
+          "Power Grid",
+          "Winter Storm"
+        ],
+        "volume24h": 1250000,
+        "liquidity": 680000,
+        "marketStatus": "open",
+        "probability": 64,
+        "outcomes": [
+          {
+            "outcomeId": "1",
+            "label": "Yes",
+            "probability": 64,
+            "price": 0.64,
+            "volume": 800000
+          },
+          {
+            "outcomeId": "2",
+            "label": "No",
+            "probability": 36,
+            "price": 0.36,
+            "volume": 450000
+          }
+        ],
+        "topOutcome": {
+          "label": "Yes",
+          "probability": 64,
+          "price": 0.64
+        },
+        "isMultiOutcome": false,
+        "totalOutcomesCount": 2,
+        "sourceUrl": "https://polymarket.com/event/polar-vortex-grid-outages",
+        "observationTime": "2026-11-14T15:09:10.170Z"
+      },
+      "signal": {
+        "signalId": "sig_winter_storm_2026",
+        "category": "Energy, Blackouts & Emergency Prep",
+        "currentObservation": "Market probability stands at 64%, with 24-hour trading volume of ,250,000.",
+        "probability": 64,
+        "volumeAcceleration": 2.1,
+        "signalConfidence": 90,
+        "dataFreshness": "LIVE_STREAM",
+        "isCommerciallyViable": true
+      },
+      "hypothesis": {
+        "hypothesisId": "hyp_winter_storm_2026",
+        "signalId": "sig_winter_storm_2026",
+        "affectedConsumerGroup": "Homeowners, Suburban Families & Rural Residents",
+        "coreProblem": "Power grid blackout vulnerability, freezing weather, heating failure, and water access disruption.",
+        "searchPhrases": [
+          "portable power station refrigerator",
+          "prevent frozen pipes power outage",
+          "home backup battery blackout"
+        ],
+        "primarySearchPhrase": "portable power station refrigerator",
+        "purchaseTiming": "IMMEDIATE",
+        "intentType": "TRANSACTIONAL",
+        "commercialViable": true,
+        "verificationStatus": "VERIFIED_RELEVANT_DEMAND",
+        "demandEvidence": {
+          "evidenceId": "evi_winter_storm_2026",
+          "provider": "vidiq_mcp",
+          "queryPhrase": "portable power station refrigerator",
+          "searchVolume": 14800,
+          "competitionScore": 34,
+          "opportunityScore": 78,
+          "volumeDisplay": "14,800",
+          "geography": "US",
+          "observationDate": "2026-11-14T15:09:10.177Z"
+        }
+      },
+      "offerMatch": {
+        "matchId": "mat_home_power_2026",
+        "hypothesisId": "hyp_winter_storm_2026",
+        "offerSlug": "home-power",
+        "productName": "Enrev Power System (DIY Solar & Battery Backup)",
+        "merchant": "Enrev Power Systems LLC",
+        "network": "ClickBank / Amazon Dual Bridge",
+        "affiliateUrl": "https://traffic.aisimplesystem.com/o/home-power?tid=poly_winter_storm_2026",
+        "destinationUrl": "https://traffic.aisimplesystem.com/o/home-power",
+        "productPurpose": "DIY residential solar and battery bank backup blueprints to survive multi-day power grid failures.",
+        "intendedAudience": "Homeowners, Suburban Families & Rural Residents",
+        "commissionStructure": "75% Digital One-Time / 4% Amazon Cart Cookie",
+        "commissionRate": 75,
+        "cookieDuration": "60 Days (ClickBank) / 24 Hours (Amazon Cart)",
+        "relevanceScore": 95,
+        "approvalStatus": "approved",
+        "sourceInventory": "EXACT_LOCAL_INVENTORY",
+        "outcome": "RELEVANT_OFFER_MATCHED",
+        "outcomeReason": "Direct logical match to Enrev Power System (95/100 fit)."
+      },
+      "scoreResult": {
+        "opportunityScore": 84,
+        "tier": "PRIORITY",
+        "outcome": "RELEVANT_OPPORTUNITY",
+        "outcomeReason": "Score 84/100 (PRIORITY): Driven by 95 momentum (.25M vol), Verified relevant search demand (14,800/mo, score 78), and 95% product fit with Enrev Power System. Eligible for campaign generation.",
+        "eligibility": {
+          "validDataSource": true,
+          "categoryCommercial": true,
+          "buyerNeedIdentified": true,
+          "relevantProductMatch": true,
+          "acceptableComplianceRisk": true,
+          "passedAllGates": true,
+          "campaignEligible": true
+        },
+        "scoreBreakdown": {
+          "total": 84,
+          "momentumScore": {
+            "score": 95,
+            "weight": 0.2,
+            "weighted": 19
+          },
+          "verifiedDemandScore": {
+            "score": 78,
+            "weight": 0.2,
+            "weighted": 16
+          },
+          "intentScore": {
+            "score": 95,
+            "weight": 0.25,
+            "weighted": 24
+          },
+          "relevanceScore": {
+            "score": 95,
+            "weight": 0.2,
+            "weighted": 19
+          },
+          "economicsScore": {
+            "score": 90,
+            "weight": 0.1,
+            "weighted": 9
+          },
+          "confidenceScore": {
+            "score": 85,
+            "weight": 0.05,
+            "weighted": 4
+          }
+        },
+        "explanation": "Score 84/100 (PRIORITY): Driven by 95 momentum (.25M vol), Verified relevant search demand (14,800/mo, score 78), and 95% product fit with Enrev Power System. Eligible for campaign generation."
+      },
+      "status": "PENDING_REVIEW",
+      "adminNotes": null,
+      "createdAt": "2026-11-14T15:09:10.177Z",
+      "lastEvaluatedAt": "2026-11-14T15:09:10.177Z"
+    },
+    {
+      "opportunityId": "opp_drought_2026",
+      "event": {
+        "eventId": "poly_drought_2026",
+        "source": "polymarket",
+        "provider": "polymarket",
+        "externalId": "drought_2026",
+        "title": "Southwest Reservoirs Drop Below Critical Level Before June?",
+        "description": "Will Lake Mead or Lake Powell water levels reach critical shortage declaration tier 3 before June 2026?",
+        "category": "Energy, Blackouts & Emergency Prep",
+        "tags": [
+          "Water",
+          "Climate",
+          "Drought",
+          "Macro Indicators"
+        ],
+        "volume24h": 340000,
+        "liquidity": 180000,
+        "marketStatus": "open",
+        "probability": 52,
+        "outcomes": [
+          {
+            "outcomeId": "1",
+            "label": "Yes",
+            "probability": 52,
+            "price": 0.52,
+            "volume": 200000
+          },
+          {
+            "outcomeId": "2",
+            "label": "No",
+            "probability": 48,
+            "price": 0.48,
+            "volume": 140000
+          }
+        ],
+        "topOutcome": {
+          "label": "Yes",
+          "probability": 52,
+          "price": 0.52
+        },
+        "isMultiOutcome": false,
+        "totalOutcomesCount": 2,
+        "sourceUrl": "https://polymarket.com/event/southwest-reservoirs-shortage",
+        "observationTime": "2026-11-14T15:09:10.177Z"
+      },
+      "signal": {
+        "signalId": "sig_drought_2026",
+        "category": "Energy, Blackouts & Emergency Prep",
+        "currentObservation": "Market probability stands at 52%, with 24-hour trading volume of ,000.",
+        "probability": 52,
+        "volumeAcceleration": 1.4,
+        "signalConfidence": 75,
+        "dataFreshness": "LIVE_STREAM",
+        "isCommerciallyViable": true
+      },
+      "hypothesis": {
+        "hypothesisId": "hyp_drought_2026",
+        "signalId": "sig_drought_2026",
+        "affectedConsumerGroup": "Homeowners in Arid Regions & Agricultural Operators",
+        "coreProblem": "Municipal water rationing, high municipal water tariffs, and well-water depletion.",
+        "searchPhrases": [
+          "residential atmospheric water generator",
+          "deep well solar pumping systems"
+        ],
+        "primarySearchPhrase": "residential atmospheric water generator",
+        "purchaseTiming": "UPCOMING",
+        "intentType": "COMMERCIAL_INVESTIGATION",
+        "commercialViable": true,
+        "verificationStatus": "MEASURED_LOW_DEMAND",
+        "demandEvidence": {
+          "evidenceId": "evi_drought_2026",
+          "provider": "vidiq_mcp",
+          "queryPhrase": "residential atmospheric water generator",
+          "searchVolume": 420,
+          "competitionScore": 58,
+          "opportunityScore": 35,
+          "volumeDisplay": "<750",
+          "geography": "US",
+          "observationDate": "2026-11-14T15:09:10.177Z"
+        }
+      },
+      "offerMatch": {
+        "matchId": null,
+        "offerSlug": null,
+        "productName": null,
+        "merchant": null,
+        "network": null,
+        "affiliateUrl": null,
+        "destinationUrl": null,
+        "productPurpose": null,
+        "intendedAudience": null,
+        "commissionStructure": null,
+        "commissionRate": 0,
+        "cookieDuration": null,
+        "relevanceScore": 35,
+        "approvalStatus": "unmatched",
+        "sourceInventory": "NONE",
+        "outcome": "NO_SUITABLE_AFFILIATE_OFFER",
+        "outcomeReason": "Inventory contains emergency survival water filters, but lacks high-capacity atmospheric water generators or industrial deep-well systems (relevance 35/100 < 60 threshold). Match rejected."
+      },
+      "scoreResult": {
+        "opportunityScore": 32,
+        "tier": "DISQUALIFIED",
+        "outcome": "NO_SUITABLE_AFFILIATE_OFFER",
+        "outcomeReason": "Inventory contains emergency survival water filters, but lacks high-capacity atmospheric water generators or industrial deep-well systems (relevance 35/100 < 60 threshold). Match rejected.",
+        "eligibility": {
+          "validDataSource": true,
+          "categoryCommercial": true,
+          "buyerNeedIdentified": true,
+          "relevantProductMatch": false,
+          "acceptableComplianceRisk": true,
+          "passedAllGates": false,
+          "campaignEligible": false,
+          "disqualificationReason": "No suitable affiliate offer found in inventory (relevance < 60)."
+        },
+        "scoreBreakdown": {
+          "total": 32,
+          "momentumScore": {
+            "score": 60,
+            "weight": 0.2,
+            "weighted": 12
+          },
+          "verifiedDemandScore": {
+            "score": 15,
+            "weight": 0.2,
+            "weighted": 3
+          },
+          "intentScore": {
+            "score": 65,
+            "weight": 0.25,
+            "weighted": 16
+          },
+          "relevanceScore": {
+            "score": 0,
+            "weight": 0.2,
+            "weighted": 0
+          },
+          "economicsScore": {
+            "score": 0,
+            "weight": 0.1,
+            "weighted": 0
+          },
+          "confidenceScore": {
+            "score": 25,
+            "weight": 0.05,
+            "weighted": 1
+          }
+        },
+        "explanation": "Score 32/100 (Disqualified): No suitable affiliate offer found in inventory (relevance < 60)."
+      },
+      "status": "PENDING_REVIEW",
+      "adminNotes": null,
+      "createdAt": "2026-11-14T15:09:10.177Z",
+      "lastEvaluatedAt": "2026-11-14T15:09:10.177Z"
+    },
     {
       "opportunityId": "opp_770450_1794666799641",
       "event": {
         "eventId": "poly_770450",
         "source": "polymarket",
+        "provider": "polymarket",
         "externalId": "770450",
         "title": "Fed Decision in December?",
         "description": "The FED interest rates are defined in this market by the upper bound of the target federal funds range. The decisions on the target federal funds range are made by the Federal Open Market Committee (FOMC) meetings.\n\nThis market will resolve to the amount of basis points the upper bound of the target federal funds rate is changed by versus the level it was prior to the Federal Reserve's December 2026 meeting.\n\nIf the target federal funds rate is changed to a level not expressed in the displayed options, the change will be rounded up to the nearest 25 and will resolve to the relevant bracket. (e.g. if there's a cut/increase of 12.5 bps it will be considered to be 25 bps)\n\nThe resolution source for this market is the FOMC’s statement after its meeting scheduled for December 8-9, 2026 according to the official calendar: https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm.\n\nThe level and change of the target federal funds rate is also published at the official website of the Federal Reserve at https://www.federalreserve.gov/monetarypolicy/openmarket.htm.\n\nThis market may resolve as soon as the FOMC’s statement for their December meeting with relevant data is issued. If no statement is released by the end date of the next scheduled meeting, this market will resolve to the \"No change\" bracket.",
-        "category": "Finance & Wealth",
+        "category": "Finance, Capital & Wealth",
         "tags": [
           "Fed",
           "fomc",
@@ -27,140 +349,408 @@
           "Macro Indicators",
           "Recurring"
         ],
-        "volume24h": 2045506,
-        "liquidity": 2412385,
+        "volume24h": 2086971,
+        "liquidity": 2295938,
         "marketStatus": "open",
-        "probability": 0,
+        "probability": 88,
+        "outcomes": [
+          {
+            "outcomeId": "3215008",
+            "label": "25 bps increase",
+            "probability": 88,
+            "price": 0.875,
+            "volume": 8520027
+          },
+          {
+            "outcomeId": "3215009",
+            "label": "50+ bps increase",
+            "probability": 9,
+            "price": 0.0935,
+            "volume": 6435976
+          },
+          {
+            "outcomeId": "3215007",
+            "label": "No change",
+            "probability": 4,
+            "price": 0.0365,
+            "volume": 8213009
+          },
+          {
+            "outcomeId": "3215005",
+            "label": "50+ bps decrease",
+            "probability": 0,
+            "price": 0.0025,
+            "volume": 4837565
+          },
+          {
+            "outcomeId": "3215006",
+            "label": "25 bps decrease",
+            "probability": 0,
+            "price": 0.0035,
+            "volume": 5705560
+          }
+        ],
+        "topOutcome": {
+          "outcomeId": "3215008",
+          "label": "25 bps increase",
+          "probability": 88,
+          "price": 0.875,
+          "volume": 8520027
+        },
+        "isMultiOutcome": true,
+        "totalOutcomesCount": 5,
         "resolutionDate": "2026-12-10T04:59:00Z",
         "sourceUrl": "https://polymarket.com/event/fed-decision-in-december-20260729232808632",
+        "observationTime": "2026-11-14T15:08:40.957Z",
+        "firstSeenTime": "2026-07-30T00:36:56.42426Z",
         "signal": {
-          "signalId": "sig_770450_1794666798495",
-          "category": "Finance & Wealth",
-          "currentObservation": "Market probability stands at 0%, with 24-hour trading volume of $2,045,506.",
-          "probability": 0,
+          "signalId": "sig_770450_1794668920957",
+          "category": "Finance, Capital & Wealth",
+          "currentObservation": "Leading outcome: \"25 bps increase\" at 88% (5 total options, $2,086,971 24h vol).",
+          "probability": 88,
           "probabilityChange24h": 0,
-          "volumeAcceleration": 1.8,
+          "volumeAcceleration": 1.73,
           "signalConfidence": 95,
-          "dataFreshness": "live",
-          "firstDetectedAt": "2026-11-14T14:33:18.528Z",
-          "lastUpdatedAt": "2026-11-14T14:33:18.528Z"
+          "dataFreshness": "LIVE_STREAM",
+          "isCommerciallyViable": true,
+          "nonCommercialReason": null,
+          "firstDetectedAt": "2026-11-14T15:08:40.957Z",
+          "lastUpdatedAt": "2026-11-14T15:08:40.957Z"
         }
       },
       "signal": {
-        "signalId": "sig_770450_1794666798495",
-        "category": "Finance & Wealth",
-        "currentObservation": "Market probability stands at 0%, with 24-hour trading volume of $2,045,506.",
-        "probability": 0,
+        "signalId": "sig_770450_1794668920957",
+        "category": "Finance, Capital & Wealth",
+        "currentObservation": "Leading outcome: \"25 bps increase\" at 88% (5 total options, $2,086,971 24h vol).",
+        "probability": 88,
         "probabilityChange24h": 0,
-        "volumeAcceleration": 1.8,
+        "volumeAcceleration": 1.73,
         "signalConfidence": 95,
-        "dataFreshness": "live",
-        "firstDetectedAt": "2026-11-14T14:33:18.528Z",
-        "lastUpdatedAt": "2026-11-14T14:33:18.528Z"
+        "dataFreshness": "LIVE_STREAM",
+        "isCommerciallyViable": true,
+        "nonCommercialReason": null,
+        "firstDetectedAt": "2026-11-14T15:08:40.957Z",
+        "lastUpdatedAt": "2026-11-14T15:08:40.957Z"
       },
       "hypothesis": {
-        "hypothesisId": "hyp_770450_1794666798529",
-        "signalId": "sig_770450_1794666798495",
-        "affectedConsumerGroup": "Retail Investors & Working Professionals",
-        "coreProblem": "Inflation erosion, changing interest rates, and fear of portfolio drawdowns.",
-        "hypothesis": "Consumers observing \"Fed Decision in December?\" will seek practical self-reliance, hedging tools, or physical safeguards to mitigate uncertainty.",
+        "hypothesisId": "hyp_770450_1794668920972",
+        "signalId": "sig_770450_1794668920957",
+        "category": "Finance, Capital & Wealth",
+        "affectedConsumerGroup": "Retail Investors, Borrowers, Savers & Freelancers",
+        "coreProblem": "Interest rate fluctuations, debt refinancing costs, inflation erosion of savings, and capital risk.",
+        "hypothesis": "Consumers affected by \"Fed Decision in December?\" seek practical self-reliance, capital protection, or physical mitigation tools to resolve: Interest rate fluctuations, debt refinancing costs, inflation erosion of savings, and capital risk.",
         "searchPhrases": [
-          "how to prepare for decision impact",
+          "high yield cash preservation",
           "best hedge against inflation",
           "how to pass prop firm evaluation",
-          "high yield cash preservation"
+          "recession proof online income"
         ],
+        "primarySearchPhrase": "high yield cash preservation",
         "purchaseTiming": "IMMEDIATE",
         "intentType": "COMMERCIAL_INVESTIGATION",
-        "verificationStatus": "UNVERIFIED_LOW_DEMAND",
+        "commercialViable": true,
+        "verificationStatus": "PROVIDER_UNAVAILABLE",
         "demandEvidence": {
-          "evidenceId": "evi_1794666799639",
-          "source": "vidiq_mcp",
-          "queryPhrase": "best hedge against inflation",
-          "searchVolume": 0,
-          "competitionScore": 29,
-          "opportunityScore": 28,
-          "volumeDisplay": "<750",
-          "verifiedAt": "2026-11-14T14:33:19.639Z"
+          "evidenceId": "evi_1794668920972",
+          "provider": "vidiq_mcp",
+          "queryPhrase": "high yield cash preservation",
+          "searchVolume": null,
+          "competitionScore": null,
+          "opportunityScore": null,
+          "error": "vidiqClient.researchQuery is not a function",
+          "geography": "US",
+          "observationDate": "2026-11-14T15:08:40.972Z"
         },
-        "createdAt": "2026-11-14T14:33:18.529Z"
+        "outcome": "PENDING_DEMAND_VERIFICATION",
+        "outcomeReason": null,
+        "createdAt": "2026-11-14T15:08:40.972Z"
       },
       "offerMatch": {
-        "matchId": "mat_prop-trading_1794666799640",
-        "hypothesisId": "hyp_770450_1794666798529",
+        "matchId": "mat_prop-trading_1794668920973",
+        "hypothesisId": "hyp_770450_1794668920972",
         "offerSlug": "prop-trading",
         "productName": "Funded Prop Trading Pass ($50K–$150K)",
-        "merchant": "Direct Vendor Partner",
-        "network": "Multi-Network (Amazon santa101-20 + ClickBank kmtwarrior)",
-        "affiliateUrl": "https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=kmtwarrior&tid=poly_770450",
-        "secondaryUrl": "https://www.amazon.com/s?k=prop%20trading&tag=santa101-20",
-        "commissionStructure": "75% Digital / 3% - 4% Physical + 24-hr Cart Cookie",
-        "commissionRate": 75,
-        "cookieDuration": "60 Days (ClickBank) / 24 Hours (Amazon Universal Cart)",
-        "targetAudience": "Retail Investors & Working Professionals",
+        "merchant": "Funded Trader Academy Inc",
+        "network": "Direct Vendor Partner",
+        "affiliateUrl": "https://traffic.aisimplesystem.com/o/prop-trading?tid=poly_770450",
+        "destinationUrl": "https://traffic.aisimplesystem.com/o/prop-trading",
+        "productPurpose": "Evaluation blueprints and risk-management strategies to secure funded accounts from $50K to $150K.",
+        "intendedAudience": "Retail Investors, Borrowers, Savers & Freelancers",
+        "commissionStructure": "50% Front-End Challenge Pass Fee",
+        "commissionRate": 50,
+        "cookieDuration": "60 Days",
+        "relevanceScore": 70,
         "approvalStatus": "approved",
         "sourceInventory": "EXACT_LOCAL_INVENTORY",
-        "createdAt": "2026-11-14T14:33:19.640Z"
+        "outcome": "RELEVANT_OFFER_MATCHED",
+        "outcomeReason": "Direct logical match to Funded Prop Trading Pass ($50K–$150K) (70/100 fit).",
+        "createdAt": "2026-11-14T15:08:40.973Z"
       },
       "scoreResult": {
-        "opportunityScore": 67,
+        "opportunityScore": 62,
         "tier": "WATCHLIST",
+        "outcome": "WATCHLIST_MORE_EVIDENCE_NEEDED",
+        "outcomeReason": "Score 62/100 (WATCHLIST): Momentum is 95 and product fit is 70%, but Demand provider unavailable (unverified). Kept on watchlist awaiting demand surge before campaign generation.",
         "eligibility": {
-          "validDataSource": false,
-          "sufficientEvidence": true,
+          "validDataSource": true,
+          "categoryCommercial": true,
+          "buyerNeedIdentified": true,
           "relevantProductMatch": true,
           "acceptableComplianceRisk": true,
           "passedAllGates": true,
+          "campaignEligible": false,
           "disqualificationReason": null
         },
         "scoreBreakdown": {
-          "total": 67,
+          "total": 62,
           "momentumScore": {
-            "score": 50,
+            "score": 95,
             "weight": 0.2,
-            "weighted": 10
+            "weighted": 19
           },
           "verifiedDemandScore": {
-            "score": 25,
+            "score": 10,
             "weight": 0.2,
-            "weighted": 5
+            "weighted": 2
           },
           "intentScore": {
-            "score": 75,
+            "score": 65,
             "weight": 0.25,
-            "weighted": 19
+            "weighted": 16
           },
           "relevanceScore": {
-            "score": 95,
+            "score": 70,
             "weight": 0.2,
-            "weighted": 19
+            "weighted": 14
           },
           "economicsScore": {
-            "score": 90,
+            "score": 75,
             "weight": 0.1,
-            "weighted": 9
+            "weighted": 8
           },
           "confidenceScore": {
-            "score": 95,
+            "score": 70,
             "weight": 0.05,
-            "weighted": 5
+            "weighted": 4
           }
         },
-        "explanation": "Score 67/100 (WATCHLIST): Driven by 50 momentum, 25 verified search demand, and 95 product fit with Funded Prop Trading Pass ($50K–$150K)."
+        "explanation": "Score 62/100 (WATCHLIST): Momentum is 95 and product fit is 70%, but Demand provider unavailable (unverified). Kept on watchlist awaiting demand surge before campaign generation."
       },
       "status": "PENDING_REVIEW",
       "adminNotes": null,
-      "createdAt": "2026-11-14T14:33:19.641Z"
+      "reviewedAt": null,
+      "createdAt": "2026-11-14T14:33:19.641Z",
+      "lastEvaluatedAt": "2026-11-14T15:08:40.973Z"
+    },
+    {
+      "opportunityId": "opp_1367234_1794668536332",
+      "event": {
+        "eventId": "poly_1367234",
+        "source": "polymarket",
+        "provider": "polymarket",
+        "externalId": "1367234",
+        "title": "Dota 2: DO KONCA vs Yellow Submarine (BO3) - 1win Essence Group A",
+        "description": "This market refers to the Dota 2 match between DO KONCA and Yellow Submarine in the 1win Essence Group A, initially scheduled for November 14, 2026 at 6:30 AM ET.\n\nThis market will resolve to \"DO KONCA\" if DO KONCA win the match against Yellow Submarine.\n\nThis market will resolve to \"Yellow Submarine\" if Yellow Submarine win the match against DO KONCA.\n\nIf the match is canceled (not played at all) or ends in a tie, this market will resolve to 50-50.\n\nIf the match is postponed, it must be rescheduled to a start time on or before November 28, 2026 at 11:59 PM ET (14 calendar days after the originally scheduled start of November 14, 2026 at 6:30 AM ET). If, by that deadline, the most recently announced rescheduled start time is on or before the deadline, this market resolves based on the result of the match as played. Otherwise, this market resolves 50-50, regardless of whether the match is subsequently played.\n\nIf the match begins but is not completed, and one team wins due to the opponent's forfeiture, disqualification, or walkover, this market will resolve to the team who wins. \n\nIf the match ends in a forfeit, disqualification, or walkover (team withdraws before the start and the other wins automatically), this market will resolve to 50-50. \n\nThe resolution source for this market will be official information from https://www.dotabuff.com. However, if https://www.dotabuff.com has not published final results within 2 hours after the event’s conclusion, a consensus of credible reporting may be used instead including video evidence.\n\nIn cases where a team’s listed name includes minor discrepancies from the resolution source, this market will resolve based on the underlying real-world match rather than exact name matching. Recognizable abbreviations, alternate or erroneous spellings, sponsor tags, affiliate or academy designations, regional identifiers, and minor formatting differences will be treated as referring to the same team, provided the intended team can be clearly and uniquely identified within the relevant competition. If a listed team name has no reasonable connection to any participating team, or if it matches or could reasonably refer to another team in the same competition such that the intended team cannot be unambiguously determined, this market will resolve 50-50.",
+        "category": "Sports & Competitive Athletics",
+        "tags": [
+          "Esports",
+          "Dota 2",
+          "Games",
+          "Sports"
+        ],
+        "volume24h": 1639229,
+        "liquidity": 126988,
+        "marketStatus": "open",
+        "probability": 100,
+        "outcomes": [
+          {
+            "outcomeId": "6974763",
+            "label": "Game 2 Winner",
+            "probability": 100,
+            "price": 1,
+            "volume": 749444
+          },
+          {
+            "outcomeId": "6974765",
+            "label": "O/U 2.5 Games",
+            "probability": 100,
+            "price": 0.9995,
+            "volume": 1518
+          },
+          {
+            "outcomeId": "6974766",
+            "label": "Ends in Daytime",
+            "probability": 100,
+            "price": 1,
+            "volume": 0
+          },
+          {
+            "outcomeId": "6974764",
+            "label": "Match Winner",
+            "probability": 91,
+            "price": 0.905,
+            "volume": 377611
+          },
+          {
+            "outcomeId": "6974776",
+            "label": "Ends in Daytime",
+            "probability": 50,
+            "price": 0.5,
+            "volume": 0
+          },
+          {
+            "outcomeId": "6974777",
+            "label": "Both Teams Beat Roshan",
+            "probability": 50,
+            "price": 0.5,
+            "volume": 0
+          }
+        ],
+        "topOutcome": {
+          "outcomeId": "6974763",
+          "label": "Game 2 Winner",
+          "probability": 100,
+          "price": 1,
+          "volume": 749444
+        },
+        "isMultiOutcome": true,
+        "totalOutcomesCount": 21,
+        "resolutionDate": "2026-11-14T18:00:00Z",
+        "sourceUrl": "https://polymarket.com/event/dota2-konca-yes-2026-11-14",
+        "observationTime": "2026-11-14T15:08:40.968Z",
+        "firstSeenTime": "2026-11-11T22:29:18.737097Z",
+        "signal": {
+          "signalId": "sig_1367234_1794668920968",
+          "category": "Sports & Competitive Athletics",
+          "currentObservation": "Leading outcome: \"Game 2 Winner\" at 100% (21 total options, $1,639,229 24h vol).",
+          "probability": 100,
+          "probabilityChange24h": 0,
+          "volumeAcceleration": 5,
+          "signalConfidence": 85,
+          "dataFreshness": "LIVE_STREAM",
+          "isCommerciallyViable": false,
+          "nonCommercialReason": "Competitive sports or athletic match without direct consumer purchasing problem or affiliate product fit.",
+          "firstDetectedAt": "2026-11-14T15:08:40.968Z",
+          "lastUpdatedAt": "2026-11-14T15:08:40.968Z"
+        }
+      },
+      "signal": {
+        "signalId": "sig_1367234_1794668920968",
+        "category": "Sports & Competitive Athletics",
+        "currentObservation": "Leading outcome: \"Game 2 Winner\" at 100% (21 total options, $1,639,229 24h vol).",
+        "probability": 100,
+        "probabilityChange24h": 0,
+        "volumeAcceleration": 5,
+        "signalConfidence": 85,
+        "dataFreshness": "LIVE_STREAM",
+        "isCommerciallyViable": false,
+        "nonCommercialReason": "Competitive sports or athletic match without direct consumer purchasing problem or affiliate product fit.",
+        "firstDetectedAt": "2026-11-14T15:08:40.968Z",
+        "lastUpdatedAt": "2026-11-14T15:08:40.968Z"
+      },
+      "hypothesis": {
+        "hypothesisId": "hyp_1367234_1794668920973",
+        "signalId": "sig_1367234_1794668920968",
+        "category": "Sports & Competitive Athletics",
+        "affectedConsumerGroup": "None (Spectators / Non-Commercial Audience)",
+        "coreProblem": "None - Event does not create practical consumer purchasing demand.",
+        "hypothesis": "Spectators observing \"Dota 2: DO KONCA vs Yellow Submarine (BO3) - 1win Essence Group A\" follow the outcome for news or entertainment without buying intent.",
+        "searchPhrases": [],
+        "purchaseTiming": "NONE",
+        "intentType": "NON_COMMERCIAL",
+        "commercialViable": false,
+        "verificationStatus": "NOT_CHECKED",
+        "demandEvidence": null,
+        "outcome": "NO_COMMERCIAL_OPPORTUNITY",
+        "outcomeReason": "Competitive sports or athletic match without direct consumer purchasing problem or affiliate product fit.",
+        "createdAt": "2026-11-14T15:08:40.974Z"
+      },
+      "offerMatch": {
+        "matchId": null,
+        "offerSlug": null,
+        "productName": null,
+        "merchant": null,
+        "network": null,
+        "affiliateUrl": null,
+        "destinationUrl": null,
+        "productPurpose": null,
+        "intendedAudience": null,
+        "commissionStructure": null,
+        "commissionRate": 0,
+        "cookieDuration": null,
+        "relevanceScore": 0,
+        "approvalStatus": "unmatched",
+        "sourceInventory": "NONE",
+        "outcome": "NO_COMMERCIAL_OPPORTUNITY",
+        "outcomeReason": "Competitive sports or athletic match without direct consumer purchasing problem or affiliate product fit.",
+        "createdAt": "2026-11-14T15:08:40.974Z"
+      },
+      "scoreResult": {
+        "opportunityScore": 20,
+        "tier": "DISQUALIFIED",
+        "outcome": "NO_COMMERCIAL_OPPORTUNITY",
+        "outcomeReason": "Competitive sports or athletic match without direct consumer purchasing problem or affiliate product fit.",
+        "eligibility": {
+          "validDataSource": true,
+          "categoryCommercial": false,
+          "buyerNeedIdentified": false,
+          "relevantProductMatch": false,
+          "acceptableComplianceRisk": true,
+          "passedAllGates": false,
+          "campaignEligible": false,
+          "disqualificationReason": "Competitive sports or athletic match without direct consumer purchasing problem or affiliate product fit."
+        },
+        "scoreBreakdown": {
+          "total": 20,
+          "momentumScore": {
+            "score": 95,
+            "weight": 0.2,
+            "weighted": 19
+          },
+          "verifiedDemandScore": {
+            "score": 0,
+            "weight": 0.2,
+            "weighted": 0
+          },
+          "intentScore": {
+            "score": 0,
+            "weight": 0.25,
+            "weighted": 0
+          },
+          "relevanceScore": {
+            "score": 0,
+            "weight": 0.2,
+            "weighted": 0
+          },
+          "economicsScore": {
+            "score": 0,
+            "weight": 0.1,
+            "weighted": 0
+          },
+          "confidenceScore": {
+            "score": 20,
+            "weight": 0.05,
+            "weighted": 1
+          }
+        },
+        "explanation": "Score 20/100 (Disqualified): Competitive sports or athletic match without direct consumer purchasing problem or affiliate product fit."
+      },
+      "status": "PENDING_REVIEW",
+      "adminNotes": null,
+      "reviewedAt": null,
+      "createdAt": "2026-11-14T15:02:16.332Z",
+      "lastEvaluatedAt": "2026-11-14T15:08:40.974Z"
     },
     {
       "opportunityId": "opp_30829_1794666800592",
       "event": {
         "eventId": "poly_30829",
         "source": "polymarket",
+        "provider": "polymarket",
         "externalId": "30829",
         "title": "Democratic Presidential Nominee 2028",
         "description": "This market will resolve to “Yes” if the named individual wins and accepts the 2028 nomination of the Democratic Party for U.S. president. Otherwise, this market will resolve to “No”.\n\nThe resolution source for this market will be a consensus of official Democratic Party sources.\n\nAny replacement of the democratic nominee before election day will not change the resolution of the market.",
-        "category": "Governance & Society",
+        "category": "Governance, Elections & Politics",
         "tags": [
           "United States",
           "Elections",
@@ -172,280 +762,600 @@
           "Parent For Derivative",
           "2028 Election"
         ],
-        "volume24h": 1629191,
-        "liquidity": 66452329,
+        "volume24h": 1635978,
+        "liquidity": 66441851,
         "marketStatus": "open",
-        "probability": 10,
+        "probability": 50,
+        "outcomes": [
+          {
+            "outcomeId": "559710",
+            "label": "Person AC",
+            "probability": 50,
+            "price": 0.5,
+            "volume": 0
+          },
+          {
+            "outcomeId": "559711",
+            "label": "Person AD",
+            "probability": 50,
+            "price": 0.5,
+            "volume": 0
+          },
+          {
+            "outcomeId": "559712",
+            "label": "Person AE",
+            "probability": 50,
+            "price": 0.5,
+            "volume": 0
+          },
+          {
+            "outcomeId": "559713",
+            "label": "Person AF",
+            "probability": 50,
+            "price": 0.5,
+            "volume": 0
+          },
+          {
+            "outcomeId": "559714",
+            "label": "Person AG",
+            "probability": 50,
+            "price": 0.5,
+            "volume": 0
+          },
+          {
+            "outcomeId": "559715",
+            "label": "Person AH",
+            "probability": 50,
+            "price": 0.5,
+            "volume": 0
+          }
+        ],
+        "topOutcome": {
+          "outcomeId": "559710",
+          "label": "Person AC",
+          "probability": 50,
+          "price": 0.5,
+          "volume": 0
+        },
+        "isMultiOutcome": true,
+        "totalOutcomesCount": 128,
         "resolutionDate": "2028-11-08T04:59:00Z",
         "sourceUrl": "https://polymarket.com/event/democratic-presidential-nominee-2028",
+        "observationTime": "2026-11-14T15:08:40.969Z",
+        "firstSeenTime": "2025-07-03T20:36:57.824243Z",
         "signal": {
-          "signalId": "sig_30829_1794666798528",
-          "category": "Governance & Society",
-          "currentObservation": "Market probability stands at 10%, with 24-hour trading volume of $1,629,191.",
-          "probability": 10,
+          "signalId": "sig_30829_1794668920969",
+          "category": "Governance, Elections & Politics",
+          "currentObservation": "Leading outcome: \"Person AC\" at 50% (128 total options, $1,635,978 24h vol).",
+          "probability": 50,
           "probabilityChange24h": 0,
-          "volumeAcceleration": 1.8,
+          "volumeAcceleration": 1.02,
           "signalConfidence": 95,
-          "dataFreshness": "live",
-          "firstDetectedAt": "2026-11-14T14:33:18.528Z",
-          "lastUpdatedAt": "2026-11-14T14:33:18.528Z"
+          "dataFreshness": "LIVE_STREAM",
+          "isCommerciallyViable": false,
+          "nonCommercialReason": "General political race or election polling speculation produces spectator curiosity, not verifiable consumer product purchasing intent.",
+          "firstDetectedAt": "2026-11-14T15:08:40.969Z",
+          "lastUpdatedAt": "2026-11-14T15:08:40.969Z"
         }
       },
       "signal": {
-        "signalId": "sig_30829_1794666798528",
-        "category": "Governance & Society",
-        "currentObservation": "Market probability stands at 10%, with 24-hour trading volume of $1,629,191.",
-        "probability": 10,
+        "signalId": "sig_30829_1794668920969",
+        "category": "Governance, Elections & Politics",
+        "currentObservation": "Leading outcome: \"Person AC\" at 50% (128 total options, $1,635,978 24h vol).",
+        "probability": 50,
         "probabilityChange24h": 0,
-        "volumeAcceleration": 1.8,
+        "volumeAcceleration": 1.02,
         "signalConfidence": 95,
-        "dataFreshness": "live",
-        "firstDetectedAt": "2026-11-14T14:33:18.528Z",
-        "lastUpdatedAt": "2026-11-14T14:33:18.528Z"
+        "dataFreshness": "LIVE_STREAM",
+        "isCommerciallyViable": false,
+        "nonCommercialReason": "General political race or election polling speculation produces spectator curiosity, not verifiable consumer product purchasing intent.",
+        "firstDetectedAt": "2026-11-14T15:08:40.969Z",
+        "lastUpdatedAt": "2026-11-14T15:08:40.969Z"
       },
       "hypothesis": {
-        "hypothesisId": "hyp_30829_1794666799641",
-        "signalId": "sig_30829_1794666798528",
-        "affectedConsumerGroup": "Civic-Minded Citizens & Preppers",
-        "coreProblem": "Policy uncertainty, supply chain friction, and personal self-reliance.",
-        "hypothesis": "Consumers observing \"Democratic Presidential Nominee 2028\" will seek practical self-reliance, hedging tools, or physical safeguards to mitigate uncertainty.",
-        "searchPhrases": [
-          "how to prepare for democratic impact",
-          "emergency water filtration home",
-          "long term survival pantry essentials",
-          "off grid communication radio"
-        ],
-        "purchaseTiming": "SPECULATIVE",
-        "intentType": "INFORMATIONAL",
-        "verificationStatus": "UNVERIFIED_LOW_DEMAND",
-        "demandEvidence": {
-          "evidenceId": "evi_1794666800592",
-          "source": "vidiq_mcp",
-          "queryPhrase": "emergency water filtration home",
-          "searchVolume": 0,
-          "competitionScore": 0,
-          "opportunityScore": 0,
-          "volumeDisplay": "<750",
-          "verifiedAt": "2026-11-14T14:33:20.592Z"
-        },
-        "createdAt": "2026-11-14T14:33:19.641Z"
+        "hypothesisId": "hyp_30829_1794668920974",
+        "signalId": "sig_30829_1794668920969",
+        "category": "Governance, Elections & Politics",
+        "affectedConsumerGroup": "None (Spectators / Non-Commercial Audience)",
+        "coreProblem": "None - Event does not create practical consumer purchasing demand.",
+        "hypothesis": "Spectators observing \"Democratic Presidential Nominee 2028\" follow the outcome for news or entertainment without buying intent.",
+        "searchPhrases": [],
+        "purchaseTiming": "NONE",
+        "intentType": "NON_COMMERCIAL",
+        "commercialViable": false,
+        "verificationStatus": "NOT_CHECKED",
+        "demandEvidence": null,
+        "outcome": "NO_COMMERCIAL_OPPORTUNITY",
+        "outcomeReason": "General political race or election polling speculation produces spectator curiosity, not verifiable consumer product purchasing intent.",
+        "createdAt": "2026-11-14T15:08:40.974Z"
       },
       "offerMatch": {
-        "matchId": "mat_offgrid-water_1794666800592",
-        "hypothesisId": "hyp_30829_1794666799641",
-        "offerSlug": "offgrid-water",
-        "productName": "Emergency Drinking Water & Off-Grid Sanitation",
-        "merchant": "Direct Vendor Partner",
-        "network": "Multi-Network (Amazon santa101-20 + ClickBank kmtwarrior)",
-        "affiliateUrl": "https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=kmtwarrior&tid=poly_30829",
-        "secondaryUrl": "https://www.amazon.com/s?k=offgrid%20water&tag=santa101-20",
-        "commissionStructure": "75% Digital / 3% - 4% Physical + 24-hr Cart Cookie",
-        "commissionRate": 75,
-        "cookieDuration": "60 Days (ClickBank) / 24 Hours (Amazon Universal Cart)",
-        "targetAudience": "Civic-Minded Citizens & Preppers",
-        "approvalStatus": "approved",
-        "sourceInventory": "EXACT_LOCAL_INVENTORY",
-        "createdAt": "2026-11-14T14:33:20.592Z"
+        "matchId": null,
+        "offerSlug": null,
+        "productName": null,
+        "merchant": null,
+        "network": null,
+        "affiliateUrl": null,
+        "destinationUrl": null,
+        "productPurpose": null,
+        "intendedAudience": null,
+        "commissionStructure": null,
+        "commissionRate": 0,
+        "cookieDuration": null,
+        "relevanceScore": 0,
+        "approvalStatus": "unmatched",
+        "sourceInventory": "NONE",
+        "outcome": "NO_COMMERCIAL_OPPORTUNITY",
+        "outcomeReason": "General political race or election polling speculation produces spectator curiosity, not verifiable consumer product purchasing intent.",
+        "createdAt": "2026-11-14T15:08:40.974Z"
       },
       "scoreResult": {
-        "opportunityScore": 58,
-        "tier": "WATCHLIST",
+        "opportunityScore": 19,
+        "tier": "DISQUALIFIED",
+        "outcome": "NO_COMMERCIAL_OPPORTUNITY",
+        "outcomeReason": "General political race or election polling speculation produces spectator curiosity, not verifiable consumer product purchasing intent.",
         "eligibility": {
-          "validDataSource": false,
-          "sufficientEvidence": true,
-          "relevantProductMatch": true,
+          "validDataSource": true,
+          "categoryCommercial": true,
+          "buyerNeedIdentified": false,
+          "relevantProductMatch": false,
           "acceptableComplianceRisk": true,
-          "passedAllGates": true,
-          "disqualificationReason": null
+          "passedAllGates": false,
+          "campaignEligible": false,
+          "disqualificationReason": "General political race or election polling speculation produces spectator curiosity, not verifiable consumer product purchasing intent."
         },
         "scoreBreakdown": {
-          "total": 58,
+          "total": 19,
           "momentumScore": {
-            "score": 50,
+            "score": 85,
             "weight": 0.2,
-            "weighted": 10
+            "weighted": 17
           },
           "verifiedDemandScore": {
-            "score": 25,
+            "score": 0,
             "weight": 0.2,
-            "weighted": 5
+            "weighted": 0
           },
           "intentScore": {
-            "score": 40,
+            "score": 0,
             "weight": 0.25,
-            "weighted": 10
+            "weighted": 0
           },
           "relevanceScore": {
-            "score": 95,
+            "score": 0,
             "weight": 0.2,
-            "weighted": 19
+            "weighted": 0
           },
           "economicsScore": {
-            "score": 90,
+            "score": 0,
             "weight": 0.1,
-            "weighted": 9
+            "weighted": 0
           },
           "confidenceScore": {
-            "score": 95,
+            "score": 30,
             "weight": 0.05,
-            "weighted": 5
+            "weighted": 2
           }
         },
-        "explanation": "Score 58/100 (WATCHLIST): Driven by 50 momentum, 25 verified search demand, and 95 product fit with Emergency Drinking Water & Off-Grid Sanitation."
+        "explanation": "Score 19/100 (Disqualified): General political race or election polling speculation produces spectator curiosity, not verifiable consumer product purchasing intent."
       },
       "status": "PENDING_REVIEW",
       "adminNotes": null,
-      "createdAt": "2026-11-14T14:33:20.592Z"
+      "reviewedAt": null,
+      "createdAt": "2026-11-14T14:33:20.592Z",
+      "lastEvaluatedAt": "2026-11-14T15:08:40.974Z"
     },
     {
       "opportunityId": "opp_1284293_1794666801821",
       "event": {
         "eventId": "poly_1284293",
         "source": "polymarket",
+        "provider": "polymarket",
         "externalId": "1284293",
         "title": "Grizzlies vs. Pelicans",
         "description": "In the upcoming NBA game between Grizzlies and Pelicans, originally scheduled for Friday, November 13, 2026 at 8:00 PM ET (as of creation of the first market related to the event):\nIf the Grizzlies win, the market will resolve to \"Grizzlies\".\nIf the Pelicans win, the market will resolve to \"Pelicans\".\nIf this market's outcome was definitively determined under its rules by the listed resolution sources before abandonment, that outcome will stand. Otherwise, the following no-result provisions apply. If the game is canceled, does not start by Sunday, November 15, 2026, 11:59 PM ET, or is abandoned with no official result by that time, this market will resolve 50-50.\nThe result will be determined based on the final score including any overtime periods.",
-        "category": "Macro & Economy",
+        "category": "Sports & Competitive Athletics",
         "tags": [
           "Sports",
           "NBA",
           "Games",
           "Basketball"
         ],
-        "volume24h": 1615177,
+        "volume24h": 1596049,
         "liquidity": 0,
         "marketStatus": "open",
         "probability": 100,
+        "outcomes": [
+          {
+            "outcomeId": "6428680",
+            "label": "Grizzlies vs. Pelicans",
+            "probability": 100,
+            "price": 1,
+            "volume": 974706
+          },
+          {
+            "outcomeId": "6999696",
+            "label": "Spread -4.5",
+            "probability": 100,
+            "price": 1,
+            "volume": 32132
+          },
+          {
+            "outcomeId": "6999708",
+            "label": "O/U 233.5",
+            "probability": 100,
+            "price": 1,
+            "volume": 14352
+          },
+          {
+            "outcomeId": "6999725",
+            "label": "Spread -5.5",
+            "probability": 100,
+            "price": 1,
+            "volume": 33695
+          },
+          {
+            "outcomeId": "6999736",
+            "label": "O/U 231.5",
+            "probability": 100,
+            "price": 1,
+            "volume": 1088
+          },
+          {
+            "outcomeId": "6999747",
+            "label": "Spread -3.5",
+            "probability": 100,
+            "price": 1,
+            "volume": 175682
+          }
+        ],
+        "topOutcome": {
+          "outcomeId": "6428680",
+          "label": "Grizzlies vs. Pelicans",
+          "probability": 100,
+          "price": 1,
+          "volume": 974706
+        },
+        "isMultiOutcome": true,
+        "totalOutcomesCount": 498,
         "resolutionDate": "2026-11-14T01:00:00Z",
         "sourceUrl": "https://polymarket.com/event/nba-mem-nop-2026-11-13",
+        "observationTime": "2026-11-14T15:08:40.969Z",
+        "firstSeenTime": "2026-10-30T18:00:08.924093Z",
         "signal": {
-          "signalId": "sig_1284293_1794666798528",
-          "category": "Macro & Economy",
-          "currentObservation": "Market probability stands at 100%, with 24-hour trading volume of $1,615,177.",
+          "signalId": "sig_1284293_1794668920969",
+          "category": "Sports & Competitive Athletics",
+          "currentObservation": "Leading outcome: \"Grizzlies vs. Pelicans\" at 100% (498 total options, $1,596,049 24h vol).",
           "probability": 100,
           "probabilityChange24h": 0,
-          "volumeAcceleration": 1.8,
-          "signalConfidence": 95,
-          "dataFreshness": "live",
-          "firstDetectedAt": "2026-11-14T14:33:18.528Z",
-          "lastUpdatedAt": "2026-11-14T14:33:18.528Z"
+          "volumeAcceleration": 2.1,
+          "signalConfidence": 70,
+          "dataFreshness": "LIVE_STREAM",
+          "isCommerciallyViable": false,
+          "nonCommercialReason": "Competitive sports or athletic match without direct consumer purchasing problem or affiliate product fit.",
+          "firstDetectedAt": "2026-11-14T15:08:40.969Z",
+          "lastUpdatedAt": "2026-11-14T15:08:40.969Z"
         }
       },
       "signal": {
-        "signalId": "sig_1284293_1794666798528",
-        "category": "Macro & Economy",
-        "currentObservation": "Market probability stands at 100%, with 24-hour trading volume of $1,615,177.",
+        "signalId": "sig_1284293_1794668920969",
+        "category": "Sports & Competitive Athletics",
+        "currentObservation": "Leading outcome: \"Grizzlies vs. Pelicans\" at 100% (498 total options, $1,596,049 24h vol).",
         "probability": 100,
         "probabilityChange24h": 0,
-        "volumeAcceleration": 1.8,
-        "signalConfidence": 95,
-        "dataFreshness": "live",
-        "firstDetectedAt": "2026-11-14T14:33:18.528Z",
-        "lastUpdatedAt": "2026-11-14T14:33:18.528Z"
+        "volumeAcceleration": 2.1,
+        "signalConfidence": 70,
+        "dataFreshness": "LIVE_STREAM",
+        "isCommerciallyViable": false,
+        "nonCommercialReason": "Competitive sports or athletic match without direct consumer purchasing problem or affiliate product fit.",
+        "firstDetectedAt": "2026-11-14T15:08:40.969Z",
+        "lastUpdatedAt": "2026-11-14T15:08:40.969Z"
       },
       "hypothesis": {
-        "hypothesisId": "hyp_1284293_1794666800592",
-        "signalId": "sig_1284293_1794666798528",
-        "affectedConsumerGroup": "Middle-Class Households & Small Business Owners",
-        "coreProblem": "Household budget compression and search for resilient secondary income.",
-        "hypothesis": "Consumers observing \"Grizzlies vs. Pelicans\" will seek practical self-reliance, hedging tools, or physical safeguards to mitigate uncertainty.",
-        "searchPhrases": [
-          "how to prepare for grizzlies impact",
-          "recession proof side hustle",
-          "emergency food preservation storage",
-          "low cost home energy savings"
-        ],
-        "purchaseTiming": "UPCOMING",
-        "intentType": "COMMERCIAL_INVESTIGATION",
-        "verificationStatus": "UNVERIFIED_LOW_DEMAND",
-        "demandEvidence": {
-          "evidenceId": "evi_1794666801820",
-          "source": "vidiq_mcp",
-          "queryPhrase": "recession proof side hustle",
-          "searchVolume": 0,
-          "competitionScore": 22,
-          "opportunityScore": 31,
-          "volumeDisplay": "<750",
-          "verifiedAt": "2026-11-14T14:33:21.820Z"
-        },
-        "createdAt": "2026-11-14T14:33:20.592Z"
+        "hypothesisId": "hyp_1284293_1794668920974",
+        "signalId": "sig_1284293_1794668920969",
+        "category": "Sports & Competitive Athletics",
+        "affectedConsumerGroup": "None (Spectators / Non-Commercial Audience)",
+        "coreProblem": "None - Event does not create practical consumer purchasing demand.",
+        "hypothesis": "Spectators observing \"Grizzlies vs. Pelicans\" follow the outcome for news or entertainment without buying intent.",
+        "searchPhrases": [],
+        "purchaseTiming": "NONE",
+        "intentType": "NON_COMMERCIAL",
+        "commercialViable": false,
+        "verificationStatus": "NOT_CHECKED",
+        "demandEvidence": null,
+        "outcome": "NO_COMMERCIAL_OPPORTUNITY",
+        "outcomeReason": "Competitive sports or athletic match without direct consumer purchasing problem or affiliate product fit.",
+        "createdAt": "2026-11-14T15:08:40.974Z"
       },
       "offerMatch": {
-        "matchId": "mat_food-preservation_1794666801821",
-        "hypothesisId": "hyp_1284293_1794666800592",
-        "offerSlug": "food-preservation",
-        "productName": "25-Year Long-Term Food Preservation & Spoilage Defense",
-        "merchant": "Direct Vendor Partner",
-        "network": "Multi-Network (Amazon santa101-20 + ClickBank kmtwarrior)",
-        "affiliateUrl": "https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=kmtwarrior&tid=poly_1284293",
-        "secondaryUrl": "https://www.amazon.com/s?k=food%20preservation&tag=santa101-20",
-        "commissionStructure": "75% Digital / 3% - 4% Physical + 24-hr Cart Cookie",
-        "commissionRate": 75,
-        "cookieDuration": "60 Days (ClickBank) / 24 Hours (Amazon Universal Cart)",
-        "targetAudience": "Middle-Class Households & Small Business Owners",
-        "approvalStatus": "approved",
-        "sourceInventory": "EXACT_LOCAL_INVENTORY",
-        "createdAt": "2026-11-14T14:33:21.821Z"
+        "matchId": null,
+        "offerSlug": null,
+        "productName": null,
+        "merchant": null,
+        "network": null,
+        "affiliateUrl": null,
+        "destinationUrl": null,
+        "productPurpose": null,
+        "intendedAudience": null,
+        "commissionStructure": null,
+        "commissionRate": 0,
+        "cookieDuration": null,
+        "relevanceScore": 0,
+        "approvalStatus": "unmatched",
+        "sourceInventory": "NONE",
+        "outcome": "NO_COMMERCIAL_OPPORTUNITY",
+        "outcomeReason": "Competitive sports or athletic match without direct consumer purchasing problem or affiliate product fit.",
+        "createdAt": "2026-11-14T15:08:40.974Z"
       },
       "scoreResult": {
-        "opportunityScore": 67,
-        "tier": "WATCHLIST",
+        "opportunityScore": 20,
+        "tier": "DISQUALIFIED",
+        "outcome": "NO_COMMERCIAL_OPPORTUNITY",
+        "outcomeReason": "Competitive sports or athletic match without direct consumer purchasing problem or affiliate product fit.",
         "eligibility": {
-          "validDataSource": false,
-          "sufficientEvidence": true,
-          "relevantProductMatch": true,
+          "validDataSource": true,
+          "categoryCommercial": false,
+          "buyerNeedIdentified": false,
+          "relevantProductMatch": false,
           "acceptableComplianceRisk": true,
-          "passedAllGates": true,
-          "disqualificationReason": null
+          "passedAllGates": false,
+          "campaignEligible": false,
+          "disqualificationReason": "Competitive sports or athletic match without direct consumer purchasing problem or affiliate product fit."
         },
         "scoreBreakdown": {
-          "total": 67,
+          "total": 20,
           "momentumScore": {
-            "score": 50,
+            "score": 95,
             "weight": 0.2,
-            "weighted": 10
+            "weighted": 19
           },
           "verifiedDemandScore": {
-            "score": 25,
+            "score": 0,
             "weight": 0.2,
-            "weighted": 5
+            "weighted": 0
           },
           "intentScore": {
-            "score": 75,
+            "score": 0,
             "weight": 0.25,
-            "weighted": 19
+            "weighted": 0
           },
           "relevanceScore": {
-            "score": 95,
+            "score": 0,
             "weight": 0.2,
-            "weighted": 19
+            "weighted": 0
           },
           "economicsScore": {
-            "score": 90,
+            "score": 0,
             "weight": 0.1,
-            "weighted": 9
+            "weighted": 0
           },
           "confidenceScore": {
-            "score": 95,
+            "score": 15,
             "weight": 0.05,
-            "weighted": 5
+            "weighted": 1
           }
         },
-        "explanation": "Score 67/100 (WATCHLIST): Driven by 50 momentum, 25 verified search demand, and 95 product fit with 25-Year Long-Term Food Preservation & Spoilage Defense."
+        "explanation": "Score 20/100 (Disqualified): Competitive sports or athletic match without direct consumer purchasing problem or affiliate product fit."
       },
       "status": "PENDING_REVIEW",
       "adminNotes": null,
-      "createdAt": "2026-11-14T14:33:21.821Z"
+      "reviewedAt": null,
+      "createdAt": "2026-11-14T14:33:21.821Z",
+      "lastEvaluatedAt": "2026-11-14T15:08:40.974Z"
+    },
+    {
+      "opportunityId": "opp_1345375_1794668536332",
+      "event": {
+        "eventId": "poly_1345375",
+        "source": "polymarket",
+        "provider": "polymarket",
+        "externalId": "1345375",
+        "title": "LoL: Bilibili Gaming vs Gen.G (BO5) - Worlds Playoffs",
+        "description": "This market refers to the LoL Grand Final match between Bilibili Gaming and Gen.G in the Worlds Playoffs, initially scheduled for November 14, 2026 at 2:00 PM ET.\n\nThis market will resolve to \"Bilibili Gaming\" if Bilibili Gaming win the match against Gen.G.\n\nThis market will resolve to \"Gen.G\" if Gen.G win the match against Bilibili Gaming.\n\nIf the match is canceled (not played at all) or ends in a tie, this market will resolve to 50-50.\n\nIf the match is postponed, it must be rescheduled to a start time on or before November 28, 2026 at 11:59 PM ET (14 calendar days after the originally scheduled start of November 14, 2026 at 2:00 PM ET). If, by that deadline, the most recently announced rescheduled start time is on or before the deadline, this market resolves based on the result of the match as played. Otherwise, this market resolves 50-50, regardless of whether the match is subsequently played.\n\nIf the match begins but is not completed, and one team wins due to the opponent's forfeiture, disqualification, or walkover, this market will resolve to the team who wins. \n\nIf the match ends in a forfeit, disqualification, or walkover (team withdraws before the start and the other wins automatically), this market will resolve to 50-50. \n\nThe resolution source for this market will be official information from https://gol.gg/esports/home. However, if https://gol.gg/esports/home has not published final results within 2 hours after the event’s conclusion, a consensus of credible reporting may be used instead including video evidence.\n\nIn cases where a team’s listed name includes minor discrepancies from the resolution source, this market will resolve based on the underlying real-world match rather than exact name matching. Recognizable abbreviations, alternate or erroneous spellings, sponsor tags, affiliate or academy designations, regional identifiers, and minor formatting differences will be treated as referring to the same team, provided the intended team can be clearly and uniquely identified within the relevant competition. If a listed team name has no reasonable connection to any participating team, or if it matches or could reasonably refer to another team in the same competition such that the intended team cannot be unambiguously determined, this market will resolve 50-50.",
+        "category": "Sports & Competitive Athletics",
+        "tags": [
+          "Esports",
+          "league of legends",
+          "Games",
+          "Sports",
+          "LoL Worlds 2026",
+          "Knockout Stage",
+          "Final"
+        ],
+        "volume24h": 1460332,
+        "liquidity": 32570982,
+        "marketStatus": "open",
+        "probability": 73,
+        "outcomes": [
+          {
+            "outcomeId": "6889028",
+            "label": "O/U 3.5 Games",
+            "probability": 73,
+            "price": 0.725,
+            "volume": 293898
+          },
+          {
+            "outcomeId": "6889033",
+            "label": "Both Teams Slay a Dragon",
+            "probability": 72,
+            "price": 0.715,
+            "volume": 0
+          },
+          {
+            "outcomeId": "6889038",
+            "label": "Both Teams Slay a Dragon",
+            "probability": 72,
+            "price": 0.715,
+            "volume": 0
+          },
+          {
+            "outcomeId": "6889043",
+            "label": "Both Teams Slay a Dragon",
+            "probability": 72,
+            "price": 0.715,
+            "volume": 0
+          },
+          {
+            "outcomeId": "6889048",
+            "label": "Both Teams Slay a Dragon",
+            "probability": 72,
+            "price": 0.715,
+            "volume": 0
+          },
+          {
+            "outcomeId": "6889053",
+            "label": "Both Teams Slay a Dragon",
+            "probability": 72,
+            "price": 0.715,
+            "volume": 0
+          }
+        ],
+        "topOutcome": {
+          "outcomeId": "6889028",
+          "label": "O/U 3.5 Games",
+          "probability": 73,
+          "price": 0.725,
+          "volume": 293898
+        },
+        "isMultiOutcome": true,
+        "totalOutcomesCount": 47,
+        "resolutionDate": "2026-11-15T01:00:00Z",
+        "sourceUrl": "https://polymarket.com/event/lol-blg-gen-2026-11-14",
+        "observationTime": "2026-11-14T15:08:40.970Z",
+        "firstSeenTime": "2026-11-09T01:50:04.852988Z",
+        "signal": {
+          "signalId": "sig_1345375_1794668920970",
+          "category": "Sports & Competitive Athletics",
+          "currentObservation": "Leading outcome: \"O/U 3.5 Games\" at 73% (47 total options, $1,460,332 24h vol).",
+          "probability": 73,
+          "probabilityChange24h": 0,
+          "volumeAcceleration": 1.04,
+          "signalConfidence": 95,
+          "dataFreshness": "LIVE_STREAM",
+          "isCommerciallyViable": false,
+          "nonCommercialReason": "Competitive sports or athletic match without direct consumer purchasing problem or affiliate product fit.",
+          "firstDetectedAt": "2026-11-14T15:08:40.970Z",
+          "lastUpdatedAt": "2026-11-14T15:08:40.970Z"
+        }
+      },
+      "signal": {
+        "signalId": "sig_1345375_1794668920970",
+        "category": "Sports & Competitive Athletics",
+        "currentObservation": "Leading outcome: \"O/U 3.5 Games\" at 73% (47 total options, $1,460,332 24h vol).",
+        "probability": 73,
+        "probabilityChange24h": 0,
+        "volumeAcceleration": 1.04,
+        "signalConfidence": 95,
+        "dataFreshness": "LIVE_STREAM",
+        "isCommerciallyViable": false,
+        "nonCommercialReason": "Competitive sports or athletic match without direct consumer purchasing problem or affiliate product fit.",
+        "firstDetectedAt": "2026-11-14T15:08:40.970Z",
+        "lastUpdatedAt": "2026-11-14T15:08:40.970Z"
+      },
+      "hypothesis": {
+        "hypothesisId": "hyp_1345375_1794668920974",
+        "signalId": "sig_1345375_1794668920970",
+        "category": "Sports & Competitive Athletics",
+        "affectedConsumerGroup": "None (Spectators / Non-Commercial Audience)",
+        "coreProblem": "None - Event does not create practical consumer purchasing demand.",
+        "hypothesis": "Spectators observing \"LoL: Bilibili Gaming vs Gen.G (BO5) - Worlds Playoffs\" follow the outcome for news or entertainment without buying intent.",
+        "searchPhrases": [],
+        "purchaseTiming": "NONE",
+        "intentType": "NON_COMMERCIAL",
+        "commercialViable": false,
+        "verificationStatus": "NOT_CHECKED",
+        "demandEvidence": null,
+        "outcome": "NO_COMMERCIAL_OPPORTUNITY",
+        "outcomeReason": "Competitive sports or athletic match without direct consumer purchasing problem or affiliate product fit.",
+        "createdAt": "2026-11-14T15:08:40.974Z"
+      },
+      "offerMatch": {
+        "matchId": null,
+        "offerSlug": null,
+        "productName": null,
+        "merchant": null,
+        "network": null,
+        "affiliateUrl": null,
+        "destinationUrl": null,
+        "productPurpose": null,
+        "intendedAudience": null,
+        "commissionStructure": null,
+        "commissionRate": 0,
+        "cookieDuration": null,
+        "relevanceScore": 0,
+        "approvalStatus": "unmatched",
+        "sourceInventory": "NONE",
+        "outcome": "NO_COMMERCIAL_OPPORTUNITY",
+        "outcomeReason": "Competitive sports or athletic match without direct consumer purchasing problem or affiliate product fit.",
+        "createdAt": "2026-11-14T15:08:40.974Z"
+      },
+      "scoreResult": {
+        "opportunityScore": 19,
+        "tier": "DISQUALIFIED",
+        "outcome": "NO_COMMERCIAL_OPPORTUNITY",
+        "outcomeReason": "Competitive sports or athletic match without direct consumer purchasing problem or affiliate product fit.",
+        "eligibility": {
+          "validDataSource": true,
+          "categoryCommercial": false,
+          "buyerNeedIdentified": false,
+          "relevantProductMatch": false,
+          "acceptableComplianceRisk": true,
+          "passedAllGates": false,
+          "campaignEligible": false,
+          "disqualificationReason": "Competitive sports or athletic match without direct consumer purchasing problem or affiliate product fit."
+        },
+        "scoreBreakdown": {
+          "total": 19,
+          "momentumScore": {
+            "score": 85,
+            "weight": 0.2,
+            "weighted": 17
+          },
+          "verifiedDemandScore": {
+            "score": 0,
+            "weight": 0.2,
+            "weighted": 0
+          },
+          "intentScore": {
+            "score": 0,
+            "weight": 0.25,
+            "weighted": 0
+          },
+          "relevanceScore": {
+            "score": 0,
+            "weight": 0.2,
+            "weighted": 0
+          },
+          "economicsScore": {
+            "score": 0,
+            "weight": 0.1,
+            "weighted": 0
+          },
+          "confidenceScore": {
+            "score": 30,
+            "weight": 0.05,
+            "weighted": 2
+          }
+        },
+        "explanation": "Score 19/100 (Disqualified): Competitive sports or athletic match without direct consumer purchasing problem or affiliate product fit."
+      },
+      "status": "PENDING_REVIEW",
+      "adminNotes": null,
+      "reviewedAt": null,
+      "createdAt": "2026-11-14T15:02:16.332Z",
+      "lastEvaluatedAt": "2026-11-14T15:08:40.974Z"
     },
     {
       "opportunityId": "opp_89502_1794666801987",
       "event": {
         "eventId": "poly_89502",
         "source": "polymarket",
+        "provider": "polymarket",
         "externalId": "89502",
         "title": "What price will Bitcoin hit in 2026?",
         "description": "What price will Bitcoin hit before 2027?",
-        "category": "Finance & Wealth",
+        "category": "Finance, Capital & Wealth",
         "tags": [
           "Bitcoin",
           "Yearly",
@@ -454,140 +1364,216 @@
           "Crypto",
           "Earn 3.25%"
         ],
-        "volume24h": 1195594,
-        "liquidity": 4147553,
+        "volume24h": 1166512,
+        "liquidity": 4072948,
         "marketStatus": "open",
-        "probability": 50,
+        "probability": 100,
+        "outcomes": [
+          {
+            "outcomeId": "2463847",
+            "label": "↓ 60,000",
+            "probability": 100,
+            "price": 1,
+            "volume": 137448
+          },
+          {
+            "outcomeId": "2467207",
+            "label": "↑ 85,000",
+            "probability": 100,
+            "price": 1,
+            "volume": 921124
+          },
+          {
+            "outcomeId": "2467208",
+            "label": "↑ 80,000",
+            "probability": 100,
+            "price": 1,
+            "volume": 680074
+          },
+          {
+            "outcomeId": "2467209",
+            "label": "↑ 75,000",
+            "probability": 100,
+            "price": 1,
+            "volume": 257794
+          },
+          {
+            "outcomeId": "2467210",
+            "label": "↑ 70,000",
+            "probability": 100,
+            "price": 1,
+            "volume": 274122
+          },
+          {
+            "outcomeId": "2467211",
+            "label": "↑ 65,000",
+            "probability": 100,
+            "price": 1,
+            "volume": 15174
+          }
+        ],
+        "topOutcome": {
+          "outcomeId": "2463847",
+          "label": "↓ 60,000",
+          "probability": 100,
+          "price": 1,
+          "volume": 137448
+        },
+        "isMultiOutcome": true,
+        "totalOutcomesCount": 47,
         "resolutionDate": "2027-01-01T05:00:00Z",
         "sourceUrl": "https://polymarket.com/event/what-price-will-bitcoin-hit-before-2027",
+        "observationTime": "2026-11-14T15:08:40.970Z",
+        "firstSeenTime": "2025-11-24T18:55:05.597959Z",
         "signal": {
-          "signalId": "sig_89502_1794666798528",
-          "category": "Finance & Wealth",
-          "currentObservation": "Market probability stands at 50%, with 24-hour trading volume of $1,195,594.",
-          "probability": 50,
+          "signalId": "sig_89502_1794668920970",
+          "category": "Finance, Capital & Wealth",
+          "currentObservation": "Leading outcome: \"↓ 60,000\" at 100% (47 total options, $1,166,512 24h vol).",
+          "probability": 100,
           "probabilityChange24h": 0,
-          "volumeAcceleration": 1.8,
+          "volumeAcceleration": 1.23,
           "signalConfidence": 95,
-          "dataFreshness": "live",
-          "firstDetectedAt": "2026-11-14T14:33:18.528Z",
-          "lastUpdatedAt": "2026-11-14T14:33:18.528Z"
+          "dataFreshness": "LIVE_STREAM",
+          "isCommerciallyViable": true,
+          "nonCommercialReason": null,
+          "firstDetectedAt": "2026-11-14T15:08:40.970Z",
+          "lastUpdatedAt": "2026-11-14T15:08:40.970Z"
         }
       },
       "signal": {
-        "signalId": "sig_89502_1794666798528",
-        "category": "Finance & Wealth",
-        "currentObservation": "Market probability stands at 50%, with 24-hour trading volume of $1,195,594.",
-        "probability": 50,
+        "signalId": "sig_89502_1794668920970",
+        "category": "Finance, Capital & Wealth",
+        "currentObservation": "Leading outcome: \"↓ 60,000\" at 100% (47 total options, $1,166,512 24h vol).",
+        "probability": 100,
         "probabilityChange24h": 0,
-        "volumeAcceleration": 1.8,
+        "volumeAcceleration": 1.23,
         "signalConfidence": 95,
-        "dataFreshness": "live",
-        "firstDetectedAt": "2026-11-14T14:33:18.528Z",
-        "lastUpdatedAt": "2026-11-14T14:33:18.528Z"
+        "dataFreshness": "LIVE_STREAM",
+        "isCommerciallyViable": true,
+        "nonCommercialReason": null,
+        "firstDetectedAt": "2026-11-14T15:08:40.970Z",
+        "lastUpdatedAt": "2026-11-14T15:08:40.970Z"
       },
       "hypothesis": {
-        "hypothesisId": "hyp_89502_1794666801821",
-        "signalId": "sig_89502_1794666798528",
-        "affectedConsumerGroup": "Retail Investors & Working Professionals",
-        "coreProblem": "Inflation erosion, changing interest rates, and fear of portfolio drawdowns.",
-        "hypothesis": "Consumers observing \"What price will Bitcoin hit in 2026?\" will seek practical self-reliance, hedging tools, or physical safeguards to mitigate uncertainty.",
+        "hypothesisId": "hyp_89502_1794668920974",
+        "signalId": "sig_89502_1794668920970",
+        "category": "Finance, Capital & Wealth",
+        "affectedConsumerGroup": "Retail Investors, Borrowers, Savers & Freelancers",
+        "coreProblem": "Interest rate fluctuations, debt refinancing costs, inflation erosion of savings, and capital risk.",
+        "hypothesis": "Consumers affected by \"What price will Bitcoin hit in 2026?\" seek practical self-reliance, capital protection, or physical mitigation tools to resolve: Interest rate fluctuations, debt refinancing costs, inflation erosion of savings, and capital risk.",
         "searchPhrases": [
-          "how to prepare for price impact",
+          "high yield cash preservation",
           "best hedge against inflation",
           "how to pass prop firm evaluation",
-          "high yield cash preservation"
+          "recession proof online income"
         ],
+        "primarySearchPhrase": "high yield cash preservation",
         "purchaseTiming": "IMMEDIATE",
         "intentType": "COMMERCIAL_INVESTIGATION",
-        "verificationStatus": "UNVERIFIED_LOW_DEMAND",
+        "commercialViable": true,
+        "verificationStatus": "PROVIDER_UNAVAILABLE",
         "demandEvidence": {
-          "evidenceId": "evi_1794666801987",
-          "source": "vidiq_mcp",
-          "queryPhrase": "best hedge against inflation",
-          "searchVolume": 0,
-          "competitionScore": 29,
-          "opportunityScore": 28,
-          "volumeDisplay": "<750",
-          "verifiedAt": "2026-11-14T14:33:21.987Z"
+          "evidenceId": "evi_1794668920974",
+          "provider": "vidiq_mcp",
+          "queryPhrase": "high yield cash preservation",
+          "searchVolume": null,
+          "competitionScore": null,
+          "opportunityScore": null,
+          "error": "vidiqClient.researchQuery is not a function",
+          "geography": "US",
+          "observationDate": "2026-11-14T15:08:40.974Z"
         },
-        "createdAt": "2026-11-14T14:33:21.821Z"
+        "outcome": "PENDING_DEMAND_VERIFICATION",
+        "outcomeReason": null,
+        "createdAt": "2026-11-14T15:08:40.974Z"
       },
       "offerMatch": {
-        "matchId": "mat_prop-trading_1794666801987",
-        "hypothesisId": "hyp_89502_1794666801821",
+        "matchId": "mat_prop-trading_1794668920974",
+        "hypothesisId": "hyp_89502_1794668920974",
         "offerSlug": "prop-trading",
         "productName": "Funded Prop Trading Pass ($50K–$150K)",
-        "merchant": "Direct Vendor Partner",
-        "network": "Multi-Network (Amazon santa101-20 + ClickBank kmtwarrior)",
-        "affiliateUrl": "https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=kmtwarrior&tid=poly_89502",
-        "secondaryUrl": "https://www.amazon.com/s?k=prop%20trading&tag=santa101-20",
-        "commissionStructure": "75% Digital / 3% - 4% Physical + 24-hr Cart Cookie",
-        "commissionRate": 75,
-        "cookieDuration": "60 Days (ClickBank) / 24 Hours (Amazon Universal Cart)",
-        "targetAudience": "Retail Investors & Working Professionals",
+        "merchant": "Funded Trader Academy Inc",
+        "network": "Direct Vendor Partner",
+        "affiliateUrl": "https://traffic.aisimplesystem.com/o/prop-trading?tid=poly_89502",
+        "destinationUrl": "https://traffic.aisimplesystem.com/o/prop-trading",
+        "productPurpose": "Evaluation blueprints and risk-management strategies to secure funded accounts from $50K to $150K.",
+        "intendedAudience": "Retail Investors, Borrowers, Savers & Freelancers",
+        "commissionStructure": "50% Front-End Challenge Pass Fee",
+        "commissionRate": 50,
+        "cookieDuration": "60 Days",
+        "relevanceScore": 70,
         "approvalStatus": "approved",
         "sourceInventory": "EXACT_LOCAL_INVENTORY",
-        "createdAt": "2026-11-14T14:33:21.987Z"
+        "outcome": "RELEVANT_OFFER_MATCHED",
+        "outcomeReason": "Direct logical match to Funded Prop Trading Pass ($50K–$150K) (70/100 fit).",
+        "createdAt": "2026-11-14T15:08:40.974Z"
       },
       "scoreResult": {
-        "opportunityScore": 67,
+        "opportunityScore": 60,
         "tier": "WATCHLIST",
+        "outcome": "WATCHLIST_MORE_EVIDENCE_NEEDED",
+        "outcomeReason": "Score 60/100 (WATCHLIST): Momentum is 85 and product fit is 70%, but Demand provider unavailable (unverified). Kept on watchlist awaiting demand surge before campaign generation.",
         "eligibility": {
-          "validDataSource": false,
-          "sufficientEvidence": true,
+          "validDataSource": true,
+          "categoryCommercial": true,
+          "buyerNeedIdentified": true,
           "relevantProductMatch": true,
           "acceptableComplianceRisk": true,
           "passedAllGates": true,
+          "campaignEligible": false,
           "disqualificationReason": null
         },
         "scoreBreakdown": {
-          "total": 67,
+          "total": 60,
           "momentumScore": {
-            "score": 50,
+            "score": 85,
             "weight": 0.2,
-            "weighted": 10
+            "weighted": 17
           },
           "verifiedDemandScore": {
-            "score": 25,
+            "score": 10,
             "weight": 0.2,
-            "weighted": 5
+            "weighted": 2
           },
           "intentScore": {
-            "score": 75,
+            "score": 65,
             "weight": 0.25,
-            "weighted": 19
+            "weighted": 16
           },
           "relevanceScore": {
-            "score": 95,
+            "score": 70,
             "weight": 0.2,
-            "weighted": 19
+            "weighted": 14
           },
           "economicsScore": {
-            "score": 90,
+            "score": 75,
             "weight": 0.1,
-            "weighted": 9
+            "weighted": 8
           },
           "confidenceScore": {
-            "score": 95,
+            "score": 70,
             "weight": 0.05,
-            "weighted": 5
+            "weighted": 4
           }
         },
-        "explanation": "Score 67/100 (WATCHLIST): Driven by 50 momentum, 25 verified search demand, and 95 product fit with Funded Prop Trading Pass ($50K–$150K)."
+        "explanation": "Score 60/100 (WATCHLIST): Momentum is 85 and product fit is 70%, but Demand provider unavailable (unverified). Kept on watchlist awaiting demand surge before campaign generation."
       },
       "status": "PENDING_REVIEW",
       "adminNotes": null,
-      "createdAt": "2026-11-14T14:33:21.987Z"
+      "reviewedAt": null,
+      "createdAt": "2026-11-14T14:33:21.987Z",
+      "lastEvaluatedAt": "2026-11-14T15:08:40.974Z"
     },
     {
       "opportunityId": "opp_31552_1794666802785",
       "event": {
         "eventId": "poly_31552",
         "source": "polymarket",
+        "provider": "polymarket",
         "externalId": "31552",
         "title": "Presidential Election Winner 2028",
         "description": "The 2028 US Presidential Election is scheduled to take place on November 7, 2028.\n\nThis market will resolve to the person who wins the 2028 US Presidential Election. Otherwise, this market will resolve to “No.”\n\nThe resolution source for this market is the Associated Press, Fox News, and NBC. This market will resolve once all three sources call the race for the same candidate. If all three sources haven’t called the race for the same candidate by the inauguration date (January 20, 2029) this market will resolve based on who is inaugurated.",
-        "category": "Technology & AI",
+        "category": "Governance, Elections & Politics",
         "tags": [
           "President",
           "United States",
@@ -601,803 +1587,576 @@
           "Parent For Derivative",
           "2028 Election"
         ],
-        "volume24h": 1053864,
-        "liquidity": 52780678,
+        "volume24h": 1072391,
+        "liquidity": 52815971,
         "marketStatus": "open",
-        "probability": 15,
+        "probability": 50,
+        "outcomes": [
+          {
+            "outcomeId": "561287",
+            "label": "Person AL",
+            "probability": 50,
+            "price": 0.5,
+            "volume": 0
+          },
+          {
+            "outcomeId": "561288",
+            "label": "Person AM",
+            "probability": 50,
+            "price": 0.5,
+            "volume": 0
+          },
+          {
+            "outcomeId": "561289",
+            "label": "Person AN",
+            "probability": 50,
+            "price": 0.5,
+            "volume": 0
+          },
+          {
+            "outcomeId": "561290",
+            "label": "Person AO",
+            "probability": 50,
+            "price": 0.5,
+            "volume": 0
+          },
+          {
+            "outcomeId": "561291",
+            "label": "Person AP",
+            "probability": 50,
+            "price": 0.5,
+            "volume": 0
+          },
+          {
+            "outcomeId": "561292",
+            "label": "Person AQ",
+            "probability": 50,
+            "price": 0.5,
+            "volume": 0
+          }
+        ],
+        "topOutcome": {
+          "outcomeId": "561287",
+          "label": "Person AL",
+          "probability": 50,
+          "price": 0.5,
+          "volume": 0
+        },
+        "isMultiOutcome": true,
+        "totalOutcomesCount": 128,
         "resolutionDate": "2028-11-08T04:59:00Z",
         "sourceUrl": "https://polymarket.com/event/presidential-election-winner-2028",
+        "observationTime": "2026-11-14T15:08:40.970Z",
+        "firstSeenTime": "2025-07-08T19:05:57.129881Z",
         "signal": {
-          "signalId": "sig_31552_1794666798528",
-          "category": "Technology & AI",
-          "currentObservation": "Market probability stands at 15%, with 24-hour trading volume of $1,053,864.",
-          "probability": 15,
+          "signalId": "sig_31552_1794668920970",
+          "category": "Governance, Elections & Politics",
+          "currentObservation": "Leading outcome: \"Person AL\" at 50% (128 total options, $1,072,391 24h vol).",
+          "probability": 50,
           "probabilityChange24h": 0,
-          "volumeAcceleration": 1.8,
+          "volumeAcceleration": 1.02,
           "signalConfidence": 95,
-          "dataFreshness": "live",
-          "firstDetectedAt": "2026-11-14T14:33:18.528Z",
-          "lastUpdatedAt": "2026-11-14T14:33:18.528Z"
+          "dataFreshness": "LIVE_STREAM",
+          "isCommerciallyViable": false,
+          "nonCommercialReason": "General political race or election polling speculation produces spectator curiosity, not verifiable consumer product purchasing intent.",
+          "firstDetectedAt": "2026-11-14T15:08:40.970Z",
+          "lastUpdatedAt": "2026-11-14T15:08:40.970Z"
         }
       },
       "signal": {
-        "signalId": "sig_31552_1794666798528",
-        "category": "Technology & AI",
-        "currentObservation": "Market probability stands at 15%, with 24-hour trading volume of $1,053,864.",
-        "probability": 15,
+        "signalId": "sig_31552_1794668920970",
+        "category": "Governance, Elections & Politics",
+        "currentObservation": "Leading outcome: \"Person AL\" at 50% (128 total options, $1,072,391 24h vol).",
+        "probability": 50,
         "probabilityChange24h": 0,
-        "volumeAcceleration": 1.8,
+        "volumeAcceleration": 1.02,
         "signalConfidence": 95,
-        "dataFreshness": "live",
-        "firstDetectedAt": "2026-11-14T14:33:18.528Z",
-        "lastUpdatedAt": "2026-11-14T14:33:18.528Z"
+        "dataFreshness": "LIVE_STREAM",
+        "isCommerciallyViable": false,
+        "nonCommercialReason": "General political race or election polling speculation produces spectator curiosity, not verifiable consumer product purchasing intent.",
+        "firstDetectedAt": "2026-11-14T15:08:40.970Z",
+        "lastUpdatedAt": "2026-11-14T15:08:40.970Z"
       },
       "hypothesis": {
-        "hypothesisId": "hyp_31552_1794666801987",
-        "signalId": "sig_31552_1794666798528",
-        "affectedConsumerGroup": "Content Creators, Freelancers & Knowledge Workers",
-        "coreProblem": "Job automation anxiety and need for high-productivity automated workflows.",
-        "hypothesis": "Consumers observing \"Presidential Election Winner 2028\" will seek practical self-reliance, hedging tools, or physical safeguards to mitigate uncertainty.",
-        "searchPhrases": [
-          "how to prepare for presidential impact",
-          "best ai tools for workflow automation",
-          "faceless channel youtube automation",
-          "ai productivity vault"
-        ],
-        "purchaseTiming": "UPCOMING",
-        "intentType": "COMMERCIAL_INVESTIGATION",
-        "verificationStatus": "UNVERIFIED_LOW_DEMAND",
-        "demandEvidence": {
-          "evidenceId": "evi_1794666802784",
-          "source": "vidiq_mcp",
-          "queryPhrase": "best ai tools for workflow automation",
-          "searchVolume": 0,
-          "competitionScore": 51,
-          "opportunityScore": 20,
-          "volumeDisplay": "<750",
-          "verifiedAt": "2026-11-14T14:33:22.784Z"
-        },
-        "createdAt": "2026-11-14T14:33:21.987Z"
+        "hypothesisId": "hyp_31552_1794668920974",
+        "signalId": "sig_31552_1794668920970",
+        "category": "Governance, Elections & Politics",
+        "affectedConsumerGroup": "None (Spectators / Non-Commercial Audience)",
+        "coreProblem": "None - Event does not create practical consumer purchasing demand.",
+        "hypothesis": "Spectators observing \"Presidential Election Winner 2028\" follow the outcome for news or entertainment without buying intent.",
+        "searchPhrases": [],
+        "purchaseTiming": "NONE",
+        "intentType": "NON_COMMERCIAL",
+        "commercialViable": false,
+        "verificationStatus": "NOT_CHECKED",
+        "demandEvidence": null,
+        "outcome": "NO_COMMERCIAL_OPPORTUNITY",
+        "outcomeReason": "General political race or election polling speculation produces spectator curiosity, not verifiable consumer product purchasing intent.",
+        "createdAt": "2026-11-14T15:08:40.974Z"
       },
       "offerMatch": {
-        "matchId": "mat_ai-vault_1794666802785",
-        "hypothesisId": "hyp_31552_1794666801987",
-        "offerSlug": "ai-vault",
-        "productName": "The 1,000+ AI Automation Vault",
-        "merchant": "Direct Vendor Partner",
-        "network": "Multi-Network (Amazon santa101-20 + ClickBank kmtwarrior)",
-        "affiliateUrl": "https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=kmtwarrior&tid=poly_31552",
-        "secondaryUrl": "https://www.amazon.com/s?k=ai%20vault&tag=santa101-20",
-        "commissionStructure": "75% Digital / 3% - 4% Physical + 24-hr Cart Cookie",
-        "commissionRate": 75,
-        "cookieDuration": "60 Days (ClickBank) / 24 Hours (Amazon Universal Cart)",
-        "targetAudience": "Content Creators, Freelancers & Knowledge Workers",
-        "approvalStatus": "approved",
-        "sourceInventory": "EXACT_LOCAL_INVENTORY",
-        "createdAt": "2026-11-14T14:33:22.785Z"
+        "matchId": null,
+        "offerSlug": null,
+        "productName": null,
+        "merchant": null,
+        "network": null,
+        "affiliateUrl": null,
+        "destinationUrl": null,
+        "productPurpose": null,
+        "intendedAudience": null,
+        "commissionStructure": null,
+        "commissionRate": 0,
+        "cookieDuration": null,
+        "relevanceScore": 0,
+        "approvalStatus": "unmatched",
+        "sourceInventory": "NONE",
+        "outcome": "NO_COMMERCIAL_OPPORTUNITY",
+        "outcomeReason": "General political race or election polling speculation produces spectator curiosity, not verifiable consumer product purchasing intent.",
+        "createdAt": "2026-11-14T15:08:40.974Z"
       },
       "scoreResult": {
-        "opportunityScore": 67,
-        "tier": "WATCHLIST",
+        "opportunityScore": 19,
+        "tier": "DISQUALIFIED",
+        "outcome": "NO_COMMERCIAL_OPPORTUNITY",
+        "outcomeReason": "General political race or election polling speculation produces spectator curiosity, not verifiable consumer product purchasing intent.",
         "eligibility": {
-          "validDataSource": false,
-          "sufficientEvidence": true,
-          "relevantProductMatch": true,
+          "validDataSource": true,
+          "categoryCommercial": true,
+          "buyerNeedIdentified": false,
+          "relevantProductMatch": false,
           "acceptableComplianceRisk": true,
-          "passedAllGates": true,
-          "disqualificationReason": null
+          "passedAllGates": false,
+          "campaignEligible": false,
+          "disqualificationReason": "General political race or election polling speculation produces spectator curiosity, not verifiable consumer product purchasing intent."
         },
         "scoreBreakdown": {
-          "total": 67,
+          "total": 19,
           "momentumScore": {
-            "score": 50,
+            "score": 85,
             "weight": 0.2,
-            "weighted": 10
+            "weighted": 17
           },
           "verifiedDemandScore": {
-            "score": 25,
+            "score": 0,
             "weight": 0.2,
-            "weighted": 5
+            "weighted": 0
           },
           "intentScore": {
-            "score": 75,
+            "score": 0,
             "weight": 0.25,
-            "weighted": 19
+            "weighted": 0
           },
           "relevanceScore": {
-            "score": 95,
+            "score": 0,
             "weight": 0.2,
-            "weighted": 19
+            "weighted": 0
           },
           "economicsScore": {
-            "score": 90,
+            "score": 0,
             "weight": 0.1,
-            "weighted": 9
+            "weighted": 0
           },
           "confidenceScore": {
-            "score": 95,
+            "score": 30,
             "weight": 0.05,
-            "weighted": 5
+            "weighted": 2
           }
         },
-        "explanation": "Score 67/100 (WATCHLIST): Driven by 50 momentum, 25 verified search demand, and 95 product fit with The 1,000+ AI Automation Vault."
+        "explanation": "Score 19/100 (Disqualified): General political race or election polling speculation produces spectator curiosity, not verifiable consumer product purchasing intent."
       },
       "status": "PENDING_REVIEW",
       "adminNotes": null,
-      "createdAt": "2026-11-14T14:33:22.785Z"
+      "reviewedAt": null,
+      "createdAt": "2026-11-14T14:33:22.785Z",
+      "lastEvaluatedAt": "2026-11-14T15:08:40.974Z"
+    },
+    {
+      "opportunityId": "opp_1292829_1794668536332",
+      "event": {
+        "eventId": "poly_1292829",
+        "source": "polymarket",
+        "provider": "polymarket",
+        "externalId": "1292829",
+        "title": "What price will Bitcoin hit in November?",
+        "description": "What price will Bitcoin hit in November?",
+        "category": "Finance, Capital & Wealth",
+        "tags": [
+          "Bitcoin",
+          "Monthly",
+          "Hit Price",
+          "Crypto",
+          "Crypto Prices",
+          "Recurring"
+        ],
+        "volume24h": 967641,
+        "liquidity": 1344897,
+        "marketStatus": "open",
+        "probability": 100,
+        "outcomes": [
+          {
+            "outcomeId": "6507378",
+            "label": "↑ 80,000",
+            "probability": 100,
+            "price": 1,
+            "volume": 457765
+          },
+          {
+            "outcomeId": "6507379",
+            "label": "↓ 77,500",
+            "probability": 100,
+            "price": 1,
+            "volume": 462633
+          },
+          {
+            "outcomeId": "6507380",
+            "label": "↓ 75,000",
+            "probability": 100,
+            "price": 1,
+            "volume": 500235
+          },
+          {
+            "outcomeId": "6507381",
+            "label": "↓ 72,500",
+            "probability": 100,
+            "price": 1,
+            "volume": 486682
+          },
+          {
+            "outcomeId": "6507382",
+            "label": "↓ 70,000",
+            "probability": 100,
+            "price": 1,
+            "volume": 446616
+          },
+          {
+            "outcomeId": "6507383",
+            "label": "↓ 67,500",
+            "probability": 100,
+            "price": 1,
+            "volume": 644388
+          }
+        ],
+        "topOutcome": {
+          "outcomeId": "6507378",
+          "label": "↑ 80,000",
+          "probability": 100,
+          "price": 1,
+          "volume": 457765
+        },
+        "isMultiOutcome": true,
+        "totalOutcomesCount": 30,
+        "resolutionDate": "2026-12-01T05:00:00Z",
+        "sourceUrl": "https://polymarket.com/event/what-price-will-bitcoin-hit-in-november-2026",
+        "observationTime": "2026-11-14T15:08:40.970Z",
+        "firstSeenTime": "2026-11-01T05:07:00.753656Z",
+        "signal": {
+          "signalId": "sig_1292829_1794668920970",
+          "category": "Finance, Capital & Wealth",
+          "currentObservation": "Leading outcome: \"↑ 80,000\" at 100% (30 total options, $967,641 24h vol).",
+          "probability": 100,
+          "probabilityChange24h": 0,
+          "volumeAcceleration": 1.58,
+          "signalConfidence": 85,
+          "dataFreshness": "LIVE_STREAM",
+          "isCommerciallyViable": true,
+          "nonCommercialReason": null,
+          "firstDetectedAt": "2026-11-14T15:08:40.970Z",
+          "lastUpdatedAt": "2026-11-14T15:08:40.970Z"
+        }
+      },
+      "signal": {
+        "signalId": "sig_1292829_1794668920970",
+        "category": "Finance, Capital & Wealth",
+        "currentObservation": "Leading outcome: \"↑ 80,000\" at 100% (30 total options, $967,641 24h vol).",
+        "probability": 100,
+        "probabilityChange24h": 0,
+        "volumeAcceleration": 1.58,
+        "signalConfidence": 85,
+        "dataFreshness": "LIVE_STREAM",
+        "isCommerciallyViable": true,
+        "nonCommercialReason": null,
+        "firstDetectedAt": "2026-11-14T15:08:40.970Z",
+        "lastUpdatedAt": "2026-11-14T15:08:40.970Z"
+      },
+      "hypothesis": {
+        "hypothesisId": "hyp_1292829_1794668920974",
+        "signalId": "sig_1292829_1794668920970",
+        "category": "Finance, Capital & Wealth",
+        "affectedConsumerGroup": "Retail Investors, Borrowers, Savers & Freelancers",
+        "coreProblem": "Interest rate fluctuations, debt refinancing costs, inflation erosion of savings, and capital risk.",
+        "hypothesis": "Consumers affected by \"What price will Bitcoin hit in November?\" seek practical self-reliance, capital protection, or physical mitigation tools to resolve: Interest rate fluctuations, debt refinancing costs, inflation erosion of savings, and capital risk.",
+        "searchPhrases": [
+          "high yield cash preservation",
+          "best hedge against inflation",
+          "how to pass prop firm evaluation",
+          "recession proof online income"
+        ],
+        "primarySearchPhrase": "high yield cash preservation",
+        "purchaseTiming": "IMMEDIATE",
+        "intentType": "COMMERCIAL_INVESTIGATION",
+        "commercialViable": true,
+        "verificationStatus": "PROVIDER_UNAVAILABLE",
+        "demandEvidence": {
+          "evidenceId": "evi_1794668920974",
+          "provider": "vidiq_mcp",
+          "queryPhrase": "high yield cash preservation",
+          "searchVolume": null,
+          "competitionScore": null,
+          "opportunityScore": null,
+          "error": "vidiqClient.researchQuery is not a function",
+          "geography": "US",
+          "observationDate": "2026-11-14T15:08:40.974Z"
+        },
+        "outcome": "PENDING_DEMAND_VERIFICATION",
+        "outcomeReason": null,
+        "createdAt": "2026-11-14T15:08:40.974Z"
+      },
+      "offerMatch": {
+        "matchId": "mat_prop-trading_1794668920974",
+        "hypothesisId": "hyp_1292829_1794668920974",
+        "offerSlug": "prop-trading",
+        "productName": "Funded Prop Trading Pass ($50K–$150K)",
+        "merchant": "Funded Trader Academy Inc",
+        "network": "Direct Vendor Partner",
+        "affiliateUrl": "https://traffic.aisimplesystem.com/o/prop-trading?tid=poly_1292829",
+        "destinationUrl": "https://traffic.aisimplesystem.com/o/prop-trading",
+        "productPurpose": "Evaluation blueprints and risk-management strategies to secure funded accounts from $50K to $150K.",
+        "intendedAudience": "Retail Investors, Borrowers, Savers & Freelancers",
+        "commissionStructure": "50% Front-End Challenge Pass Fee",
+        "commissionRate": 50,
+        "cookieDuration": "60 Days",
+        "relevanceScore": 70,
+        "approvalStatus": "approved",
+        "sourceInventory": "EXACT_LOCAL_INVENTORY",
+        "outcome": "RELEVANT_OFFER_MATCHED",
+        "outcomeReason": "Direct logical match to Funded Prop Trading Pass ($50K–$150K) (70/100 fit).",
+        "createdAt": "2026-11-14T15:08:40.974Z"
+      },
+      "scoreResult": {
+        "opportunityScore": 60,
+        "tier": "WATCHLIST",
+        "outcome": "WATCHLIST_MORE_EVIDENCE_NEEDED",
+        "outcomeReason": "Score 60/100 (WATCHLIST): Momentum is 85 and product fit is 70%, but Demand provider unavailable (unverified). Kept on watchlist awaiting demand surge before campaign generation.",
+        "eligibility": {
+          "validDataSource": true,
+          "categoryCommercial": true,
+          "buyerNeedIdentified": true,
+          "relevantProductMatch": true,
+          "acceptableComplianceRisk": true,
+          "passedAllGates": true,
+          "campaignEligible": false,
+          "disqualificationReason": null
+        },
+        "scoreBreakdown": {
+          "total": 60,
+          "momentumScore": {
+            "score": 85,
+            "weight": 0.2,
+            "weighted": 17
+          },
+          "verifiedDemandScore": {
+            "score": 10,
+            "weight": 0.2,
+            "weighted": 2
+          },
+          "intentScore": {
+            "score": 65,
+            "weight": 0.25,
+            "weighted": 16
+          },
+          "relevanceScore": {
+            "score": 70,
+            "weight": 0.2,
+            "weighted": 14
+          },
+          "economicsScore": {
+            "score": 75,
+            "weight": 0.1,
+            "weighted": 8
+          },
+          "confidenceScore": {
+            "score": 60,
+            "weight": 0.05,
+            "weighted": 3
+          }
+        },
+        "explanation": "Score 60/100 (WATCHLIST): Momentum is 85 and product fit is 70%, but Demand provider unavailable (unverified). Kept on watchlist awaiting demand surge before campaign generation."
+      },
+      "status": "PENDING_REVIEW",
+      "adminNotes": null,
+      "reviewedAt": null,
+      "createdAt": "2026-11-14T15:02:16.332Z",
+      "lastEvaluatedAt": "2026-11-14T15:08:40.974Z"
     }
   ],
   "campaignDrafts": [
     {
-      "campaignId": "cmp_1794666799641",
-      "opportunityId": "opp_770450_1794666799641",
-      "title": "Campaign: Fed Decision in December? -> Funded Prop Trading Pass ($50K–$150K)",
-      "targetNiche": "Finance & Wealth",
-      "targetAudience": "Retail Investors & Working Professionals",
+      "campaignId": "cmp_1794668950177",
+      "opportunityId": "opp_winter_storm_2026",
+      "title": "Campaign: Major Polar Vortex Storm Disrupts East Coast Grid in December? -> Enrev Power System (DIY Solar & Battery Backup)",
+      "targetNiche": "Energy, Blackouts & Emergency Prep",
+      "targetAudience": "Homeowners, Suburban Families & Rural Residents",
       "status": "UNPUBLISHED",
-      "createdAt": "2026-11-14T14:33:19.641Z",
+      "createdAt": "2026-11-14T15:09:10.177Z",
       "landerOutline": {
         "framework": "8-Pillar Glassmorphic Trust System",
-        "headline": "The 3-Step Field Protocol to Handle Fed Decision in December",
-        "subheadline": "A verified, practical guide for retail investors & working professionals facing inflation erosion, changing interest rates, and fear of portfolio drawdowns..",
+        "headline": "The 3-Step Power & Grid Defense Protocol for Major Polar Vortex Storm Disrupts East Coast Grid in December",
+        "subheadline": "A verified field manual for homeowners, suburban families & rural residents facing grid instability and extreme weather emergencies.",
         "heroTrustBadges": [
-          "Field-Tested Protocol",
-          "100% Non-Punitive",
-          "Instant Relief"
+          "Field-Tested Strategy",
+          "100% Practical Protocol",
+          "Instant Digital Delivery"
         ],
         "protocolSteps": [
           {
             "step": 1,
-            "title": "Immediate Physical / Tactical Reset",
-            "desc": "Eliminate acute stress without relying on fragile external networks."
+            "title": "Thermal & Critical Load Reset",
+            "desc": "Secure essential refrigeration, heating, and emergency communications without reliance on municipal power."
           },
           {
             "step": 2,
-            "title": "Critical Avoidance (What NOT To Do)",
-            "desc": "Avoid panicked knee-jerk spending that worsens the underlying problem."
+            "title": "Storage & Generation Avoidance",
+            "desc": "Avoid dangerous indoor fuel generators and unverified battery banks prone to thermal failure."
           },
           {
             "step": 3,
-            "title": "Spatial / Environmental Stabilization",
-            "desc": "Secure your living space or finances with proven baseline tools."
+            "title": "Autonomous Power Redundancy",
+            "desc": "Deploy residential solar charging and dedicated backup battery storage."
           }
         ],
         "productBundleTiering": {
           "starter": {
             "price": 9.95,
-            "name": "Quick-Start Action Guide (PDF + Checklist)"
+            "name": "Quick-Start Field Guide (PDF + Checklist)"
           },
           "complete": {
             "price": 27,
-            "name": "Complete Video Masterclass & Resource Suite"
+            "name": "Complete Video Masterclass & System Suite"
           },
           "vip": {
             "price": 67,
-            "name": "Lifetime VIP Vault & Direct Expert Q&A"
+            "name": "Lifetime Implementation Vault & Direct Q&A"
           }
         },
         "hardwareGearChecklist": [
           {
             "tier": "Low",
-            "name": "Tactical Entry Tool",
-            "estPrice": "$15 - $22",
+            "name": "Tactical Baseline Tool",
+            "estPrice": "$15 - $25",
             "vendor": "Amazon Prime"
           },
           {
             "tier": "Medium",
-            "name": "Body / Environmental Support Unit",
-            "estPrice": "$35 - $50",
+            "name": "Dedicated Support Unit",
+            "estPrice": "$35 - $60",
             "vendor": "Walmart Curbside"
           },
           {
             "tier": "Premium",
-            "name": "Commercial Backup / Haven System",
-            "estPrice": "$110 - $180",
+            "name": "Commercial Backup / System Unit",
+            "estPrice": "$120 - $250",
             "vendor": "Amazon Prime"
           }
         ]
       },
       "seoStrategy": {
-        "primaryKeyword": "how to prepare for decision impact",
+        "primaryKeyword": "portable power station refrigerator",
         "secondaryKeywords": [
-          "how to prepare for decision impact",
-          "best hedge against inflation",
-          "how to pass prop firm evaluation",
-          "high yield cash preservation"
+          "portable power station refrigerator",
+          "prevent frozen pipes power outage",
+          "home backup battery blackout"
         ],
-        "articleSlug": "guide-770450",
-        "metaTitle": "How to Prepare for Fed Decision in December?: 3-Step Field Guide",
-        "metaDescription": "Essential preparation protocol for retail investors & working professionals. Step-by-step physical checklist and verified gear recommendations.",
+        "articleSlug": "guide-home-power-winter_storm_2026",
+        "metaTitle": "The 3-Step Power & Grid Defense Protocol for Major Polar Vortex Storm Disrupts East Coast Grid in December (Complete Guide)",
+        "metaDescription": "A verified field manual for homeowners, suburban families & rural residents facing grid instability and extreme weather emergencies.",
         "recommendedWordCount": 1400,
-        "searchIntent": "COMMERCIAL_INVESTIGATION"
+        "searchIntent": "TRANSACTIONAL"
       },
       "youtubeLongformOutline": {
         "estimatedDurationMinutes": 12,
-        "workingTitle": "The Truth About Fed Decision in December? (And How to Protect Yourself Now)",
-        "hook": "If you are paying attention to recent market signals, you know something major is shifting. Here is what they are not telling you.",
+        "workingTitle": "The 3-Step Power & Grid Defense Protocol for Major Polar Vortex Storm Disrupts East Coast Grid in December (What You Need to Know Now)",
+        "hook": "If you have been watching the recent developments around Major Polar Vortex Storm Disrupts East Coast Grid in December?, you know something major is shifting. Here is what smart individuals are doing right now to stay protected.",
         "pacingSections": [
           {
             "timestamp": "00:00 - 01:30",
-            "topic": "The Signal: What just happened in the market"
+            "topic": "The Signal: What the market data reveals"
           },
           {
-            "timestamp": "01:30 - 04:45",
-            "topic": "The Hidden Trap: Why 90% of people react the wrong way"
+            "timestamp": "01:30 - 04:30",
+            "topic": "The Hidden Trap: Why conventional reactions fail"
           },
           {
-            "timestamp": "04:45 - 08:30",
-            "topic": "The 3-Step Protocol: Exactly what to do in your home right now"
+            "timestamp": "04:30 - 08:30",
+            "topic": "The 3-Step Protocol: Step-by-step practical implementation"
           },
           {
             "timestamp": "08:30 - 11:00",
-            "topic": "Hardware Breakdown: Essential gear vs useless junk"
+            "topic": "Solution Breakdown: How Enrev Power System (DIY Solar & Battery Backup) solves the core problem"
           },
           {
             "timestamp": "11:00 - 12:00",
-            "topic": "Call to Action: Download the field checklist in the pinned link"
+            "topic": "Call to Action: Access the verified action guide at the link below"
           }
         ]
       },
       "shortsScripts": [
         {
-          "angle": "Urgent Problem Interrupt",
+          "angle": "Problem Interrupt",
           "durationSec": 45,
-          "scriptHook": "Stop scrolling if you are watching Fed Decision in December?. Most people are preparing for the completely wrong thing.",
-          "scriptBody": "Here is the reality. When this occurs, conventional solutions become backlogged in 48 hours. Instead of panic-buying, use this 3-step physical protocol: First, secure your immediate space. Second, do not touch high-fee alternatives. Third, deploy a dedicated local backup.",
-          "scriptCta": "Get the full free 3-step action guide at the link in my bio."
+          "scriptHook": "Stop scrolling if you are affected by Major Polar Vortex Storm Disrupts East Coast Grid in December?. Most people are preparing for the completely wrong outcome.",
+          "scriptBody": "Here is the reality. When this shifts, conventional options become backlogged in 48 hours. Instead of panic-buying, use this 3-step practical protocol: First, secure your immediate environment. Second, eliminate high-fee alternatives. Third, deploy a dedicated local backup.",
+          "scriptCta": "Get the complete free 3-step action guide at the link in my bio."
         },
         {
           "angle": "Mistake Avoidance",
           "durationSec": 40,
-          "scriptHook": "The biggest mistake people make regarding Fed Decision in December? is waiting until headlines confirm it.",
-          "scriptBody": "By the time news outlets report this, prices surge 300%. Here are three simple tools you can order right now for under $30 that keep you completely safe.",
+          "scriptHook": "The biggest mistake people make regarding Major Polar Vortex Storm Disrupts East Coast Grid in December? is waiting until headlines confirm what data already proved.",
+          "scriptBody": "By the time news outlets report this, solutions surge in price. Here is the verified protocol we use to stay completely safe without overspending.",
           "scriptCta": "Tap the bio link for the complete checklist."
         }
       ],
       "socialPosts": {
         "xThread": [
-          "1/ Market prediction volume on \"Fed Decision in December?\" just crossed unprecedented highs. Here is what smart households are doing right now to prepare: 🧵",
-          "2/ Most people react with panic. The real move is a simple 3-step sensory and physical protocol that removes 90% of the vulnerability.",
-          "3/ Read our full field protocol and verified gear checklist here: https://traffic.aisimplesystem.com/protocol"
+          "1/ Market prediction volume on \"Major Polar Vortex Storm Disrupts East Coast Grid in December?\" just crossed unprecedented highs. Here is what smart households and investors are doing right now to prepare: 🧵",
+          "2/ Most people react with panic. The real move is a simple 3-step protocol that removes 90% of the vulnerability before the market moves.",
+          "3/ Read our full field protocol and verified recommendations here: https://traffic.aisimplesystem.com/o/home-power"
         ],
-        "threads": "Watching the shifts around Fed Decision in December?? Do not wait for headlines to confirm what the data already shows. Here is the calm 3-step protocol: https://traffic.aisimplesystem.com/protocol"
+        "threads": "Watching the shifts around Major Polar Vortex Storm Disrupts East Coast Grid in December?? Do not wait for headlines to confirm what the data already shows. Here is the calm 3-step protocol: https://traffic.aisimplesystem.com/o/home-power"
       },
       "emailSequence": [
         {
           "day": 1,
-          "subject": "Your Field Action Guide: Fed Decision in December?",
-          "preview": "Here is the 3-step protocol you requested.",
-          "body": "Thank you for requesting our emergency guide.\n\nWhen events like this emerge, speed and calm execution matter more than speculation.\n\nStep 1 is to stabilize your immediate environment...\n\nAccess your complete digital action guide here: https://traffic.aisimplesystem.com/calm"
+          "subject": "Your Action Guide: Major Polar Vortex Storm Disrupts East Coast Grid in December?",
+          "preview": "Here is the step-by-step protocol you requested.",
+          "body": "Thank you for requesting our guide.\n\nWhen events like this emerge, calm execution matters far more than speculation.\n\nStep 1 is to stabilize your immediate baseline...\n\nAccess your complete digital action guide here: https://traffic.aisimplesystem.com/o/home-power"
         },
         {
           "day": 2,
-          "subject": "The #1 mistake people make with Fed Decision in December?",
-          "preview": "Why knee-jerk buying fails.",
-          "body": "Yesterday we covered the immediate physical reset. Today, let us talk about what NOT to do.\n\nMost people waste hundreds on tools that fail when needed...\n\nHere is our tested gear checklist: https://traffic.aisimplesystem.com/protocol"
+          "subject": "The #1 mistake people make with Major Polar Vortex Storm Disrupts East Coast Grid in December?",
+          "preview": "Why knee-jerk reactions fail.",
+          "body": "Yesterday we covered the immediate baseline reset. Today, let us talk about what NOT to do.\n\nMost people waste hundreds on tools that fail when needed...\n\nHere is our tested checklist: https://traffic.aisimplesystem.com/o/home-power"
         }
       ],
       "productComparison": {
-        "recommendedProduct": "Funded Prop Trading Pass ($50K–$150K)",
-        "alternativeComparison": "Generic Amazon Knockoffs",
-        "keyAdvantage": "Commercial build quality, verified returns under 3%, and same-day delivery."
+        "recommendedProduct": "Enrev Power System (DIY Solar & Battery Backup)",
+        "alternativeComparison": "Generic Mass-Market Alternatives",
+        "keyAdvantage": "Verified merchant reputation, 60-day money-back guarantee, and dedicated customer support."
       },
       "callsToAction": {
-        "primaryButtonText": "Unlock Instant Funded Prop Trading Pass ($50K–$150K) Toolkit ($9.95)",
-        "secondaryButtonText": "Check Amazon Same-Day Stock",
+        "primaryButtonText": "Unlock Instant Enrev Power System (DIY Solar & Battery Backup) Protocol",
+        "secondaryButtonText": "Review Detailed Specifications",
         "bannerHeadline": "Take the guesswork out of preparation today."
       },
-      "ftcDisclosure": "Disclosure: This publication contains affiliate links. If you purchase through our links, we may earn an affiliate commission at no additional cost to you. We only recommend products tested for reliability and commercial performance.",
+      "ftcDisclosure": "Disclosure: This publication contains affiliate links. If you purchase through our links, we may earn an affiliate commission from Enrev Power Systems LLC at no additional cost to you. We only recommend products tested for practical utility and commercial reliability.",
       "trackingConfig": {
-        "opportunityId": "opp_770450_1794666799641",
-        "campaignId": "cmp_1794666799641",
-        "amazonTag": "santa101-20",
-        "clickbankAffiliate": "kmtwarrior",
-        "digistoreAffiliate": "marketranger1",
-        "primaryTrackingUrl": "https://traffic.aisimplesystem.com/o/prop-trading?src=poly_campaign"
-      }
-    },
-    {
-      "campaignId": "cmp_1794666801821",
-      "opportunityId": "opp_1284293_1794666801821",
-      "title": "Campaign: Grizzlies vs. Pelicans -> 25-Year Long-Term Food Preservation & Spoilage Defense",
-      "targetNiche": "Macro & Economy",
-      "targetAudience": "Middle-Class Households & Small Business Owners",
-      "status": "UNPUBLISHED",
-      "createdAt": "2026-11-14T14:33:21.821Z",
-      "landerOutline": {
-        "framework": "8-Pillar Glassmorphic Trust System",
-        "headline": "The 3-Step Field Protocol to Handle Grizzlies vs Pelicans",
-        "subheadline": "A verified, practical guide for middle-class households & small business owners facing household budget compression and search for resilient secondary income..",
-        "heroTrustBadges": [
-          "Field-Tested Protocol",
-          "100% Non-Punitive",
-          "Instant Relief"
-        ],
-        "protocolSteps": [
-          {
-            "step": 1,
-            "title": "Immediate Physical / Tactical Reset",
-            "desc": "Eliminate acute stress without relying on fragile external networks."
-          },
-          {
-            "step": 2,
-            "title": "Critical Avoidance (What NOT To Do)",
-            "desc": "Avoid panicked knee-jerk spending that worsens the underlying problem."
-          },
-          {
-            "step": 3,
-            "title": "Spatial / Environmental Stabilization",
-            "desc": "Secure your living space or finances with proven baseline tools."
-          }
-        ],
-        "productBundleTiering": {
-          "starter": {
-            "price": 9.95,
-            "name": "Quick-Start Action Guide (PDF + Checklist)"
-          },
-          "complete": {
-            "price": 27,
-            "name": "Complete Video Masterclass & Resource Suite"
-          },
-          "vip": {
-            "price": 67,
-            "name": "Lifetime VIP Vault & Direct Expert Q&A"
-          }
-        },
-        "hardwareGearChecklist": [
-          {
-            "tier": "Low",
-            "name": "Tactical Entry Tool",
-            "estPrice": "$15 - $22",
-            "vendor": "Amazon Prime"
-          },
-          {
-            "tier": "Medium",
-            "name": "Body / Environmental Support Unit",
-            "estPrice": "$35 - $50",
-            "vendor": "Walmart Curbside"
-          },
-          {
-            "tier": "Premium",
-            "name": "Commercial Backup / Haven System",
-            "estPrice": "$110 - $180",
-            "vendor": "Amazon Prime"
-          }
-        ]
-      },
-      "seoStrategy": {
-        "primaryKeyword": "how to prepare for grizzlies impact",
-        "secondaryKeywords": [
-          "how to prepare for grizzlies impact",
-          "recession proof side hustle",
-          "emergency food preservation storage",
-          "low cost home energy savings"
-        ],
-        "articleSlug": "guide-1284293",
-        "metaTitle": "How to Prepare for Grizzlies vs. Pelicans: 3-Step Field Guide",
-        "metaDescription": "Essential preparation protocol for middle-class households & small business owners. Step-by-step physical checklist and verified gear recommendations.",
-        "recommendedWordCount": 1400,
-        "searchIntent": "COMMERCIAL_INVESTIGATION"
-      },
-      "youtubeLongformOutline": {
-        "estimatedDurationMinutes": 12,
-        "workingTitle": "The Truth About Grizzlies vs. Pelicans (And How to Protect Yourself Now)",
-        "hook": "If you are paying attention to recent market signals, you know something major is shifting. Here is what they are not telling you.",
-        "pacingSections": [
-          {
-            "timestamp": "00:00 - 01:30",
-            "topic": "The Signal: What just happened in the market"
-          },
-          {
-            "timestamp": "01:30 - 04:45",
-            "topic": "The Hidden Trap: Why 90% of people react the wrong way"
-          },
-          {
-            "timestamp": "04:45 - 08:30",
-            "topic": "The 3-Step Protocol: Exactly what to do in your home right now"
-          },
-          {
-            "timestamp": "08:30 - 11:00",
-            "topic": "Hardware Breakdown: Essential gear vs useless junk"
-          },
-          {
-            "timestamp": "11:00 - 12:00",
-            "topic": "Call to Action: Download the field checklist in the pinned link"
-          }
-        ]
-      },
-      "shortsScripts": [
-        {
-          "angle": "Urgent Problem Interrupt",
-          "durationSec": 45,
-          "scriptHook": "Stop scrolling if you are watching Grizzlies vs. Pelicans. Most people are preparing for the completely wrong thing.",
-          "scriptBody": "Here is the reality. When this occurs, conventional solutions become backlogged in 48 hours. Instead of panic-buying, use this 3-step physical protocol: First, secure your immediate space. Second, do not touch high-fee alternatives. Third, deploy a dedicated local backup.",
-          "scriptCta": "Get the full free 3-step action guide at the link in my bio."
-        },
-        {
-          "angle": "Mistake Avoidance",
-          "durationSec": 40,
-          "scriptHook": "The biggest mistake people make regarding Grizzlies vs. Pelicans is waiting until headlines confirm it.",
-          "scriptBody": "By the time news outlets report this, prices surge 300%. Here are three simple tools you can order right now for under $30 that keep you completely safe.",
-          "scriptCta": "Tap the bio link for the complete checklist."
-        }
-      ],
-      "socialPosts": {
-        "xThread": [
-          "1/ Market prediction volume on \"Grizzlies vs. Pelicans\" just crossed unprecedented highs. Here is what smart households are doing right now to prepare: 🧵",
-          "2/ Most people react with panic. The real move is a simple 3-step sensory and physical protocol that removes 90% of the vulnerability.",
-          "3/ Read our full field protocol and verified gear checklist here: https://traffic.aisimplesystem.com/protocol"
-        ],
-        "threads": "Watching the shifts around Grizzlies vs. Pelicans? Do not wait for headlines to confirm what the data already shows. Here is the calm 3-step protocol: https://traffic.aisimplesystem.com/protocol"
-      },
-      "emailSequence": [
-        {
-          "day": 1,
-          "subject": "Your Field Action Guide: Grizzlies vs. Pelicans",
-          "preview": "Here is the 3-step protocol you requested.",
-          "body": "Thank you for requesting our emergency guide.\n\nWhen events like this emerge, speed and calm execution matter more than speculation.\n\nStep 1 is to stabilize your immediate environment...\n\nAccess your complete digital action guide here: https://traffic.aisimplesystem.com/calm"
-        },
-        {
-          "day": 2,
-          "subject": "The #1 mistake people make with Grizzlies vs. Pelicans",
-          "preview": "Why knee-jerk buying fails.",
-          "body": "Yesterday we covered the immediate physical reset. Today, let us talk about what NOT to do.\n\nMost people waste hundreds on tools that fail when needed...\n\nHere is our tested gear checklist: https://traffic.aisimplesystem.com/protocol"
-        }
-      ],
-      "productComparison": {
-        "recommendedProduct": "25-Year Long-Term Food Preservation & Spoilage Defense",
-        "alternativeComparison": "Generic Amazon Knockoffs",
-        "keyAdvantage": "Commercial build quality, verified returns under 3%, and same-day delivery."
-      },
-      "callsToAction": {
-        "primaryButtonText": "Unlock Instant 25-Year Long-Term Food Preservation & Spoilage Defense Toolkit ($9.95)",
-        "secondaryButtonText": "Check Amazon Same-Day Stock",
-        "bannerHeadline": "Take the guesswork out of preparation today."
-      },
-      "ftcDisclosure": "Disclosure: This publication contains affiliate links. If you purchase through our links, we may earn an affiliate commission at no additional cost to you. We only recommend products tested for reliability and commercial performance.",
-      "trackingConfig": {
-        "opportunityId": "opp_1284293_1794666801821",
-        "campaignId": "cmp_1794666801821",
-        "amazonTag": "santa101-20",
-        "clickbankAffiliate": "kmtwarrior",
-        "digistoreAffiliate": "marketranger1",
-        "primaryTrackingUrl": "https://traffic.aisimplesystem.com/o/food-preservation?src=poly_campaign"
-      }
-    },
-    {
-      "campaignId": "cmp_1794666801987",
-      "opportunityId": "opp_89502_1794666801987",
-      "title": "Campaign: What price will Bitcoin hit in 2026? -> Funded Prop Trading Pass ($50K–$150K)",
-      "targetNiche": "Finance & Wealth",
-      "targetAudience": "Retail Investors & Working Professionals",
-      "status": "UNPUBLISHED",
-      "createdAt": "2026-11-14T14:33:21.987Z",
-      "landerOutline": {
-        "framework": "8-Pillar Glassmorphic Trust System",
-        "headline": "The 3-Step Field Protocol to Handle What price will Bitcoin hit in 2026",
-        "subheadline": "A verified, practical guide for retail investors & working professionals facing inflation erosion, changing interest rates, and fear of portfolio drawdowns..",
-        "heroTrustBadges": [
-          "Field-Tested Protocol",
-          "100% Non-Punitive",
-          "Instant Relief"
-        ],
-        "protocolSteps": [
-          {
-            "step": 1,
-            "title": "Immediate Physical / Tactical Reset",
-            "desc": "Eliminate acute stress without relying on fragile external networks."
-          },
-          {
-            "step": 2,
-            "title": "Critical Avoidance (What NOT To Do)",
-            "desc": "Avoid panicked knee-jerk spending that worsens the underlying problem."
-          },
-          {
-            "step": 3,
-            "title": "Spatial / Environmental Stabilization",
-            "desc": "Secure your living space or finances with proven baseline tools."
-          }
-        ],
-        "productBundleTiering": {
-          "starter": {
-            "price": 9.95,
-            "name": "Quick-Start Action Guide (PDF + Checklist)"
-          },
-          "complete": {
-            "price": 27,
-            "name": "Complete Video Masterclass & Resource Suite"
-          },
-          "vip": {
-            "price": 67,
-            "name": "Lifetime VIP Vault & Direct Expert Q&A"
-          }
-        },
-        "hardwareGearChecklist": [
-          {
-            "tier": "Low",
-            "name": "Tactical Entry Tool",
-            "estPrice": "$15 - $22",
-            "vendor": "Amazon Prime"
-          },
-          {
-            "tier": "Medium",
-            "name": "Body / Environmental Support Unit",
-            "estPrice": "$35 - $50",
-            "vendor": "Walmart Curbside"
-          },
-          {
-            "tier": "Premium",
-            "name": "Commercial Backup / Haven System",
-            "estPrice": "$110 - $180",
-            "vendor": "Amazon Prime"
-          }
-        ]
-      },
-      "seoStrategy": {
-        "primaryKeyword": "how to prepare for price impact",
-        "secondaryKeywords": [
-          "how to prepare for price impact",
-          "best hedge against inflation",
-          "how to pass prop firm evaluation",
-          "high yield cash preservation"
-        ],
-        "articleSlug": "guide-89502",
-        "metaTitle": "How to Prepare for What price will Bitcoin hit in 2026?: 3-Step Field Guide",
-        "metaDescription": "Essential preparation protocol for retail investors & working professionals. Step-by-step physical checklist and verified gear recommendations.",
-        "recommendedWordCount": 1400,
-        "searchIntent": "COMMERCIAL_INVESTIGATION"
-      },
-      "youtubeLongformOutline": {
-        "estimatedDurationMinutes": 12,
-        "workingTitle": "The Truth About What price will Bitcoin hit in 2026? (And How to Protect Yourself Now)",
-        "hook": "If you are paying attention to recent market signals, you know something major is shifting. Here is what they are not telling you.",
-        "pacingSections": [
-          {
-            "timestamp": "00:00 - 01:30",
-            "topic": "The Signal: What just happened in the market"
-          },
-          {
-            "timestamp": "01:30 - 04:45",
-            "topic": "The Hidden Trap: Why 90% of people react the wrong way"
-          },
-          {
-            "timestamp": "04:45 - 08:30",
-            "topic": "The 3-Step Protocol: Exactly what to do in your home right now"
-          },
-          {
-            "timestamp": "08:30 - 11:00",
-            "topic": "Hardware Breakdown: Essential gear vs useless junk"
-          },
-          {
-            "timestamp": "11:00 - 12:00",
-            "topic": "Call to Action: Download the field checklist in the pinned link"
-          }
-        ]
-      },
-      "shortsScripts": [
-        {
-          "angle": "Urgent Problem Interrupt",
-          "durationSec": 45,
-          "scriptHook": "Stop scrolling if you are watching What price will Bitcoin hit in 2026?. Most people are preparing for the completely wrong thing.",
-          "scriptBody": "Here is the reality. When this occurs, conventional solutions become backlogged in 48 hours. Instead of panic-buying, use this 3-step physical protocol: First, secure your immediate space. Second, do not touch high-fee alternatives. Third, deploy a dedicated local backup.",
-          "scriptCta": "Get the full free 3-step action guide at the link in my bio."
-        },
-        {
-          "angle": "Mistake Avoidance",
-          "durationSec": 40,
-          "scriptHook": "The biggest mistake people make regarding What price will Bitcoin hit in 2026? is waiting until headlines confirm it.",
-          "scriptBody": "By the time news outlets report this, prices surge 300%. Here are three simple tools you can order right now for under $30 that keep you completely safe.",
-          "scriptCta": "Tap the bio link for the complete checklist."
-        }
-      ],
-      "socialPosts": {
-        "xThread": [
-          "1/ Market prediction volume on \"What price will Bitcoin hit in 2026?\" just crossed unprecedented highs. Here is what smart households are doing right now to prepare: 🧵",
-          "2/ Most people react with panic. The real move is a simple 3-step sensory and physical protocol that removes 90% of the vulnerability.",
-          "3/ Read our full field protocol and verified gear checklist here: https://traffic.aisimplesystem.com/protocol"
-        ],
-        "threads": "Watching the shifts around What price will Bitcoin hit in 2026?? Do not wait for headlines to confirm what the data already shows. Here is the calm 3-step protocol: https://traffic.aisimplesystem.com/protocol"
-      },
-      "emailSequence": [
-        {
-          "day": 1,
-          "subject": "Your Field Action Guide: What price will Bitcoin hit in 2026?",
-          "preview": "Here is the 3-step protocol you requested.",
-          "body": "Thank you for requesting our emergency guide.\n\nWhen events like this emerge, speed and calm execution matter more than speculation.\n\nStep 1 is to stabilize your immediate environment...\n\nAccess your complete digital action guide here: https://traffic.aisimplesystem.com/calm"
-        },
-        {
-          "day": 2,
-          "subject": "The #1 mistake people make with What price will Bitcoin hit in 2026?",
-          "preview": "Why knee-jerk buying fails.",
-          "body": "Yesterday we covered the immediate physical reset. Today, let us talk about what NOT to do.\n\nMost people waste hundreds on tools that fail when needed...\n\nHere is our tested gear checklist: https://traffic.aisimplesystem.com/protocol"
-        }
-      ],
-      "productComparison": {
-        "recommendedProduct": "Funded Prop Trading Pass ($50K–$150K)",
-        "alternativeComparison": "Generic Amazon Knockoffs",
-        "keyAdvantage": "Commercial build quality, verified returns under 3%, and same-day delivery."
-      },
-      "callsToAction": {
-        "primaryButtonText": "Unlock Instant Funded Prop Trading Pass ($50K–$150K) Toolkit ($9.95)",
-        "secondaryButtonText": "Check Amazon Same-Day Stock",
-        "bannerHeadline": "Take the guesswork out of preparation today."
-      },
-      "ftcDisclosure": "Disclosure: This publication contains affiliate links. If you purchase through our links, we may earn an affiliate commission at no additional cost to you. We only recommend products tested for reliability and commercial performance.",
-      "trackingConfig": {
-        "opportunityId": "opp_89502_1794666801987",
-        "campaignId": "cmp_1794666801987",
-        "amazonTag": "santa101-20",
-        "clickbankAffiliate": "kmtwarrior",
-        "digistoreAffiliate": "marketranger1",
-        "primaryTrackingUrl": "https://traffic.aisimplesystem.com/o/prop-trading?src=poly_campaign"
-      }
-    },
-    {
-      "campaignId": "cmp_1794666802785",
-      "opportunityId": "opp_31552_1794666802785",
-      "title": "Campaign: Presidential Election Winner 2028 -> The 1,000+ AI Automation Vault",
-      "targetNiche": "Technology & AI",
-      "targetAudience": "Content Creators, Freelancers & Knowledge Workers",
-      "status": "UNPUBLISHED",
-      "createdAt": "2026-11-14T14:33:22.785Z",
-      "landerOutline": {
-        "framework": "8-Pillar Glassmorphic Trust System",
-        "headline": "The 3-Step Field Protocol to Handle Presidential Election Winner 2028",
-        "subheadline": "A verified, practical guide for content creators, freelancers & knowledge workers facing job automation anxiety and need for high-productivity automated workflows..",
-        "heroTrustBadges": [
-          "Field-Tested Protocol",
-          "100% Non-Punitive",
-          "Instant Relief"
-        ],
-        "protocolSteps": [
-          {
-            "step": 1,
-            "title": "Immediate Physical / Tactical Reset",
-            "desc": "Eliminate acute stress without relying on fragile external networks."
-          },
-          {
-            "step": 2,
-            "title": "Critical Avoidance (What NOT To Do)",
-            "desc": "Avoid panicked knee-jerk spending that worsens the underlying problem."
-          },
-          {
-            "step": 3,
-            "title": "Spatial / Environmental Stabilization",
-            "desc": "Secure your living space or finances with proven baseline tools."
-          }
-        ],
-        "productBundleTiering": {
-          "starter": {
-            "price": 9.95,
-            "name": "Quick-Start Action Guide (PDF + Checklist)"
-          },
-          "complete": {
-            "price": 27,
-            "name": "Complete Video Masterclass & Resource Suite"
-          },
-          "vip": {
-            "price": 67,
-            "name": "Lifetime VIP Vault & Direct Expert Q&A"
-          }
-        },
-        "hardwareGearChecklist": [
-          {
-            "tier": "Low",
-            "name": "Tactical Entry Tool",
-            "estPrice": "$15 - $22",
-            "vendor": "Amazon Prime"
-          },
-          {
-            "tier": "Medium",
-            "name": "Body / Environmental Support Unit",
-            "estPrice": "$35 - $50",
-            "vendor": "Walmart Curbside"
-          },
-          {
-            "tier": "Premium",
-            "name": "Commercial Backup / Haven System",
-            "estPrice": "$110 - $180",
-            "vendor": "Amazon Prime"
-          }
-        ]
-      },
-      "seoStrategy": {
-        "primaryKeyword": "how to prepare for presidential impact",
-        "secondaryKeywords": [
-          "how to prepare for presidential impact",
-          "best ai tools for workflow automation",
-          "faceless channel youtube automation",
-          "ai productivity vault"
-        ],
-        "articleSlug": "guide-31552",
-        "metaTitle": "How to Prepare for Presidential Election Winner 2028: 3-Step Field Guide",
-        "metaDescription": "Essential preparation protocol for content creators, freelancers & knowledge workers. Step-by-step physical checklist and verified gear recommendations.",
-        "recommendedWordCount": 1400,
-        "searchIntent": "COMMERCIAL_INVESTIGATION"
-      },
-      "youtubeLongformOutline": {
-        "estimatedDurationMinutes": 12,
-        "workingTitle": "The Truth About Presidential Election Winner 2028 (And How to Protect Yourself Now)",
-        "hook": "If you are paying attention to recent market signals, you know something major is shifting. Here is what they are not telling you.",
-        "pacingSections": [
-          {
-            "timestamp": "00:00 - 01:30",
-            "topic": "The Signal: What just happened in the market"
-          },
-          {
-            "timestamp": "01:30 - 04:45",
-            "topic": "The Hidden Trap: Why 90% of people react the wrong way"
-          },
-          {
-            "timestamp": "04:45 - 08:30",
-            "topic": "The 3-Step Protocol: Exactly what to do in your home right now"
-          },
-          {
-            "timestamp": "08:30 - 11:00",
-            "topic": "Hardware Breakdown: Essential gear vs useless junk"
-          },
-          {
-            "timestamp": "11:00 - 12:00",
-            "topic": "Call to Action: Download the field checklist in the pinned link"
-          }
-        ]
-      },
-      "shortsScripts": [
-        {
-          "angle": "Urgent Problem Interrupt",
-          "durationSec": 45,
-          "scriptHook": "Stop scrolling if you are watching Presidential Election Winner 2028. Most people are preparing for the completely wrong thing.",
-          "scriptBody": "Here is the reality. When this occurs, conventional solutions become backlogged in 48 hours. Instead of panic-buying, use this 3-step physical protocol: First, secure your immediate space. Second, do not touch high-fee alternatives. Third, deploy a dedicated local backup.",
-          "scriptCta": "Get the full free 3-step action guide at the link in my bio."
-        },
-        {
-          "angle": "Mistake Avoidance",
-          "durationSec": 40,
-          "scriptHook": "The biggest mistake people make regarding Presidential Election Winner 2028 is waiting until headlines confirm it.",
-          "scriptBody": "By the time news outlets report this, prices surge 300%. Here are three simple tools you can order right now for under $30 that keep you completely safe.",
-          "scriptCta": "Tap the bio link for the complete checklist."
-        }
-      ],
-      "socialPosts": {
-        "xThread": [
-          "1/ Market prediction volume on \"Presidential Election Winner 2028\" just crossed unprecedented highs. Here is what smart households are doing right now to prepare: 🧵",
-          "2/ Most people react with panic. The real move is a simple 3-step sensory and physical protocol that removes 90% of the vulnerability.",
-          "3/ Read our full field protocol and verified gear checklist here: https://traffic.aisimplesystem.com/protocol"
-        ],
-        "threads": "Watching the shifts around Presidential Election Winner 2028? Do not wait for headlines to confirm what the data already shows. Here is the calm 3-step protocol: https://traffic.aisimplesystem.com/protocol"
-      },
-      "emailSequence": [
-        {
-          "day": 1,
-          "subject": "Your Field Action Guide: Presidential Election Winner 2028",
-          "preview": "Here is the 3-step protocol you requested.",
-          "body": "Thank you for requesting our emergency guide.\n\nWhen events like this emerge, speed and calm execution matter more than speculation.\n\nStep 1 is to stabilize your immediate environment...\n\nAccess your complete digital action guide here: https://traffic.aisimplesystem.com/calm"
-        },
-        {
-          "day": 2,
-          "subject": "The #1 mistake people make with Presidential Election Winner 2028",
-          "preview": "Why knee-jerk buying fails.",
-          "body": "Yesterday we covered the immediate physical reset. Today, let us talk about what NOT to do.\n\nMost people waste hundreds on tools that fail when needed...\n\nHere is our tested gear checklist: https://traffic.aisimplesystem.com/protocol"
-        }
-      ],
-      "productComparison": {
-        "recommendedProduct": "The 1,000+ AI Automation Vault",
-        "alternativeComparison": "Generic Amazon Knockoffs",
-        "keyAdvantage": "Commercial build quality, verified returns under 3%, and same-day delivery."
-      },
-      "callsToAction": {
-        "primaryButtonText": "Unlock Instant The 1,000+ AI Automation Vault Toolkit ($9.95)",
-        "secondaryButtonText": "Check Amazon Same-Day Stock",
-        "bannerHeadline": "Take the guesswork out of preparation today."
-      },
-      "ftcDisclosure": "Disclosure: This publication contains affiliate links. If you purchase through our links, we may earn an affiliate commission at no additional cost to you. We only recommend products tested for reliability and commercial performance.",
-      "trackingConfig": {
-        "opportunityId": "opp_31552_1794666802785",
-        "campaignId": "cmp_1794666802785",
-        "amazonTag": "santa101-20",
-        "clickbankAffiliate": "kmtwarrior",
-        "digistoreAffiliate": "marketranger1",
-        "primaryTrackingUrl": "https://traffic.aisimplesystem.com/o/ai-vault?src=poly_campaign"
+        "opportunityId": "opp_winter_storm_2026",
+        "campaignId": "cmp_1794668950177",
+        "offerSlug": "home-power",
+        "merchant": "Enrev Power Systems LLC",
+        "network": "ClickBank / Amazon Dual Bridge",
+        "commissionStructure": "75% Digital One-Time / 4% Amazon Cart Cookie",
+        "primaryTrackingUrl": "https://traffic.aisimplesystem.com/o/home-power?tid=poly_winter_storm_2026",
+        "destinationUrl": "https://traffic.aisimplesystem.com/o/home-power"
       }
     }
   ]

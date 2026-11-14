@@ -13,6 +13,8 @@ const { generateCampaignDraft } = require('./campaign-draft-generator');
 const STATE_FILE = path.join(__dirname, 'prediction-state.json');
 
 async function runPredictionPipeline(options = {}) {
+  const startedAt = new Date().toISOString();
+  const runId = `run_${Date.now()}`;
   const logs = [];
   const log = (msg) => {
     const entry = `[${new Date().toISOString().split('T')[1].slice(0, 8)}] ${msg}`;
@@ -20,35 +22,69 @@ async function runPredictionPipeline(options = {}) {
     console.log(`🔮 [Prediction Engine] ${msg}`);
   };
 
-  log("Starting Prediction-to-Profit Pipeline run...");
+  log(`Starting Prediction-to-Profit Pipeline (${runId})...`);
+
+  // Load existing state to preserve manual admin decisions across runs
+  let existingOpportunities = new Map();
+  if (fs.existsSync(STATE_FILE)) {
+    try {
+      const prevState = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+      if (Array.isArray(prevState.opportunities)) {
+        for (const opp of prevState.opportunities) {
+          if (opp.event?.externalId) {
+            existingOpportunities.set(opp.event.externalId, opp);
+          }
+        }
+      }
+    } catch (_) {}
+  }
   
   // 1. Fetch live prediction markets (read-only Polymarket Gamma API)
-  log("Step 1: Ingesting live prediction events from Polymarket...");
-  const rawEvents = await fetchLivePredictionMarkets({ limit: options.limit || 15 });
-  log(`Ingested ${rawEvents.length} normalized commercial events.`);
+  log('Step 1: Ingesting live prediction events from Polymarket Gamma API...');
+  let rawEvents = [];
+  let polymarketStatus = 'HEALTHY';
+  try {
+    rawEvents = await fetchLivePredictionMarkets({ limit: options.limit || 20 });
+    log(`Ingested ${rawEvents.length} normalized market events.`);
+  } catch (err) {
+    polymarketStatus = `ERROR: ${err.message}`;
+    log(`Polymarket API error: ${err.message}`);
+    throw err;
+  }
 
   const opportunities = [];
   const campaignDrafts = [];
 
-  // 2. Process each event through the intelligence funnel
-  for (const event of rawEvents.slice(0, options.processLimit || 6)) {
-    log(`\nEvaluating Market: "${event.title}" (24h Vol: $${event.volume24h.toLocaleString()}, Cat: ${event.category})`);
+  // 2. Process each event through the strict evidence chain
+  const processLimit = options.processLimit || 10;
+  for (const event of rawEvents.slice(0, processLimit)) {
+    log(`\nEvaluating: "${event.title}"`);
+    log(` -> Category: ${event.category} | 24h Vol: $${event.volume24h.toLocaleString()} | Top Outcome: ${event.topOutcome?.label} (${event.topOutcome?.probability}%)`);
 
     // A. Analyze Buyer Intent & Validate Independent Demand
-    log(` -> Analyzing buyer intent hypotheses...`);
-    const hypothesis = await analyzeBuyerIntent(event, { skipVerification: false });
-    log(` -> Demand Verification: ${hypothesis.verificationStatus} (Query: "${hypothesis.demandEvidence?.queryPhrase || 'N/A'}", Score: ${hypothesis.demandEvidence?.opportunityScore || 0}/100)`);
+    const hypothesis = await analyzeBuyerIntent(event, { skipVidiqApi: options.skipVidiqApi || false });
+    log(` -> Commercial Viability: ${hypothesis.commercialViable ? 'YES' : 'NO'}`);
+    log(` -> Demand Status: ${hypothesis.verificationStatus} (Query: "${hypothesis.demandEvidence?.queryPhrase || 'N/A'}", Score: ${hypothesis.demandEvidence?.opportunityScore ?? 'N/A'})`);
 
-    // B. Match Affiliate Offer (Priority 1: Existing Inventory, Priority 2: Amazon Direct)
-    log(` -> Matching affiliate offer inventory...`);
+    // B. Match Affiliate Offer (Strict Semantic Relevance)
     const offerMatch = matchAffiliateOffer(event, hypothesis);
-    log(` -> Matched: "${offerMatch.productName}" via ${offerMatch.network} (Comm: ${offerMatch.commissionStructure})`);
+    if (offerMatch.approvalStatus === 'approved') {
+      log(` -> Matched Offer: "${offerMatch.productName}" via ${offerMatch.network} (Relevance: ${offerMatch.relevanceScore}/100)`);
+    } else {
+      log(` -> Offer Match: NONE (${offerMatch.outcomeReason})`);
+    }
 
-    // C. Calculate Explainable Opportunity Score (0 - 100)
-    const scoreResult = scoreAffiliateOpportunity(event.signal, hypothesis, offerMatch);
-    log(` -> Opportunity Score: ${scoreResult.opportunityScore}/100 (${scoreResult.tier})`);
+    // C. Calculate Auditable Opportunity Score (0 - 100)
+    const scoreResult = scoreAffiliateOpportunity(event, hypothesis, offerMatch);
+    log(` -> Score: ${scoreResult.opportunityScore}/100 (${scoreResult.tier}) | Outcome: ${scoreResult.outcome}`);
 
-    const oppId = `opp_${event.externalId}_${Date.now()}`;
+    // Preserve prior admin review if previously decided
+    const prev = existingOpportunities.get(event.externalId);
+    let status = prev?.status || 'PENDING_REVIEW';
+    let adminNotes = prev?.adminNotes || null;
+    let reviewedAt = prev?.reviewedAt || null;
+
+    const oppId = prev?.opportunityId || `opp_${event.externalId}_${Date.now()}`;
     const opportunityRecord = {
       opportunityId: oppId,
       event,
@@ -56,37 +92,56 @@ async function runPredictionPipeline(options = {}) {
       hypothesis,
       offerMatch,
       scoreResult,
-      status: 'PENDING_REVIEW',
-      adminNotes: null,
-      createdAt: new Date().toISOString()
+      status,
+      adminNotes,
+      reviewedAt,
+      createdAt: prev?.createdAt || new Date().toISOString(),
+      lastEvaluatedAt: new Date().toISOString()
     };
 
     opportunities.push(opportunityRecord);
 
-    // D. Auto-generate Unpublished Campaign Draft for Qualifying Opportunities (Score >= 60)
-    if (scoreResult.opportunityScore >= 60) {
-      log(` ✨ Score exceeds threshold (>=60). Formulating unpublished campaign draft...`);
+    // D. Auto-generate Unpublished Campaign Draft ONLY for Eligible Opportunities
+    if (scoreResult.eligibility.campaignEligible && scoreResult.outcome === 'RELEVANT_OPPORTUNITY') {
+      log(` ✨ Opportunity is eligible for campaigns. Generating 10-point multi-channel draft...`);
       const draft = generateCampaignDraft(opportunityRecord);
-      campaignDrafts.push(draft);
-      log(` -> Campaign draft generated: "${draft.title}" (Status: UNPUBLISHED)`);
+      if (draft) {
+        campaignDrafts.push(draft);
+        log(` -> Campaign draft generated: "${draft.title}" (Status: UNPUBLISHED)`);
+      }
+    } else {
+      log(` 🛑 Draft skipped: ${scoreResult.explanation}`);
     }
   }
 
-  // 3. Persist State to Local Snapshot & Database
+  // 3. Persist State Snapshot
+  const completedAt = new Date().toISOString();
+  const eligibleCount = opportunities.filter(o => o.scoreResult.eligibility.campaignEligible).length;
+  const watchlistCount = opportunities.filter(o => o.scoreResult.tier === 'WATCHLIST').length;
+  const disqualifiedCount = opportunities.filter(o => o.scoreResult.tier === 'DISQUALIFIED').length;
+
   const pipelineState = {
-    lastRunAt: new Date().toISOString(),
+    runId,
+    startedAt,
+    completedAt,
+    lastRunAt: completedAt,
+    providerHealth: {
+      polymarket: polymarketStatus,
+      vidiq: options.skipVidiqApi ? 'MOCKED_IN_TEST' : 'ACTIVE'
+    },
     totalEventsIngested: rawEvents.length,
     opportunitiesEvaluated: opportunities.length,
-    priorityOpportunitiesCount: opportunities.filter(o => o.scoreResult.tier === 'PRIORITY').length,
-    strongOpportunitiesCount: opportunities.filter(o => o.scoreResult.tier === 'STRONG').length,
+    eligibleOpportunitiesCount: eligibleCount,
+    watchlistCount,
+    disqualifiedCount,
     campaignDraftsCount: campaignDrafts.length,
     opportunities,
     campaignDrafts
   };
 
   fs.writeFileSync(STATE_FILE, JSON.stringify(pipelineState, null, 2), 'utf8');
-  log(`\n✅ Pipeline completed successfully. State saved to prediction-state.json`);
-  log(`Summary: ${opportunities.length} opportunities ranked | ${campaignDrafts.length} campaign drafts prepared for admin review.`);
+  log(`\n✅ Pipeline run completed. State saved to prediction-state.json`);
+  log(`Summary: ${opportunities.length} evaluated | ${eligibleCount} eligible | ${watchlistCount} watchlist | ${disqualifiedCount} disqualified | ${campaignDrafts.length} drafts`);
 
   return {
     state: pipelineState,
@@ -96,10 +151,10 @@ async function runPredictionPipeline(options = {}) {
 
 // CLI execution support
 if (require.main === module) {
-  runPredictionPipeline({ limit: 12, processLimit: 5 })
+  runPredictionPipeline({ limit: 15, processLimit: 8 })
     .then(() => process.exit(0))
     .catch(err => {
-      console.error("Pipeline fatal error:", err);
+      console.error('Pipeline fatal error:', err);
       process.exit(1);
     });
 }

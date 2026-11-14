@@ -1,44 +1,91 @@
 // Campaign Draft Generator
 // Connects validated prediction opportunities to the Growth Engine
 // Produces 10-point multi-channel campaign drafts (Unpublished by default)
-// Zero em dashes in all copywriting
+// Only generates drafts for eligible opportunities (RELEVANT_OPPORTUNITY)
+// Rejects generic emergency-prep copy on unrelated niches
+// Rejects generic /calm destination URLs
 
 function generateCampaignDraft(opportunity, options = {}) {
   const { event, signal, hypothesis, offerMatch, scoreResult } = opportunity;
-  const nicheName = offerMatch.productName || 'Smart Solution';
+
+  // 1. Mandatory Eligibility Check: Reject draft generation for unverified/disqualified events
+  if (!scoreResult?.eligibility?.campaignEligible || scoreResult?.outcome !== 'RELEVANT_OPPORTUNITY') {
+    return null;
+  }
+
+  const nicheName = offerMatch.productName || 'Verified Solution';
   const targetAudience = hypothesis.affectedConsumerGroup || 'Consumers';
-  const primaryProblem = hypothesis.coreProblem || 'Unexpected disruption';
-  const primarySearchPhrase = hypothesis.searchPhrases?.[0] || 'emergency solutions';
+  const primaryProblem = hypothesis.coreProblem || 'Economic and environmental uncertainty';
+  const primarySearchPhrase = hypothesis.searchPhrases?.[0] || 'essential preparation guide';
+  const destinationUrl = offerMatch.destinationUrl || `https://traffic.aisimplesystem.com/o/${offerMatch.offerSlug}`;
+  const trackingUrl = offerMatch.affiliateUrl || destinationUrl;
+  const category = event.category || 'General';
+
+  // 2. Build Category-Specific Frameworks
+  let frameworkName = '8-Pillar Glassmorphic Trust System';
+  let headline = `Practical Action Protocol for ${event.title}`;
+  let subheadline = `A field-tested implementation guide for ${targetAudience.toLowerCase()} addressing ${primaryProblem.toLowerCase()}.`;
+  let protocolSteps = [];
+
+  if (category === 'Energy, Blackouts & Emergency Prep') {
+    headline = `The 3-Step Power & Grid Defense Protocol for ${event.title.replace(/[\?\.!]/g, '')}`;
+    subheadline = `A verified field manual for ${targetAudience.toLowerCase()} facing grid instability and extreme weather emergencies.`;
+    protocolSteps = [
+      { step: 1, title: 'Thermal & Critical Load Reset', desc: 'Secure essential refrigeration, heating, and emergency communications without reliance on municipal power.' },
+      { step: 2, title: 'Storage & Generation Avoidance', desc: 'Avoid dangerous indoor fuel generators and unverified battery banks prone to thermal failure.' },
+      { step: 3, title: 'Autonomous Power Redundancy', desc: 'Deploy residential solar charging and dedicated backup battery storage.' }
+    ];
+  } else if (category === 'Finance, Capital & Wealth') {
+    headline = `Capital Preservation & Funding Protocol in Response to ${event.title.replace(/[\?\.!]/g, '')}`;
+    subheadline = `A tactical capital protection blueprint for ${targetAudience.toLowerCase()} navigating interest rate volatility.`;
+    protocolSteps = [
+      { step: 1, title: 'Cash Drawdown Insulation', desc: 'Reallocate liquid reserves to insulate portfolio capital from interest rate and inflation erosion.' },
+      { step: 2, title: 'High-Fee Alternative Elimination', desc: 'Eliminate high-fee retail brokerage exposures and unhedged speculative positions.' },
+      { step: 3, title: 'Proprietary Capital Qualification', desc: 'Leverage structured evaluation rules to secure funded trading capital without risking personal savings.' }
+    ];
+  } else if (category === 'Health, Sleep & Wellness') {
+    headline = `The Evening Reset & Cortisol Stabilization Protocol`;
+    subheadline = `A targeted physical protocol for ${targetAudience.toLowerCase()} dealing with nocturnal wakefulness and chronic fatigue.`;
+    protocolSteps = [
+      { step: 1, title: 'Circadian Light Phase Neutralization', desc: 'Eliminate artificial blue light stimulus 90 minutes before scheduled sleep.' },
+      { step: 2, title: 'Cortisol Spike Dampening', desc: 'Prevent 3 AM histamine and cortisol rushes with targeted evening nutrient synergy.' },
+      { step: 3, title: 'Physical Sleep Architecture Recovery', desc: 'Support natural delta-wave sleep cycles with clinical-grade tart cherry nano-botanicals.' }
+    ];
+  } else {
+    headline = `The Automated Workflow & Traffic Engine`;
+    subheadline = `A step-by-step digital implementation guide for ${targetAudience.toLowerCase()} seeking automated buyer lead capture.`;
+    protocolSteps = [
+      { step: 1, title: 'Friction Point Audit', desc: 'Identify critical workflow bottlenecks and manual traffic leakages.' },
+      { step: 2, title: 'Automated Hook Routing', desc: 'Deploy psychological capture mechanisms and automated email handoffs.' },
+      { step: 3, title: 'Perpetual Buyer Syndication', desc: 'Connect verified affiliate pathways into a 24-hour conversion loop.' }
+    ];
+  }
 
   return {
     campaignId: `cmp_${Date.now()}`,
     opportunityId: opportunity.opportunityId,
     title: `Campaign: ${event.title} -> ${nicheName}`,
-    targetNiche: event.category || 'General',
+    targetNiche: category,
     targetAudience,
     status: 'UNPUBLISHED',
     createdAt: new Date().toISOString(),
 
     // A. Affiliate Landing-Page Outline
     landerOutline: {
-      framework: '8-Pillar Glassmorphic Trust System',
-      headline: `The 3-Step Field Protocol to Handle ${event.title.replace(/[\?\.!]/g, '')}`,
-      subheadline: `A verified, practical guide for ${targetAudience.toLowerCase()} facing ${primaryProblem.toLowerCase()}.`,
-      heroTrustBadges: ['Field-Tested Protocol', '100% Non-Punitive', 'Instant Relief'],
-      protocolSteps: [
-        { step: 1, title: 'Immediate Physical / Tactical Reset', desc: 'Eliminate acute stress without relying on fragile external networks.' },
-        { step: 2, title: 'Critical Avoidance (What NOT To Do)', desc: 'Avoid panicked knee-jerk spending that worsens the underlying problem.' },
-        { step: 3, title: 'Spatial / Environmental Stabilization', desc: 'Secure your living space or finances with proven baseline tools.' }
-      ],
+      framework: frameworkName,
+      headline,
+      subheadline,
+      heroTrustBadges: ['Field-Tested Strategy', '100% Practical Protocol', 'Instant Digital Delivery'],
+      protocolSteps,
       productBundleTiering: {
-        starter: { price: 9.95, name: 'Quick-Start Action Guide (PDF + Checklist)' },
-        complete: { price: 27.00, name: 'Complete Video Masterclass & Resource Suite' },
-        vip: { price: 67.00, name: 'Lifetime VIP Vault & Direct Expert Q&A' }
+        starter: { price: 9.95, name: 'Quick-Start Field Guide (PDF + Checklist)' },
+        complete: { price: 27.00, name: 'Complete Video Masterclass & System Suite' },
+        vip: { price: 67.00, name: 'Lifetime Implementation Vault & Direct Q&A' }
       },
       hardwareGearChecklist: [
-        { tier: 'Low', name: 'Tactical Entry Tool', estPrice: '$15 - $22', vendor: 'Amazon Prime' },
-        { tier: 'Medium', name: 'Body / Environmental Support Unit', estPrice: '$35 - $50', vendor: 'Walmart Curbside' },
-        { tier: 'Premium', name: 'Commercial Backup / Haven System', estPrice: '$110 - $180', vendor: 'Amazon Prime' }
+        { tier: 'Low', name: 'Tactical Baseline Tool', estPrice: '$15 - $25', vendor: 'Amazon Prime' },
+        { tier: 'Medium', name: 'Dedicated Support Unit', estPrice: '$35 - $60', vendor: 'Walmart Curbside' },
+        { tier: 'Premium', name: 'Commercial Backup / System Unit', estPrice: '$120 - $250', vendor: 'Amazon Prime' }
       ]
     },
 
@@ -46,9 +93,9 @@ function generateCampaignDraft(opportunity, options = {}) {
     seoStrategy: {
       primaryKeyword: primarySearchPhrase,
       secondaryKeywords: hypothesis.searchPhrases || [],
-      articleSlug: `guide-${event.externalId}`,
-      metaTitle: `How to Prepare for ${event.title}: 3-Step Field Guide`,
-      metaDescription: `Essential preparation protocol for ${targetAudience.toLowerCase()}. Step-by-step physical checklist and verified gear recommendations.`,
+      articleSlug: `guide-${offerMatch.offerSlug}-${event.externalId || Date.now()}`,
+      metaTitle: `${headline} (Complete Guide)`,
+      metaDescription: subheadline,
       recommendedWordCount: 1400,
       searchIntent: hypothesis.intentType || 'COMMERCIAL_INVESTIGATION'
     },
@@ -56,31 +103,31 @@ function generateCampaignDraft(opportunity, options = {}) {
     // C. YouTube Long-Form Video Outline
     youtubeLongformOutline: {
       estimatedDurationMinutes: 12,
-      workingTitle: `The Truth About ${event.title} (And How to Protect Yourself Now)`,
-      hook: 'If you are paying attention to recent market signals, you know something major is shifting. Here is what they are not telling you.',
+      workingTitle: `${headline} (What You Need to Know Now)`,
+      hook: `If you have been watching the recent developments around ${event.title}, you know something major is shifting. Here is what smart individuals are doing right now to stay protected.`,
       pacingSections: [
-        { timestamp: '00:00 - 01:30', topic: 'The Signal: What just happened in the market' },
-        { timestamp: '01:30 - 04:45', topic: 'The Hidden Trap: Why 90% of people react the wrong way' },
-        { timestamp: '04:45 - 08:30', topic: 'The 3-Step Protocol: Exactly what to do in your home right now' },
-        { timestamp: '08:30 - 11:00', topic: 'Hardware Breakdown: Essential gear vs useless junk' },
-        { timestamp: '11:00 - 12:00', topic: 'Call to Action: Download the field checklist in the pinned link' }
+        { timestamp: '00:00 - 01:30', topic: 'The Signal: What the market data reveals' },
+        { timestamp: '01:30 - 04:30', topic: 'The Hidden Trap: Why conventional reactions fail' },
+        { timestamp: '04:30 - 08:30', topic: 'The 3-Step Protocol: Step-by-step practical implementation' },
+        { timestamp: '08:30 - 11:00', topic: `Solution Breakdown: How ${nicheName} solves the core problem` },
+        { timestamp: '11:00 - 12:00', topic: 'Call to Action: Access the verified action guide at the link below' }
       ]
     },
 
     // D. YouTube Shorts / TikTok Scripts
     shortsScripts: [
       {
-        angle: 'Urgent Problem Interrupt',
+        angle: 'Problem Interrupt',
         durationSec: 45,
-        scriptHook: `Stop scrolling if you are watching ${event.title}. Most people are preparing for the completely wrong thing.`,
-        scriptBody: `Here is the reality. When this occurs, conventional solutions become backlogged in 48 hours. Instead of panic-buying, use this 3-step physical protocol: First, secure your immediate space. Second, do not touch high-fee alternatives. Third, deploy a dedicated local backup.`,
-        scriptCta: `Get the full free 3-step action guide at the link in my bio.`
+        scriptHook: `Stop scrolling if you are affected by ${event.title}. Most people are preparing for the completely wrong outcome.`,
+        scriptBody: `Here is the reality. When this shifts, conventional options become backlogged in 48 hours. Instead of panic-buying, use this 3-step practical protocol: First, secure your immediate environment. Second, eliminate high-fee alternatives. Third, deploy a dedicated local backup.`,
+        scriptCta: `Get the complete free 3-step action guide at the link in my bio.`
       },
       {
         angle: 'Mistake Avoidance',
         durationSec: 40,
-        scriptHook: `The biggest mistake people make regarding ${event.title} is waiting until headlines confirm it.`,
-        scriptBody: `By the time news outlets report this, prices surge 300%. Here are three simple tools you can order right now for under $30 that keep you completely safe.`,
+        scriptHook: `The biggest mistake people make regarding ${event.title} is waiting until headlines confirm what data already proved.`,
+        scriptBody: `By the time news outlets report this, solutions surge in price. Here is the verified protocol we use to stay completely safe without overspending.`,
         scriptCta: `Tap the bio link for the complete checklist.`
       }
     ],
@@ -88,54 +135,56 @@ function generateCampaignDraft(opportunity, options = {}) {
     // E. Social Media Posts
     socialPosts: {
       xThread: [
-        `1/ Market prediction volume on "${event.title}" just crossed unprecedented highs. Here is what smart households are doing right now to prepare: 🧵`,
-        `2/ Most people react with panic. The real move is a simple 3-step sensory and physical protocol that removes 90% of the vulnerability.`,
-        `3/ Read our full field protocol and verified gear checklist here: https://traffic.aisimplesystem.com/protocol`
+        `1/ Market prediction volume on "${event.title}" just crossed unprecedented highs. Here is what smart households and investors are doing right now to prepare: 🧵`,
+        `2/ Most people react with panic. The real move is a simple 3-step protocol that removes 90% of the vulnerability before the market moves.`,
+        `3/ Read our full field protocol and verified recommendations here: ${destinationUrl}`
       ],
-      threads: `Watching the shifts around ${event.title}? Do not wait for headlines to confirm what the data already shows. Here is the calm 3-step protocol: https://traffic.aisimplesystem.com/protocol`
+      threads: `Watching the shifts around ${event.title}? Do not wait for headlines to confirm what the data already shows. Here is the calm 3-step protocol: ${destinationUrl}`
     },
 
-    // F. Email Sequences (4-Day Nurture Drip)
+    // F. Email Sequence (Opted-in Subscribers)
     emailSequence: [
       {
         day: 1,
-        subject: `Your Field Action Guide: ${event.title}`,
-        preview: 'Here is the 3-step protocol you requested.',
-        body: `Thank you for requesting our emergency guide.\n\nWhen events like this emerge, speed and calm execution matter more than speculation.\n\nStep 1 is to stabilize your immediate environment...\n\nAccess your complete digital action guide here: https://traffic.aisimplesystem.com/calm`
+        subject: `Your Action Guide: ${event.title}`,
+        preview: 'Here is the step-by-step protocol you requested.',
+        body: `Thank you for requesting our guide.\n\nWhen events like this emerge, calm execution matters far more than speculation.\n\nStep 1 is to stabilize your immediate baseline...\n\nAccess your complete digital action guide here: ${destinationUrl}`
       },
       {
         day: 2,
         subject: `The #1 mistake people make with ${event.title}`,
-        preview: 'Why knee-jerk buying fails.',
-        body: `Yesterday we covered the immediate physical reset. Today, let us talk about what NOT to do.\n\nMost people waste hundreds on tools that fail when needed...\n\nHere is our tested gear checklist: https://traffic.aisimplesystem.com/protocol`
+        preview: 'Why knee-jerk reactions fail.',
+        body: `Yesterday we covered the immediate baseline reset. Today, let us talk about what NOT to do.\n\nMost people waste hundreds on tools that fail when needed...\n\nHere is our tested checklist: ${destinationUrl}`
       }
     ],
 
     // G. Product Comparison Content
     productComparison: {
-      recommendedProduct: offerMatch.productName,
-      alternativeComparison: 'Generic Amazon Knockoffs',
-      keyAdvantage: 'Commercial build quality, verified returns under 3%, and same-day delivery.'
+      recommendedProduct: nicheName,
+      alternativeComparison: 'Generic Mass-Market Alternatives',
+      keyAdvantage: `Verified merchant reputation, 60-day money-back guarantee, and dedicated customer support.`
     },
 
     // H. Conversion Calls to Action
     callsToAction: {
-      primaryButtonText: `Unlock Instant ${nicheName} Toolkit ($9.95)`,
-      secondaryButtonText: 'Check Amazon Same-Day Stock',
+      primaryButtonText: `Unlock Instant ${nicheName} Protocol`,
+      secondaryButtonText: `Review Detailed Specifications`,
       bannerHeadline: 'Take the guesswork out of preparation today.'
     },
 
-    // I. FTC-Compliant Affiliate Disclosure Copy
-    ftcDisclosure: `Disclosure: This publication contains affiliate links. If you purchase through our links, we may earn an affiliate commission at no additional cost to you. We only recommend products tested for reliability and commercial performance.`,
+    // I. FTC Affiliate Disclosure Copy
+    ftcDisclosure: `Disclosure: This publication contains affiliate links. If you purchase through our links, we may earn an affiliate commission from ${offerMatch.merchant || 'the vendor'} at no additional cost to you. We only recommend products tested for practical utility and commercial reliability.`,
 
     // J. Attribution and Tracking Configuration
     trackingConfig: {
       opportunityId: opportunity.opportunityId,
       campaignId: `cmp_${Date.now()}`,
-      amazonTag: 'santa101-20',
-      clickbankAffiliate: 'kmtwarrior',
-      digistoreAffiliate: 'marketranger1',
-      primaryTrackingUrl: `https://traffic.aisimplesystem.com/o/${offerMatch.offerSlug}?src=poly_campaign`
+      offerSlug: offerMatch.offerSlug,
+      merchant: offerMatch.merchant,
+      network: offerMatch.network,
+      commissionStructure: offerMatch.commissionStructure,
+      primaryTrackingUrl: trackingUrl,
+      destinationUrl
     }
   };
 }

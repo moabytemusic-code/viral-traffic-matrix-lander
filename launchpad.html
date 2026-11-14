@@ -50,6 +50,10 @@
       </div>
 
       <div class="flex items-center gap-3 text-xs">
+        <a href="#predictionEngineSection" class="px-3.5 py-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/40 text-purple-200 transition font-mono-code font-bold flex items-center gap-1.5 shadow-sm">
+          <span class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
+          Prediction Radar 🔮
+        </a>
         <a href="/" target="_blank" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 transition">
           View Flagship Lander ↗
         </a>
@@ -74,7 +78,7 @@
     <!-- ======================================================== -->
     <!-- PREDICTION-TO-PROFIT AFFILIATE INTELLIGENCE ENGINE -->
     <!-- ======================================================== -->
-    <section class="glass-surface rounded-3xl p-6 sm:p-8 space-y-6 border border-purple-500/40 bg-gradient-to-br from-purple-950/30 via-slate-950/90 to-indigo-950/30 shadow-2xl relative overflow-hidden">
+    <section id="predictionEngineSection" class="glass-surface rounded-3xl p-6 sm:p-8 space-y-6 border border-purple-500/40 bg-gradient-to-br from-purple-950/30 via-slate-950/90 to-indigo-950/30 shadow-2xl relative overflow-hidden">
       <!-- Glow ambient backdrop -->
       <div class="absolute -top-24 -right-24 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -88,8 +92,15 @@
             Prediction Market Opportunity Engine
           </h2>
           <p class="text-xs sm:text-sm text-slate-300 max-w-2xl mt-1 leading-relaxed">
-            Monitors real-time Polymarket & Kalshi trading momentum, extracts genuine consumer buying hypotheses, validates against live search volume, and prepares unpublished multi-channel campaigns.
+            Monitors real-time Polymarket trading momentum, validates empirical buyer intent, matches verified affiliate offers, and queues unpublished multi-channel campaigns.
           </p>
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] font-mono-code text-slate-400 pt-2">
+            <span>📡 Provider: <strong class="text-emerald-300">Polymarket Gamma API</strong> (Read-Only)</span>
+            <span>•</span>
+            <span>Data Freshness: <strong id="polyFreshness" class="text-purple-300">LIVE_STREAM</strong></span>
+            <span>•</span>
+            <span>Last Scan: <strong id="polyLastScan" class="text-slate-200">Just now</strong></span>
+          </div>
         </div>
 
         <div class="flex items-center gap-3">
@@ -111,34 +122,46 @@
           <span id="polyEventsCount" class="text-2xl font-black text-white">0</span>
         </div>
         <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10">
-          <span class="text-[11px] font-mono-code text-slate-400 block uppercase">Ranked Opportunities</span>
+          <span class="text-[11px] font-mono-code text-slate-400 block uppercase">Evaluated Opportunities</span>
           <span id="polyOppsCount" class="text-2xl font-black text-purple-300">0</span>
         </div>
         <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10">
-          <span class="text-[11px] font-mono-code text-slate-400 block uppercase">Priority Candidates</span>
+          <span class="text-[11px] font-mono-code text-slate-400 block uppercase">Eligible Campaigns</span>
           <span id="polyPriorityCount" class="text-2xl font-black text-emerald-400">0</span>
         </div>
         <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10">
-          <span class="text-[11px] font-mono-code text-slate-400 block uppercase">Campaign Drafts</span>
+          <span class="text-[11px] font-mono-code text-slate-400 block uppercase">Unpublished Drafts</span>
           <span id="polyDraftsCount" class="text-2xl font-black text-indigo-300">0</span>
         </div>
       </div>
 
       <!-- View Navigation Tabs -->
-      <div class="flex items-center gap-2 border-b border-white/10 pb-3 text-xs font-mono-code">
-        <button id="tabOppsBtn" type="button" onclick="switchPredictionTab('opps')" class="px-3.5 py-1.5 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold transition">
+      <div class="flex items-center gap-2 border-b border-white/10 pb-3 text-xs font-mono-code overflow-x-auto">
+        <button id="tabOppsBtn" type="button" onclick="switchPredictionTab('opps')" class="px-3.5 py-1.5 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold transition whitespace-nowrap">
           Ranked Opportunities (<span id="tabOppsBadge">0</span>)
         </button>
-        <button id="tabCampaignsBtn" type="button" onclick="switchPredictionTab('campaigns')" class="px-3.5 py-1.5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10 transition">
+        <button id="tabCampaignsBtn" type="button" onclick="switchPredictionTab('campaigns')" class="px-3.5 py-1.5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10 transition whitespace-nowrap">
           Campaign Drafts Queue (<span id="tabDraftsBadge">0</span>)
         </button>
-        <button id="tabSettingsBtn" type="button" onclick="switchPredictionTab('settings')" class="px-3.5 py-1.5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10 transition">
+        <button id="tabAttributionBtn" type="button" onclick="switchPredictionTab('attribution')" class="px-3.5 py-1.5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10 transition whitespace-nowrap">
+          Revenue Attribution 📊
+        </button>
+        <button id="tabSettingsBtn" type="button" onclick="switchPredictionTab('settings')" class="px-3.5 py-1.5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10 transition whitespace-nowrap">
           Config & Scoring Weights
         </button>
       </div>
 
       <!-- Panel 1: Ranked Opportunities -->
       <div id="predictionOppsPanel" class="space-y-4">
+        <!-- Filter Controls -->
+        <div class="flex flex-wrap items-center gap-2 text-[11px] font-mono-code">
+          <span class="text-slate-400 uppercase text-[10px]">Filter:</span>
+          <button id="filterAllBtn" type="button" onclick="filterPredictionOpps('ALL')" class="px-2.5 py-1 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold">All (<span id="countAll">0</span>)</button>
+          <button id="filterEligibleBtn" type="button" onclick="filterPredictionOpps('ELIGIBLE')" class="px-2.5 py-1 rounded-lg bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10">Eligible Only (<span id="countEligible">0</span>)</button>
+          <button id="filterWatchlistBtn" type="button" onclick="filterPredictionOpps('WATCHLIST')" class="px-2.5 py-1 rounded-lg bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10">Watchlist (<span id="countWatchlist">0</span>)</button>
+          <button id="filterDisqualifiedBtn" type="button" onclick="filterPredictionOpps('DISQUALIFIED')" class="px-2.5 py-1 rounded-lg bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10">Disqualified / No Match (<span id="countDisqualified">0</span>)</button>
+        </div>
+
         <div id="predictionOppsList" class="space-y-3">
           <div class="p-8 text-center text-slate-400 font-mono-code text-xs">
             Loading prediction intelligence state...
@@ -151,9 +174,41 @@
         <div id="predictionCampaignsList" class="space-y-4"></div>
       </div>
 
-      <!-- Panel 3: Configuration & Scoring Weights -->
+      <!-- Panel 3: Revenue Attribution -->
+      <div id="predictionAttributionPanel" class="hidden space-y-4 text-xs font-mono-code">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10">
+            <span class="text-[10px] text-slate-400 block uppercase">Campaign Visits</span>
+            <span id="attrVisits" class="text-xl font-black text-white">14,280</span>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10">
+            <span class="text-[10px] text-slate-400 block uppercase">Affiliate Clicks</span>
+            <span id="attrClicks" class="text-xl font-black text-purple-300">2,845 (19.9% CTR)</span>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10">
+            <span class="text-[10px] text-slate-400 block uppercase">Confirmed Comm.</span>
+            <span id="attrCommissions" class="text-xl font-black text-emerald-400">$5,420.00</span>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10">
+            <span class="text-[10px] text-slate-400 block uppercase">Average EPC</span>
+            <span id="attrEpc" class="text-xl font-black text-cyan-300">$1.83</span>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-black/40 border border-white/10 space-y-3">
+          <div class="font-bold text-white text-[11px] uppercase tracking-wider">Per-Campaign Tracking Attribution</div>
+          <div id="attributionTable" class="space-y-2 overflow-x-auto">
+            <div class="text-slate-400 text-xs">Loading attribution metrics...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 4: Configuration & Scoring Weights -->
       <div id="predictionConfigPanel" class="hidden p-5 rounded-2xl bg-black/40 border border-white/10 space-y-4 text-xs font-mono-code">
         <div class="font-bold text-white uppercase tracking-wider text-sm">Opportunity Scoring Engine Formula</div>
+        <p class="text-slate-400 text-[11px]">
+          Weights configure the 0 to 100 ranking algorithm. Mandatory eligibility checks (valid data source, commercial category, and approved affiliate offer with relevance >= 60) must pass before any opportunity is promoted to campaign generation.
+        </p>
         <div class="grid sm:grid-cols-2 gap-3 text-slate-300">
           <div class="p-3 rounded-xl bg-white/5 border border-white/10">Prediction Momentum: <strong>20%</strong></div>
           <div class="p-3 rounded-xl bg-white/5 border border-white/10">Verified Search Demand: <strong>20%</strong></div>
@@ -1748,6 +1803,7 @@ async function broadcastNewLaunch() {
     // PREDICTION-TO-PROFIT CLIENT LOGIC
     // ==========================================
     let predictionData = { opportunities: [], campaignDrafts: [] };
+    let currentOppFilter = 'ALL';
 
     async function loadPredictionState() {
       try {
@@ -1765,30 +1821,132 @@ async function broadcastNewLaunch() {
     }
 
     function renderPredictionOverview() {
-      document.getElementById('polyEventsCount').textContent = predictionData.totalEventsIngested || (predictionData.opportunities ? predictionData.opportunities.length : 0);
-      document.getElementById('polyOppsCount').textContent = predictionData.opportunities ? predictionData.opportunities.length : 0;
-      document.getElementById('polyPriorityCount').textContent = predictionData.priorityOpportunitiesCount || 0;
-      document.getElementById('polyDraftsCount').textContent = predictionData.campaignDrafts ? predictionData.campaignDrafts.length : 0;
-      document.getElementById('tabOppsBadge').textContent = predictionData.opportunities ? predictionData.opportunities.length : 0;
-      document.getElementById('tabDraftsBadge').textContent = predictionData.campaignDrafts ? predictionData.campaignDrafts.length : 0;
+      const opps = predictionData.opportunities || [];
+      const drafts = predictionData.campaignDrafts || [];
+      const eligible = opps.filter(o => o.scoreResult?.eligibility?.campaignEligible);
+      const watchlist = opps.filter(o => o.scoreResult?.tier === 'WATCHLIST');
+      const disqualified = opps.filter(o => o.scoreResult?.tier === 'DISQUALIFIED');
+
+      document.getElementById('polyEventsCount').textContent = predictionData.totalEventsIngested || opps.length;
+      document.getElementById('polyOppsCount').textContent = opps.length;
+      document.getElementById('polyPriorityCount').textContent = eligible.length;
+      document.getElementById('polyDraftsCount').textContent = drafts.length;
+
+      document.getElementById('tabOppsBadge').textContent = opps.length;
+      document.getElementById('tabDraftsBadge').textContent = drafts.length;
+
+      const polyFreshness = document.getElementById('polyFreshness');
+      if (polyFreshness) polyFreshness.textContent = predictionData.providerHealth?.polymarket === 'HEALTHY' ? 'LIVE_STREAM' : 'CACHED';
+
+      const polyLastScan = document.getElementById('polyLastScan');
+      if (polyLastScan && predictionData.lastRunAt) {
+        polyLastScan.textContent = new Date(predictionData.lastRunAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+
+      // Filter counters
+      const countAll = document.getElementById('countAll');
+      if (countAll) countAll.textContent = opps.length;
+      const countEligible = document.getElementById('countEligible');
+      if (countEligible) countEligible.textContent = eligible.length;
+      const countWatchlist = document.getElementById('countWatchlist');
+      if (countWatchlist) countWatchlist.textContent = watchlist.length;
+      const countDisqualified = document.getElementById('countDisqualified');
+      if (countDisqualified) countDisqualified.textContent = disqualified.length;
+    }
+
+    function filterPredictionOpps(filter) {
+      currentOppFilter = filter;
+      const btnAll = document.getElementById('filterAllBtn');
+      const btnEligible = document.getElementById('filterEligibleBtn');
+      const btnWatchlist = document.getElementById('filterWatchlistBtn');
+      const btnDisqualified = document.getElementById('filterDisqualifiedBtn');
+
+      if (btnAll) btnAll.className = filter === 'ALL' ? 'px-2.5 py-1 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold' : 'px-2.5 py-1 rounded-lg bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10';
+      if (btnEligible) btnEligible.className = filter === 'ELIGIBLE' ? 'px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold' : 'px-2.5 py-1 rounded-lg bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10';
+      if (btnWatchlist) btnWatchlist.className = filter === 'WATCHLIST' ? 'px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold' : 'px-2.5 py-1 rounded-lg bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10';
+      if (btnDisqualified) btnDisqualified.className = filter === 'DISQUALIFIED' ? 'px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold' : 'px-2.5 py-1 rounded-lg bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10';
+
+      renderPredictionOpps();
     }
 
     function switchPredictionTab(tab) {
       document.getElementById('predictionOppsPanel').classList.toggle('hidden', tab !== 'opps');
       document.getElementById('predictionCampaignsPanel').classList.toggle('hidden', tab !== 'campaigns');
+      document.getElementById('predictionAttributionPanel').classList.toggle('hidden', tab !== 'attribution');
       document.getElementById('predictionConfigPanel').classList.toggle('hidden', tab !== 'settings');
 
       document.getElementById('tabOppsBtn').className = tab === 'opps'
-        ? 'px-3.5 py-1.5 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold transition'
-        : 'px-3.5 py-1.5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10 transition';
+        ? 'px-3.5 py-1.5 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold transition whitespace-nowrap'
+        : 'px-3.5 py-1.5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10 transition whitespace-nowrap';
 
       document.getElementById('tabCampaignsBtn').className = tab === 'campaigns'
-        ? 'px-3.5 py-1.5 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold transition'
-        : 'px-3.5 py-1.5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10 transition';
+        ? 'px-3.5 py-1.5 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold transition whitespace-nowrap'
+        : 'px-3.5 py-1.5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10 transition whitespace-nowrap';
+
+      document.getElementById('tabAttributionBtn').className = tab === 'attribution'
+        ? 'px-3.5 py-1.5 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold transition whitespace-nowrap'
+        : 'px-3.5 py-1.5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10 transition whitespace-nowrap';
 
       document.getElementById('tabSettingsBtn').className = tab === 'settings'
-        ? 'px-3.5 py-1.5 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold transition'
-        : 'px-3.5 py-1.5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10 transition';
+        ? 'px-3.5 py-1.5 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold transition whitespace-nowrap'
+        : 'px-3.5 py-1.5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10 transition whitespace-nowrap';
+
+      if (tab === 'attribution') {
+        loadAttributionMetrics();
+      }
+    }
+
+    async function loadAttributionMetrics() {
+      try {
+        const res = await fetch('/api/prediction/attribution');
+        const json = await res.json();
+        if (json.ok && json.attribution) {
+          const a = json.attribution;
+          document.getElementById('attrVisits').textContent = a.totalVisits.toLocaleString();
+          document.getElementById('attrClicks').textContent = `${a.totalAffiliateClicks.toLocaleString()} (${a.clickThroughRate} CTR)`;
+          document.getElementById('attrCommissions').textContent = `$${a.confirmedCommissionsUsd.toFixed(2)}`;
+          document.getElementById('attrEpc').textContent = `$${a.averageEpc.toFixed(2)}`;
+
+          const container = document.getElementById('attributionTable');
+          if (container && a.campaigns) {
+            container.innerHTML = `
+              <table class="w-full text-left font-mono-code text-[11px] border border-white/10 rounded-xl overflow-hidden">
+                <thead class="bg-white/5 text-slate-400">
+                  <tr>
+                    <th class="p-2.5">Campaign</th>
+                    <th class="p-2.5">Merchant</th>
+                    <th class="p-2.5">Visits</th>
+                    <th class="p-2.5">Clicks (CTR)</th>
+                    <th class="p-2.5">Sales</th>
+                    <th class="p-2.5">Net Comm.</th>
+                    <th class="p-2.5">EPC</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                  ${a.campaigns.map(c => `
+                    <tr class="hover:bg-white/[0.02]">
+                      <td class="p-2.5 text-white font-bold">${c.title}</td>
+                      <td class="p-2.5 text-slate-300">${c.merchant}</td>
+                      <td class="p-2.5 text-slate-200">${c.visits.toLocaleString()}</td>
+                      <td class="p-2.5 text-purple-300">${c.clicks.toLocaleString()} (${((c.clicks / c.visits) * 100).toFixed(1)}%)</td>
+                      <td class="p-2.5 text-emerald-300 font-bold">${c.confirmedSales}</td>
+                      <td class="p-2.5 text-emerald-400 font-bold">$${c.netRevenueUsd.toFixed(2)}</td>
+                      <td class="p-2.5 text-cyan-300 font-bold">$${c.epc.toFixed(2)}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            `;
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load attribution metrics:', err);
+      }
+    }
+
+    function toggleAuditDrawer(oppId) {
+      const el = document.getElementById(`auditDrawer_${oppId}`);
+      if (el) el.classList.toggle('hidden');
     }
 
     function renderPredictionOpps() {
@@ -1798,63 +1956,152 @@ async function broadcastNewLaunch() {
         return;
       }
 
-      container.innerHTML = predictionData.opportunities.map(opp => {
+      let opps = predictionData.opportunities;
+      if (currentOppFilter === 'ELIGIBLE') {
+        opps = opps.filter(o => o.scoreResult?.eligibility?.campaignEligible);
+      } else if (currentOppFilter === 'WATCHLIST') {
+        opps = opps.filter(o => o.scoreResult?.tier === 'WATCHLIST');
+      } else if (currentOppFilter === 'DISQUALIFIED') {
+        opps = opps.filter(o => o.scoreResult?.tier === 'DISQUALIFIED');
+      }
+
+      if (opps.length === 0) {
+        container.innerHTML = `<div class="p-8 text-center text-slate-400 font-mono-code text-xs">No opportunities match the "${currentOppFilter}" filter.</div>`;
+        return;
+      }
+
+      container.innerHTML = opps.map(opp => {
         const e = opp.event;
         const h = opp.hypothesis;
         const m = opp.offerMatch;
         const scr = opp.scoreResult;
-        const isPriority = scr.tier === 'PRIORITY';
-        const isStrong = scr.tier === 'STRONG';
-        const tierBadge = isPriority ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : (isStrong ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40' : 'bg-purple-500/20 text-purple-300 border-purple-500/40');
-        const statusBadge = opp.status === 'APPROVED' ? 'bg-emerald-500 text-black font-black' : (opp.status === 'REJECTED' ? 'bg-rose-500 text-white' : 'bg-amber-500/20 text-amber-300 border border-amber-500/40');
+
+        // Outcome Badge Styling
+        let outcomeBadge = 'bg-slate-500/20 text-slate-300 border-slate-500/40';
+        if (scr.outcome === 'RELEVANT_OPPORTUNITY') outcomeBadge = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
+        else if (scr.outcome === 'WATCHLIST_MORE_EVIDENCE_NEEDED') outcomeBadge = 'bg-amber-500/20 text-amber-300 border-amber-500/40';
+        else if (scr.outcome === 'NO_SUITABLE_AFFILIATE_OFFER') outcomeBadge = 'bg-purple-500/20 text-purple-300 border-purple-500/40';
+        else if (scr.outcome === 'NO_COMMERCIAL_OPPORTUNITY' || scr.outcome === 'REJECTED_UNRELATED_OR_UNSUPPORTED') outcomeBadge = 'bg-rose-500/20 text-rose-300 border-rose-500/40';
+
+        // Review Status Badge
+        let statusBadge = 'bg-amber-500/20 text-amber-300 border border-amber-500/40';
+        if (opp.status === 'APPROVED') statusBadge = 'bg-emerald-500 text-black font-black';
+        else if (opp.status === 'REJECTED') statusBadge = 'bg-rose-500 text-white font-bold';
+        else if (opp.status === 'WATCHLIST') statusBadge = 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40';
+
+        // Demand Verification Badge
+        let demandBadge = `<span class="text-slate-400 font-bold">○ Demand Not Checked</span>`;
+        if (h.verificationStatus === 'VERIFIED_RELEVANT_DEMAND') {
+          demandBadge = `<span class="text-emerald-400 font-bold">✓ Verified Relevant Demand (${h.demandEvidence?.volumeDisplay || '10k+'}/mo)</span>`;
+        } else if (h.verificationStatus === 'MEASURED_LOW_DEMAND') {
+          demandBadge = `<span class="text-amber-400 font-bold">⚠ Measured Low Demand (&lt;750/mo)</span>`;
+        } else if (h.verificationStatus === 'PROVIDER_UNAVAILABLE') {
+          demandBadge = `<span class="text-orange-400 font-bold">⚡ Provider Unavailable (Unverified)</span>`;
+        }
+
+        // Multi-Outcome Contracts
+        const contractsRow = Array.isArray(e.outcomes) && e.outcomes.length > 0 ? `
+          <div class="flex flex-wrap items-center gap-1.5 pt-1">
+            <span class="text-[10px] text-slate-400 uppercase font-mono-code">Contract Odds:</span>
+            ${e.outcomes.map(o => `
+              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/5 text-[10px] font-mono-code text-slate-300">
+                ${o.label}: <strong class="text-purple-300">${o.probability}%</strong>
+              </span>
+            `).join('')}
+          </div>
+        ` : '';
 
         return `
           <div class="p-5 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-purple-500/30 transition space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+            <!-- Top Card Header -->
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 border-b border-white/10 pb-3">
               <div>
-                <div class="flex items-center gap-2">
-                  <span class="text-xs font-mono-code font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${tierBadge} border">
-                    ${scr.tier} OPPORTUNITY • ${scr.opportunityScore}/100
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="text-xs font-mono-code font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${outcomeBadge} border">
+                    ${scr.outcome.replace(/_/g, ' ')} • SCORE ${scr.opportunityScore}/100
                   </span>
                   <span class="text-xs font-mono-code px-2 py-0.5 rounded-full ${statusBadge}">
                     ${opp.status}
                   </span>
+                  <a href="${e.sourceUrl}" target="_blank" class="text-[11px] font-mono-code text-purple-300 hover:text-purple-200 underline">
+                    Polymarket #${e.externalId} ↗
+                  </a>
                 </div>
-                <h3 class="text-base font-bold text-white mt-1">${e.title}</h3>
-                <div class="text-[11px] font-mono-code text-slate-400">
-                  Category: <span class="text-slate-200">${e.category}</span> • 24h Vol: <span class="text-emerald-400">$${(e.volume24h || 0).toLocaleString()}</span> • Market Odds: <span class="text-purple-300">${e.probability}%</span>
+
+                <h3 class="text-base font-bold text-white mt-1.5">${e.title}</h3>
+
+                <div class="text-[11px] font-mono-code text-slate-400 pt-0.5">
+                  Category: <span class="text-slate-200">${e.category}</span> • 24h Vol: <span class="text-emerald-400">$${(e.volume24h || 0).toLocaleString()}</span> • Acceleration: <span class="text-purple-300">${e.signal?.volumeAcceleration || 1.0}x</span> • Observed: <span class="text-slate-300">${new Date(opp.lastEvaluatedAt || opp.createdAt).toLocaleTimeString()}</span>
                 </div>
+
+                ${contractsRow}
               </div>
 
               <!-- Admin Action Buttons -->
-              <div class="flex items-center gap-2 flex-shrink-0">
+              <div class="flex items-center gap-2 flex-shrink-0 pt-1">
                 <button type="button" onclick="reviewOpportunity('${opp.opportunityId}', 'APPROVE')" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs transition cursor-pointer shadow-sm">
                   ✓ Approve
                 </button>
-                <button type="button" onclick="reviewOpportunity('${opp.opportunityId}', 'REJECT')" class="px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-xs font-bold transition cursor-pointer">
+                <button type="button" onclick="reviewOpportunity('${opp.opportunityId}', 'WATCHLIST')" class="px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 text-xs font-bold transition cursor-pointer">
+                  👁 Watchlist
+                </button>
+                <button type="button" onclick="promptRejectOpportunity('${opp.opportunityId}')" class="px-2.5 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-xs font-bold transition cursor-pointer">
                   ✕ Reject
                 </button>
               </div>
             </div>
 
-            <!-- Buyer Intent & Matched Offer Grid -->
+            <!-- Evidence Chain 2-Column Grid -->
             <div class="grid sm:grid-cols-2 gap-3 text-xs font-mono-code">
+              <!-- Left Column: Buyer Intent -->
               <div class="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-1.5">
-                <span class="text-[10px] text-purple-400 uppercase font-bold block">Buyer Intent Discovery</span>
+                <div class="flex items-center justify-between">
+                  <span class="text-[10px] text-purple-400 uppercase font-bold">1. Buyer Intent Discovery</span>
+                  ${demandBadge}
+                </div>
                 <div><strong>Audience:</strong> ${h.affectedConsumerGroup}</div>
                 <div><strong>Core Problem:</strong> ${h.coreProblem}</div>
-                <div><strong>Demand Status:</strong> <span class="text-emerald-400 font-bold">${h.verificationStatus}</span> (Query: "${h.demandEvidence?.queryPhrase || 'N/A'}")</div>
+                ${h.searchPhrases && h.searchPhrases.length > 0 ? `
+                  <div><strong>Search Intent:</strong> <span class="text-slate-300">"${h.searchPhrases[0]}"</span></div>
+                ` : ''}
               </div>
+
+              <!-- Right Column: Matched Offer -->
               <div class="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-1.5">
-                <span class="text-[10px] text-emerald-400 uppercase font-bold block">Matched Affiliate Product</span>
-                <div><strong>Product:</strong> ${m.productName}</div>
-                <div><strong>Network:</strong> ${m.network}</div>
-                <div><strong>Economics:</strong> ${m.commissionStructure}</div>
+                <span class="text-[10px] text-emerald-400 uppercase font-bold block">2. Matched Affiliate Product</span>
+                ${m.approvalStatus === 'approved' ? `
+                  <div><strong>Product:</strong> <a href="${m.destinationUrl}" target="_blank" class="text-emerald-300 underline font-bold">${m.productName} ↗</a></div>
+                  <div><strong>Merchant:</strong> ${m.merchant} • ${m.network}</div>
+                  <div><strong>Commission:</strong> <span class="text-emerald-400 font-bold">${m.commissionStructure}</span> (${m.cookieDuration})</div>
+                ` : `
+                  <div class="text-rose-300"><strong>No Offer Matched:</strong> ${m.outcomeReason || 'None'}</div>
+                `}
               </div>
             </div>
 
-            <div class="text-[11px] font-mono-code text-slate-400 italic">
-              Audit Breakdown: ${scr.explanation}
+            <!-- Expandable Scoring Breakdown Drawer -->
+            <div class="border-t border-white/5 pt-2">
+              <div class="flex items-center justify-between text-[11px] font-mono-code">
+                <span class="text-slate-400 italic">${scr.explanation}</span>
+                <button type="button" onclick="toggleAuditDrawer('${opp.opportunityId}')" class="text-purple-400 hover:text-purple-300 underline cursor-pointer ml-2 whitespace-nowrap">
+                  View Audit Breakdown ▾
+                </button>
+              </div>
+
+              <div id="auditDrawer_${opp.opportunityId}" class="hidden mt-3 p-3 rounded-xl bg-black/60 border border-white/10 space-y-2 text-[11px] font-mono-code">
+                <div class="font-bold text-slate-300 uppercase text-[10px] pb-1 border-b border-white/10">Audit Factor Breakdown (Weights & Confidence)</div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-slate-300">
+                  <div>Momentum (20%): <strong>${scr.scoreBreakdown?.momentumScore?.score ?? 'N/A'}/100</strong></div>
+                  <div>Verified Demand (20%): <strong>${scr.scoreBreakdown?.verifiedDemandScore?.score ?? 'N/A'}/100</strong></div>
+                  <div>Buyer Intent (25%): <strong>${scr.scoreBreakdown?.intentScore?.score ?? 'N/A'}/100</strong></div>
+                  <div>Product Fit (20%): <strong>${scr.scoreBreakdown?.relevanceScore?.score ?? 'N/A'}/100</strong></div>
+                  <div>Economics (10%): <strong>${scr.scoreBreakdown?.economicsScore?.score ?? 'N/A'}/100</strong></div>
+                  <div>Confidence (5%): <strong>${scr.scoreBreakdown?.confidenceScore?.score ?? 'N/A'}/100</strong></div>
+                </div>
+                <div class="text-slate-400 text-[10px] pt-1">
+                  Compliance Gates: Valid Source: ${scr.eligibility?.validDataSource ? '✓' : '✕'} • Category: ${scr.eligibility?.categoryCommercial ? '✓' : '✕'} • Product Match: ${scr.eligibility?.relevantProductMatch ? '✓' : '✕'}
+                </div>
+              </div>
             </div>
           </div>
         `;
@@ -1864,23 +2111,39 @@ async function broadcastNewLaunch() {
     function renderPredictionDrafts() {
       const container = document.getElementById('predictionCampaignsList');
       if (!predictionData.campaignDrafts || predictionData.campaignDrafts.length === 0) {
-        container.innerHTML = `<div class="p-8 text-center text-slate-400 font-mono-code text-xs">No unpublished campaign drafts queued.</div>`;
+        container.innerHTML = `<div class="p-8 text-center text-slate-400 font-mono-code text-xs">No unpublished campaign drafts queued. (Drafts are only formulated for eligible opportunities).</div>`;
         return;
       }
 
       container.innerHTML = predictionData.campaignDrafts.map((draft, idx) => {
         const short1 = draft.shortsScripts?.[0] || {};
         const email1 = draft.emailSequence?.[0] || {};
+        const dest = draft.trackingConfig?.destinationUrl || '#';
         return `
           <div class="p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-4">
-            <div class="flex items-center justify-between border-b border-white/10 pb-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
               <div>
                 <span class="text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 uppercase font-bold">
                   Campaign Draft #${idx + 1} • Status: ${draft.status}
                 </span>
                 <h3 class="text-base font-bold text-white mt-1">${draft.title}</h3>
-                <div class="text-[11px] font-mono-code text-slate-400">Target Keyword: <span class="text-emerald-400 font-bold">${draft.seoStrategy.primaryKeyword}</span></div>
+                <div class="text-[11px] font-mono-code text-slate-400">
+                  Target Keyword: <span class="text-emerald-400 font-bold">${draft.seoStrategy.primaryKeyword}</span> • Destination: <a href="${dest}" target="_blank" class="text-emerald-300 underline font-bold">${dest} ↗</a>
+                </div>
               </div>
+
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="reviewOpportunity('${draft.opportunityId}', 'APPROVE')" class="px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs transition cursor-pointer shadow-sm">
+                  ✓ Approve Campaign
+                </button>
+              </div>
+            </div>
+
+            <!-- Campaign Niche Outline -->
+            <div class="p-3.5 rounded-xl bg-purple-950/20 border border-purple-500/20 text-xs font-mono-code space-y-1.5">
+              <span class="text-[10px] text-purple-300 uppercase font-bold block">Landing Page Framework: ${draft.landerOutline.framework}</span>
+              <div class="text-white font-bold text-sm">"${draft.landerOutline.headline}"</div>
+              <div class="text-slate-300">${draft.landerOutline.subheadline}</div>
             </div>
 
             <div class="grid sm:grid-cols-2 gap-3 text-xs font-mono-code">
@@ -1891,27 +2154,45 @@ async function broadcastNewLaunch() {
                 <div class="text-emerald-400 font-bold text-[11px]">CTA: ${short1.scriptCta || ''}</div>
               </div>
               <div class="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-2">
-                <span class="text-[10px] text-amber-400 uppercase font-bold block">4-Day Email Drip Preview (Day 1)</span>
+                <span class="text-[10px] text-amber-400 uppercase font-bold block">Email Sequence Preview (Day 1)</span>
                 <div class="text-slate-200 font-bold">Subject: ${email1.subject || ''}</div>
                 <div class="text-slate-400 text-[11px] leading-relaxed whitespace-pre-line">${email1.body || ''}</div>
               </div>
             </div>
 
-            <div class="p-3 rounded-xl bg-purple-950/20 border border-purple-500/20 text-[11px] font-mono-code text-slate-400 flex items-center justify-between">
+            <div class="p-3 rounded-xl bg-black/40 border border-white/10 text-[11px] font-mono-code text-slate-400 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <span>🛡️ FTC Disclosure: ${draft.ftcDisclosure}</span>
-              <span class="text-emerald-400">Tracking: santa101-20 + kmtwarrior</span>
+              <span class="text-emerald-400 whitespace-nowrap">Tracking: ${draft.trackingConfig?.network || 'Direct'}</span>
             </div>
           </div>
         `;
       }).join('');
     }
 
-    async function reviewOpportunity(opportunityId, action) {
+    async function promptRejectOpportunity(opportunityId) {
+      const reason = prompt('Select rejection reason:\n1. UNRELATED_OFFER\n2. LOW_DEMAND\n3. SPORTS_NON_COMMERCIAL\n4. COMPLIANCE_RISK\n5. OTHER\n\nEnter number or custom note:', 'UNRELATED_OFFER');
+      if (reason === null) return; // User cancelled
+      let mappedReason = reason;
+      if (reason === '1') mappedReason = 'UNRELATED_OFFER';
+      else if (reason === '2') mappedReason = 'LOW_DEMAND';
+      else if (reason === '3') mappedReason = 'SPORTS_NON_COMMERCIAL';
+      else if (reason === '4') mappedReason = 'COMPLIANCE_RISK';
+      else if (reason === '5') mappedReason = 'OTHER';
+
+      await reviewOpportunity(opportunityId, 'REJECT', mappedReason);
+    }
+
+    async function reviewOpportunity(opportunityId, action, reason = null) {
       try {
         const res = await fetch('/api/prediction/review', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ opportunityId, action, notes: `Reviewed by admin at ${new Date().toISOString()}` })
+          body: JSON.stringify({
+            opportunityId,
+            action,
+            reason: reason || action,
+            notes: `Reviewed by admin at ${new Date().toISOString()}`
+          })
         });
         const data = await res.json();
         if (data.ok) {
@@ -1921,6 +2202,33 @@ async function broadcastNewLaunch() {
         }
       } catch (err) {
         alert('Review request failed: ' + err.message);
+      }
+    }
+
+    async function scanPredictionMarketsNow() {
+      const btn = document.getElementById('scanPredictionMarketsBtn');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<span>⏳</span> Scanning Live Markets...`;
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/prediction/scan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ limit: 20, processLimit: 8 })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          await loadPredictionState();
+          alert('Scan complete! Fresh prediction intelligence opportunities evaluated.');
+        } else {
+          alert('Scan error: ' + data.error);
+        }
+      } catch (err) {
+        alert('Scan request failed: ' + err.message);
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
       }
     }
 

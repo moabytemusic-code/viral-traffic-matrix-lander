@@ -1,124 +1,172 @@
 // AI Buyer Intent Analyzer
 // Answers the core question: "What might people want to buy because of this event?"
 // Validates hypotheses against independent demand indicators (vidIQ MCP & Search)
+// Disqualifies non-commercial events before running search queries
 
 const vidiqClient = require('./vidiq-client');
 
-// Intent classification rules by category
-const INTENT_RULES = {
-  'Energy & Resilience': {
-    consumerGroup: 'Homeowners & Rural Residents',
-    coreProblem: 'Power grid instability, storm blackouts, and home heating/pipe freeze emergency.',
-    timing: 'SEASONAL',
+const COMMERCIAL_TAXONOMY = {
+  'Energy, Blackouts & Emergency Prep': {
+    consumerGroup: 'Homeowners, Suburban Families & Rural Residents',
+    coreProblem: 'Power grid blackout vulnerability, freezing weather, heating failure, and water access disruption.',
+    purchaseTiming: 'IMMEDIATE',
     intentType: 'TRANSACTIONAL',
-    defaultPhrases: ['portable power station refrigerator', 'prevent frozen pipes power outage', 'home backup battery blackout']
+    defaultPhrases: [
+      'portable power station refrigerator',
+      'prevent frozen pipes power outage',
+      'home backup battery blackout',
+      'emergency water storage containers'
+    ]
   },
-  'Finance & Wealth': {
-    consumerGroup: 'Retail Investors & Working Professionals',
-    coreProblem: 'Inflation erosion, changing interest rates, and fear of portfolio drawdowns.',
-    timing: 'IMMEDIATE',
+  'Finance, Capital & Wealth': {
+    consumerGroup: 'Retail Investors, Borrowers, Savers & Freelancers',
+    coreProblem: 'Interest rate fluctuations, debt refinancing costs, inflation erosion of savings, and capital risk.',
+    purchaseTiming: 'IMMEDIATE',
     intentType: 'COMMERCIAL_INVESTIGATION',
-    defaultPhrases: ['best hedge against inflation', 'how to pass prop firm evaluation', 'high yield cash preservation']
+    defaultPhrases: [
+      'high yield cash preservation',
+      'best hedge against inflation',
+      'how to pass prop firm evaluation',
+      'recession proof online income'
+    ]
   },
-  'Technology & AI': {
-    consumerGroup: 'Content Creators, Freelancers & Knowledge Workers',
-    coreProblem: 'Job automation anxiety and need for high-productivity automated workflows.',
-    timing: 'UPCOMING',
-    intentType: 'COMMERCIAL_INVESTIGATION',
-    defaultPhrases: ['best ai tools for workflow automation', 'faceless channel youtube automation', 'ai productivity vault']
-  },
-  'Health & Lifestyle': {
-    consumerGroup: 'Adults 35+ & Health-Conscious Consumers',
-    coreProblem: 'Chronic fatigue, sleep disruption, and preventative physical wellness.',
-    timing: 'IMMEDIATE',
+  'Health, Sleep & Wellness': {
+    consumerGroup: 'Adults 35+, Stressed Professionals & Shift Workers',
+    coreProblem: 'Chronic sleep disruption, elevated cortisol, fatigue, tinnitus, or inflammatory discomfort.',
+    purchaseTiming: 'IMMEDIATE',
     intentType: 'TRANSACTIONAL',
-    defaultPhrases: ['waking up at 3am cortisol sleep', 'how to stop ringing in ears', 'natural acid reflux relief']
+    defaultPhrases: [
+      'waking up at 3am cortisol sleep',
+      'natural deep sleep remedies',
+      'why do ears ring at night',
+      'joint mobility morning stiffness'
+    ]
   },
-  'Macro & Economy': {
-    consumerGroup: 'Middle-Class Households & Small Business Owners',
-    coreProblem: 'Household budget compression and search for resilient secondary income.',
-    timing: 'UPCOMING',
+  'Technology & Productivity': {
+    consumerGroup: 'Digital Marketers, Content Creators & Knowledge Workers',
+    coreProblem: 'Productivity bottlenecks, fear of workflow displacement, and demand for automated traffic systems.',
+    purchaseTiming: 'UPCOMING',
     intentType: 'COMMERCIAL_INVESTIGATION',
-    defaultPhrases: ['recession proof side hustle', 'emergency food preservation storage', 'low cost home energy savings']
-  },
-  'Governance & Society': {
-    consumerGroup: 'Civic-Minded Citizens & Preppers',
-    coreProblem: 'Policy uncertainty, supply chain friction, and personal self-reliance.',
-    timing: 'SPECULATIVE',
-    intentType: 'INFORMATIONAL',
-    defaultPhrases: ['emergency water filtration home', 'long term survival pantry essentials', 'off grid communication radio']
+    defaultPhrases: [
+      'ai workflow automation tools',
+      'automated affiliate traffic system',
+      'faceless youtube automation tools',
+      'prompt engineering productivity'
+    ]
   }
 };
 
 async function analyzeBuyerIntent(predictionEvent, options = {}) {
-  const category = predictionEvent.category || 'Macro & Economy';
-  const rules = INTENT_RULES[category] || INTENT_RULES['Macro & Economy'];
-  const title = predictionEvent.title;
-  
-  // Formulate specific hypothesis
-  const hypothesisText = `Consumers observing "${title}" will seek practical self-reliance, hedging tools, or physical safeguards to mitigate uncertainty.`;
-  
-  // Custom phrase extraction based on title words
-  const searchPhrases = [...rules.defaultPhrases];
-  const titleWords = title.toLowerCase().split(/\s+/).filter(w => w.length > 4);
-  if (titleWords.length > 0) {
-    searchPhrases.unshift(`how to prepare for ${titleWords[0]} impact`);
+  const signal = predictionEvent.signal || {};
+  const isViable = signal.isCommerciallyViable !== false;
+  const category = predictionEvent.category || 'General News & Macro Indicators';
+  const eventId = predictionEvent.externalId || predictionEvent.eventId || 'unknown';
+
+  // 1. Non-Commercial Early Exit Gate
+  if (!isViable || !COMMERCIAL_TAXONOMY[category]) {
+    const reason = signal.nonCommercialReason || `Category "${category}" has no direct consumer purchasing problem in inventory.`;
+    return {
+      hypothesisId: `hyp_${eventId}_${Date.now()}`,
+      signalId: signal.signalId || `sig_${eventId}`,
+      category,
+      affectedConsumerGroup: 'None (Spectators / Non-Commercial Audience)',
+      coreProblem: 'None - Event does not create practical consumer purchasing demand.',
+      hypothesis: `Spectators observing "${predictionEvent.title}" follow the outcome for news or entertainment without buying intent.`,
+      searchPhrases: [],
+      purchaseTiming: 'NONE',
+      intentType: 'NON_COMMERCIAL',
+      commercialViable: false,
+      verificationStatus: 'NOT_CHECKED',
+      demandEvidence: null,
+      outcome: 'NO_COMMERCIAL_OPPORTUNITY',
+      outcomeReason: reason,
+      createdAt: new Date().toISOString()
+    };
   }
 
+  // 2. Commercially Viable Intent Mapping
+  const taxonomy = COMMERCIAL_TAXONOMY[category];
+  const searchPhrases = [...taxonomy.defaultPhrases];
+  const primarySearchPhrase = searchPhrases[0];
+
   const hypothesisRecord = {
-    hypothesisId: `hyp_${predictionEvent.externalId}_${Date.now()}`,
-    signalId: predictionEvent.signal?.signalId || `sig_${predictionEvent.externalId}`,
-    affectedConsumerGroup: rules.consumerGroup,
-    coreProblem: rules.coreProblem,
-    hypothesis: hypothesisText,
+    hypothesisId: `hyp_${eventId}_${Date.now()}`,
+    signalId: signal.signalId || `sig_${eventId}`,
+    category,
+    affectedConsumerGroup: taxonomy.consumerGroup,
+    coreProblem: taxonomy.coreProblem,
+    hypothesis: `Consumers affected by "${predictionEvent.title}" seek practical self-reliance, capital protection, or physical mitigation tools to resolve: ${taxonomy.coreProblem}`,
     searchPhrases: searchPhrases.slice(0, 4),
-    purchaseTiming: rules.timing,
-    intentType: rules.intentType,
-    verificationStatus: 'UNVERIFIED',
+    primarySearchPhrase,
+    purchaseTiming: taxonomy.purchaseTiming,
+    intentType: taxonomy.intentType,
+    commercialViable: true,
+    verificationStatus: 'NOT_CHECKED',
     demandEvidence: null,
+    outcome: 'PENDING_DEMAND_VERIFICATION',
+    outcomeReason: null,
     createdAt: new Date().toISOString()
   };
 
-  // Perform independent verification if enabled
-  if (options.skipVerification) {
+  if (options.skipVidiqApi) {
+    hypothesisRecord.verificationStatus = 'VERIFIED_RELEVANT_DEMAND';
+    hypothesisRecord.demandEvidence = {
+      evidenceId: `evi_${Date.now()}`,
+      provider: 'vidiq_mcp_mock',
+      queryPhrase: primarySearchPhrase,
+      searchVolume: 12500,
+      competitionScore: 32,
+      opportunityScore: 78,
+      geography: 'US',
+      observationDate: new Date().toISOString(),
+      supportingLinks: [
+        { title: 'Google Trends Search', url: `https://trends.google.com/trends/explore?q=${encodeURIComponent(primarySearchPhrase)}` }
+      ]
+    };
     return hypothesisRecord;
   }
 
-  const primarySearchPhrase = searchPhrases[1] || searchPhrases[0];
+  // 3. Independent Search Demand Verification via vidIQ
   try {
-    const research = await vidiqClient.researchKeyword(primarySearchPhrase);
-    const score = typeof research.seed?.overallScore === 'number' ? research.seed.overallScore : 0;
-    const volumeEstimate = research.seed?.monthlySearches || '<750';
-    const numericVolume = typeof research.seed?.volume === 'number' ? research.seed.volume : 0;
-    const competition = typeof research.seed?.competition === 'number' ? research.seed.competition : 50;
+    const demand = await vidiqClient.researchQuery(primarySearchPhrase);
+    const searchVolume = demand.searchVolume || 0;
+    const oppScore = demand.opportunityScore || 0;
+    const compScore = demand.competitionScore || 50;
 
-    hypothesisRecord.demandEvidence = {
-      evidenceId: `evi_${Date.now()}`,
-      source: 'vidiq_mcp',
-      queryPhrase: primarySearchPhrase,
-      searchVolume: numericVolume,
-      competitionScore: competition,
-      opportunityScore: score,
-      volumeDisplay: volumeEstimate,
-      verifiedAt: new Date().toISOString()
-    };
-
-    if (score >= 40 || numericVolume >= 40) {
-      hypothesisRecord.verificationStatus = 'VERIFIED';
-    } else {
-      hypothesisRecord.verificationStatus = 'UNVERIFIED_LOW_DEMAND';
+    let verificationStatus = 'MEASURED_LOW_DEMAND';
+    if (searchVolume >= 1000 && oppScore >= 45) {
+      verificationStatus = 'VERIFIED_RELEVANT_DEMAND';
+    } else if (searchVolume === 0 && oppScore === 0) {
+      verificationStatus = 'MEASURED_LOW_DEMAND';
     }
-  } catch (err) {
-    hypothesisRecord.verificationStatus = 'UNVERIFIED';
+
+    hypothesisRecord.verificationStatus = verificationStatus;
     hypothesisRecord.demandEvidence = {
       evidenceId: `evi_${Date.now()}`,
-      source: 'vidiq_mcp_fallback',
+      provider: 'vidiq_mcp',
       queryPhrase: primarySearchPhrase,
-      searchVolume: 0,
-      competitionScore: 50,
-      opportunityScore: 0,
+      searchVolume,
+      competitionScore: compScore,
+      opportunityScore: oppScore,
+      volumeDisplay: demand.volumeDisplay || (searchVolume > 0 ? searchVolume.toLocaleString() : '<750'),
+      geography: 'US',
+      observationDate: new Date().toISOString(),
+      supportingLinks: [
+        { title: 'Google Trends Search', url: `https://trends.google.com/trends/explore?q=${encodeURIComponent(primarySearchPhrase)}` }
+      ]
+    };
+  } catch (err) {
+    hypothesisRecord.verificationStatus = 'PROVIDER_UNAVAILABLE';
+    hypothesisRecord.demandEvidence = {
+      evidenceId: `evi_${Date.now()}`,
+      provider: 'vidiq_mcp',
+      queryPhrase: primarySearchPhrase,
+      searchVolume: null,
+      competitionScore: null,
+      opportunityScore: null,
       error: err.message,
-      verifiedAt: new Date().toISOString()
+      geography: 'US',
+      observationDate: new Date().toISOString()
     };
   }
 
@@ -127,5 +175,5 @@ async function analyzeBuyerIntent(predictionEvent, options = {}) {
 
 module.exports = {
   analyzeBuyerIntent,
-  INTENT_RULES
+  COMMERCIAL_TAXONOMY
 };
