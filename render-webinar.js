@@ -483,6 +483,9 @@ function renderWebinarViewer(accessContext) {
         if (data && data.ok && data.sessionMetrics) {
           verifiedUniqueWatchedSec = Number(data.sessionMetrics.uniqueWatchedSeconds) || 0;
           updateWatchUi();
+        } else if (res.status === 409 && data && data.error) {
+          if (playerStateText) playerStateText.textContent = 'Revision Outdated';
+          if (ctaCountdownStatus) ctaCountdownStatus.textContent = data.error;
         }
       } catch (e) {}
     }

@@ -2625,7 +2625,7 @@ async function broadcastNewLaunch() {
               </div>
             </div>
 
-            <!-- Reconciled Metrics Strip (Production vs Preview Separated) -->
+            <!-- Reconciled Metrics Strip (Production vs Preview Separated + Durable Brevo Outbox) -->
             <div class="p-3 rounded-xl bg-gradient-to-r from-purple-950/20 via-black/40 to-indigo-950/20 border border-white/5 flex flex-wrap items-center justify-between gap-4 text-xs font-mono-code">
               <div class="flex flex-wrap items-center gap-4">
                 <span class="text-emerald-300 font-bold uppercase text-[10px]">Production:</span>
@@ -2636,8 +2636,9 @@ async function broadcastNewLaunch() {
                 <span>Leads: <strong class="text-cyan-300">${prodA.registrations || 0}</strong></span>
                 <span>FAQ Queries: <strong class="text-pink-300">${prodA.faqQuestionsAsked || 0}</strong></span>
               </div>
-              <div class="flex items-center gap-3 text-[11px] text-slate-400">
+              <div class="flex flex-wrap items-center gap-3 text-[11px] text-slate-400">
                 <span>Preview Sessions: <strong>${prevA.uniqueSessions || 0}</strong> | Preview Watch: <strong>${prevA.averageUniqueWatchSeconds || 0}s</strong></span>
+                <span>Brevo Outbox: <strong class="text-amber-300">Q:${w.brevoOutbox?.counts?.queued || 0}</strong> / <strong class="text-emerald-400">Sync:${w.brevoOutbox?.counts?.synchronized || 0}</strong> / <strong class="text-rose-400">Fail:${w.brevoOutbox?.counts?.failed || 0}</strong></span>
                 <span>Sales: <strong class="text-amber-400">${w.analytics?.salesAttributionStatus || 'NOT_CONNECTED'}</strong></span>
               </div>
             </div>

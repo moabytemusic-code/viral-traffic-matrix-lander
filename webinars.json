@@ -52,7 +52,7 @@
         "headline": "Save Webinar Reference Notes & Optional Updates",
         "description": "Register your email to record your interest in this product overview. Marketing emails are optional and require separate consent below.",
         "brevoListId": 80,
-        "consentVersion": "2026-11-14.v2",
+        "consentVersion": "2026-11-15.v3",
         "registrationDisclosure": "Save my webinar registration and reference summary request.",
         "marketingConsentText": "Optional: I agree to receive email updates and product analysis notices. I can unsubscribe at any time.",
         "privacyPolicyUrl": "/privacy"
@@ -253,7 +253,9 @@
         "faqQuestionsAsked": 0,
         "faqFallbacks": 0,
         "seekEvents": 0,
-        "backgroundIgnoredSeconds": 0
+        "backgroundIgnoredSeconds": 0,
+        "telemetryTrustLevel": "CLIENT_REPORTED_BOUND_TO_SIGNED_SESSION",
+        "sessionRefreshPolicy": "NEW_SIGNED_SESSION_ON_PAGE_LOAD"
       },
       "preview": {
         "visitsTotal": 0,
@@ -276,13 +278,17 @@
         "faqQuestionsAsked": 0,
         "faqFallbacks": 0,
         "seekEvents": 0,
-        "backgroundIgnoredSeconds": 0
+        "backgroundIgnoredSeconds": 0,
+        "telemetryTrustLevel": "CLIENT_REPORTED_BOUND_TO_SIGNED_SESSION",
+        "sessionRefreshPolicy": "NEW_SIGNED_SESSION_ON_PAGE_LOAD"
       },
       "salesAttributionStatus": "NOT_CONNECTED",
       "confirmedSales": 0,
       "confirmedRevenueUsd": 0,
       "pendingCommissionsUsd": 0,
-      "refundedCommissionsUsd": 0
+      "refundedCommissionsUsd": 0,
+      "telemetryTrustLevel": "CLIENT_REPORTED_BOUND_TO_SIGNED_SESSION",
+      "sessionRefreshPolicy": "NEW_SIGNED_SESSION_ON_PAGE_LOAD"
     }
   }
 }

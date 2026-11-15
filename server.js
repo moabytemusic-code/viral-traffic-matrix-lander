@@ -677,6 +677,17 @@ Sitemap: https://${host}/sitemap.xml
     }
 
     if (access.reason !== 'NOT_FOUND') {
+      const isOutdatedPreview = access.reason === 'PREVIEW_REVISION_OUTDATED';
+      const isExpiredOrRevoked = access.reason === 'PREVIEW_TOKEN_EXPIRED' || access.reason === 'PREVIEW_TOKEN_REVOKED';
+      const headingText = isOutdatedPreview
+        ? `Preview Link Outdated (Superseded by Draft Revision #${access.currentRevision || ''})`
+        : isExpiredOrRevoked
+          ? 'Preview Link Expired or Revoked'
+          : 'Webinar Currently in Private Review';
+      const detailText = access.message
+        ? access.message
+        : `Access blocked (${access.reason}). This webinar overview is not publicly available or the preview token is invalid, expired, or revoked.`;
+
       res.writeHead(access.statusCode || 403, {
         'Content-Type': 'text/html; charset=utf-8',
         'Referrer-Policy': 'no-referrer',
@@ -684,11 +695,12 @@ Sitemap: https://${host}/sitemap.xml
       });
       return res.end(`
         <body style="background:#020617;color:#f8fafc;font-family:sans-serif;padding:60px 20px;text-align:center">
-          <div style="max-width:500px;margin:0 auto;background:#0f172a;padding:40px;border-radius:24px;border:1px solid rgba(255,255,255,0.1)">
-            <div style="font-size:32px;margin-bottom:16px">🔒</div>
-            <h1 style="font-size:20px;font-weight:bold;margin-bottom:12px">Webinar Currently in Private Review</h1>
-            <p style="color:#94a3b8;font-size:14px;line-height:1.6">Access blocked (${escapeHtml(access.reason)}). This webinar overview is not publicly available or the preview token is invalid, expired, or revoked.</p>
-            <p style="margin-top:24px"><a href="/launchpad" style="color:#6366f1;text-decoration:none;font-size:13px;font-weight:bold">Return to Admin Launchpad -></a></p>
+          <div style="max-width:540px;margin:0 auto;background:#0f172a;padding:40px;border-radius:24px;border:1px solid rgba(255,255,255,0.1)">
+            <div style="font-size:32px;margin-bottom:16px">${isOutdatedPreview ? '🔄' : '🔒'}</div>
+            <h1 style="font-size:20px;font-weight:bold;margin-bottom:12px">${escapeHtml(headingText)}</h1>
+            <p style="color:#94a3b8;font-size:14px;line-height:1.6">${escapeHtml(detailText)}</p>
+            <p style="color:#64748b;font-size:12px;margin-top:12px;font-family:monospace">Status Code: ${escapeHtml(String(access.reason))}</p>
+            <p style="margin-top:24px"><a href="/launchpad" style="color:#6366f1;text-decoration:none;font-size:13px;font-weight:bold">Return to Admin Launchpad -&gt;</a></p>
           </div>
         </body>
       `);
@@ -1157,15 +1169,15 @@ Sitemap: https://${host}/sitemap.xml
   // WEBINAR ENGINE & ADMIN AUTHENTICATION API ENDPOINTS
   // ==========================================
 
-  // POST /api/admin/session -> Create HttpOnly admin/viewer session cookie with CSRF token
+  // POST /api/admin/session -> Create HttpOnly admin/viewer session cookie with CSRF token & Secure flag enforcement
   if (req.method === 'POST' && pathname === '/api/admin/session') {
     try {
       const body = await readJsonBody(req);
-      const session = webinarEngine.createAdminSession(body.token);
+      const session = webinarEngine.createAdminSession(body.token, req);
       res.writeHead(200, {
         'Content-Type': 'application/json',
         'Cache-Control': 'no-store',
-        'Set-Cookie': `webinar_admin_session=${encodeURIComponent(session.sessionId)}; HttpOnly; SameSite=Strict; Path=/; Max-Age=43200`
+        'Set-Cookie': session.cookieHeader
       });
       return res.end(JSON.stringify({
         ok: true,
@@ -1177,7 +1189,7 @@ Sitemap: https://${host}/sitemap.xml
       }));
     } catch (err) {
       res.writeHead(err.statusCode || 400, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
-      return res.end(JSON.stringify({ ok: false, error: err.message }));
+      return res.end(JSON.stringify({ ok: false, code: err.code || 'ADMIN_SESSION_ERROR', error: err.message }));
     }
   }
 
@@ -1199,17 +1211,16 @@ Sitemap: https://${host}/sitemap.xml
     }));
   }
 
-  // DELETE /api/admin/session -> Revoke admin session cookie
+  // DELETE /api/admin/session -> Revoke admin session cookie with matching Secure attribute
   if (req.method === 'DELETE' && pathname === '/api/admin/session') {
     const cookieHeader = req.headers.cookie || '';
     const m = cookieHeader.match(/(?:^|;\s*)webinar_admin_session=([^;]+)/);
-    if (m && m[1]) {
-      webinarEngine.revokeAdminSession(decodeURIComponent(m[1]));
-    }
+    const sessionId = m && m[1] ? decodeURIComponent(m[1]) : null;
+    const revoked = webinarEngine.revokeAdminSession(sessionId, req);
     res.writeHead(200, {
       'Content-Type': 'application/json',
       'Cache-Control': 'no-store',
-      'Set-Cookie': 'webinar_admin_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0'
+      'Set-Cookie': revoked.cookieHeader
     });
     return res.end(JSON.stringify({ ok: true }));
   }
@@ -1227,7 +1238,7 @@ Sitemap: https://${host}/sitemap.xml
     return res.end(JSON.stringify({ ok: true, webinar: pub }));
   }
 
-  // POST /api/webinars/:slug/register -> Viewer Lead Capture with Server-Verified Viewer Context & Consent
+  // POST /api/webinars/:slug/register -> Viewer Lead Capture with Server-Verified Viewer Context & Durable Outbox
   if (req.method === 'POST' && pathname.match(/^\/api\/webinars\/[^/]+\/register$/)) {
     try {
       const slug = pathname.split('/')[3];
@@ -1246,6 +1257,28 @@ Sitemap: https://${host}/sitemap.xml
       const status = err.statusCode || 400;
       res.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
       return res.end(JSON.stringify({ ok: false, code: err.code || 'REGISTRATION_ERROR', error: err.message }));
+    }
+  }
+
+  // POST /api/webinars/:slug/consent -> Update or withdraw marketing consent & cancel any pending Brevo outbox job
+  if (req.method === 'POST' && pathname.match(/^\/api\/webinars\/[^/]+\/consent$/)) {
+    try {
+      const slug = pathname.split('/')[3];
+      const body = await readJsonBody(req);
+      const viewerContextToken = req.headers['x-viewer-context'] || body.viewerContextToken || '';
+      const adminAuth = webinarEngine.authenticateAdminRequest(req, 'webinar:write');
+      const isAdmin = Boolean(adminAuth.authenticated && adminAuth.authorized);
+      const result = await webinarEngine.updateRegistrationConsent(slug, body, {
+        viewerContextToken,
+        isAdmin,
+        actorId: isAdmin ? adminAuth.actorId : null
+      });
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify(result));
+    } catch (err) {
+      const status = err.statusCode || 400;
+      res.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: false, code: err.code || 'CONSENT_UPDATE_ERROR', error: err.message }));
     }
   }
 
@@ -1269,16 +1302,18 @@ Sitemap: https://${host}/sitemap.xml
     }
   }
 
-  // POST /api/webinars/:slug/track -> Interval-Based Viewer Analytics Tracking with Server-Verified Viewer Context
+  // POST /api/webinars/:slug/track -> Interval-Based Viewer Analytics Tracking Bound to Signed Session
   if (req.method === 'POST' && pathname.match(/^\/api\/webinars\/[^/]+\/track$/)) {
     try {
       const slug = pathname.split('/')[3];
       const body = await readJsonBody(req);
       const viewerContextToken = req.headers['x-viewer-context'] || body.viewerContextToken || '';
       const userAgent = req.headers['user-agent'] || '';
+      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
       const result = await webinarEngine.trackEvent(slug, body, {
         viewerContextToken,
-        userAgent
+        userAgent,
+        ip
       });
       res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
       return res.end(JSON.stringify(result));
@@ -1286,6 +1321,45 @@ Sitemap: https://${host}/sitemap.xml
       const status = err.statusCode || 400;
       res.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
       return res.end(JSON.stringify({ ok: false, code: err.code || 'TRACK_ERROR', error: err.message }));
+    }
+  }
+
+  // GET /api/webinars/:slug/brevo-outbox -> Inspect durable Brevo contact sync outbox (requires webinar:read)
+  if (req.method === 'GET' && pathname.match(/^\/api\/webinars\/[^/]+\/brevo-outbox$/)) {
+    const auth = webinarEngine.authenticateAdminRequest(req, 'webinar:read');
+    if (!auth.authenticated || !auth.authorized) {
+      res.writeHead(auth.statusCode || 401, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: false, code: auth.code, error: auth.error }));
+    }
+    const slug = pathname.split('/')[3];
+    const outbox = webinarEngine.getBrevoOutboxSummary(slug);
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+    return res.end(JSON.stringify({ ok: true, slug, outbox }));
+  }
+
+  // POST /api/webinars/:slug/brevo-outbox/process -> Run durable Brevo outbox worker pass (requires webinar:write)
+  if (req.method === 'POST' && pathname.match(/^\/api\/webinars\/[^/]+\/brevo-outbox\/process$/)) {
+    const auth = webinarEngine.authenticateAdminRequest(req, 'webinar:write');
+    if (!auth.authenticated || !auth.authorized) {
+      res.writeHead(auth.statusCode || 401, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: false, code: auth.code, error: auth.error }));
+    }
+    try {
+      const slug = pathname.split('/')[3];
+      const body = await readJsonBody(req);
+      const result = await webinarEngine.processBrevoOutbox({
+        workerId: `admin_manual:${auth.actorId}`,
+        batchSize: Number(body.batchSize) || 10
+      });
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({
+        ok: true,
+        ...result,
+        webinarOutbox: webinarEngine.getBrevoOutboxSummary(slug)
+      }));
+    } catch (err) {
+      res.writeHead(err.statusCode || 500, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: false, code: err.code || 'OUTBOX_PROCESS_ERROR', error: err.message }));
     }
   }
 
@@ -1430,10 +1504,15 @@ Sitemap: https://${host}/sitemap.xml
       return res.end(JSON.stringify({ ok: false, error: 'Webinar not found' }));
     }
     const registrations = webinarEngine.getRegistrationsForWebinar(slug);
+    const brevoOutbox = webinarEngine.getBrevoOutboxSummary(slug);
     res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
     return res.end(JSON.stringify({
       ok: true,
       analytics: webinar.analytics,
+      telemetryTrustLevel: 'CLIENT_REPORTED_BOUND_TO_SIGNED_SESSION',
+      sessionRefreshPolicy: 'NEW_SIGNED_SESSION_ON_PAGE_LOAD',
+      brevoOutbox,
+      persistenceModel: webinar.persistenceModel,
       auditLog: webinar.auditLog,
       versionHistory: webinar.versionHistory,
       approval: webinar.approval,
@@ -2515,10 +2594,22 @@ Sitemap: https://${host}/sitemap.xml
 });
 
 server.listen(PORT, HOST, () => {
-  console.log(`🚀 Offer Launchpad & Viral Giveaway Engine running at http://${HOST}:${PORT}`);
   try {
-    continuousDaemon.initContinuousDaemon();
-  } catch (daemonErr) {
-    console.error('Failed to initialize Continuous Daemon:', daemonErr);
+    // Eagerly initialize WebinarEngine single-writer lock & production secret validation on startup
+    webinarEngine.getPersistenceModelInfo();
+  } catch (webinarInitErr) {
+    console.error('Fatal WebinarEngine initialization error:', webinarInitErr.message);
+    process.exit(1);
+  }
+  console.log(`🚀 Offer Launchpad & Viral Giveaway Engine running at http://${HOST}:${PORT}`);
+  if (
+    process.env.WEBINAR_DISABLE_BACKGROUND_DAEMONS !== 'true' &&
+    process.env.NODE_ENV !== 'test'
+  ) {
+    try {
+      continuousDaemon.initContinuousDaemon();
+    } catch (daemonErr) {
+      console.error('Failed to initialize Continuous Daemon:', daemonErr);
+    }
   }
 });

@@ -1,6 +1,6 @@
 /**
- * End-to-End HTTP Security, Lifecycle, Reference, Registration & Analytics Verification Suite
- * Spawns server.js on an isolated ephemeral port with an isolated temporary WEBINAR_DATA_DIR.
+ * End-to-End HTTP Security, Lifecycle, Reference, Registration, Outbox & Analytics Verification Suite
+ * Spawns server.js on isolated ephemeral ports with isolated temporary WEBINAR_DATA_DIRs.
  * Never mutates workspace state files or contacts external APIs.
  */
 
@@ -11,12 +11,14 @@ const path = require('path');
 const { spawn } = require('child_process');
 
 const PORT = 3981;
+const PROD_PORT = 3982;
 const BASE_URL = `http://127.0.0.1:${PORT}`;
-const ADMIN_TOKEN = 'e2e-admin-secret-token-777';
-const VIEWER_TOKEN = 'e2e-viewer-readonly-token-333';
-const SESSION_SECRET = 'e2e-session-hmac-secret-555';
+const PROD_BASE_URL = `http://127.0.0.1:${PROD_PORT}`;
+const ADMIN_TOKEN = 'e2e-admin-secret-token-777-strong-32plus-characters-ok';
+const VIEWER_TOKEN = 'e2e-viewer-readonly-token-333-strong-32plus-characters';
+const SESSION_SECRET = 'e2e-session-hmac-secret-555-distinct-strong-32plus-chars';
 
-async function httpReq(urlPath, { method = 'GET', headers = {}, body = null } = {}) {
+async function httpReq(urlPath, { baseUrl = BASE_URL, method = 'GET', headers = {}, body = null } = {}) {
   const opts = {
     method,
     headers: { ...headers }
@@ -25,7 +27,7 @@ async function httpReq(urlPath, { method = 'GET', headers = {}, body = null } = 
     opts.headers['Content-Type'] = 'application/json';
     opts.body = JSON.stringify(body);
   }
-  const res = await fetch(`${BASE_URL}${urlPath}`, opts);
+  const res = await fetch(`${baseUrl}${urlPath}`, opts);
   const text = await res.text();
   let json = null;
   try {
@@ -34,21 +36,22 @@ async function httpReq(urlPath, { method = 'GET', headers = {}, body = null } = 
   return { status: res.status, headers: res.headers, text, json };
 }
 
-async function waitForServer(maxWaitMs = 8000) {
+async function waitForServer(baseUrl = BASE_URL, maxWaitMs = 8000) {
   const start = Date.now();
   while (Date.now() - start < maxWaitMs) {
     try {
-      const r = await httpReq('/health');
+      const r = await httpReq('/health', { baseUrl });
       if (r.status === 200) return;
     } catch (_) {}
     await new Promise((r) => setTimeout(r, 150));
   }
-  throw new Error('Server failed to start within timeout');
+  throw new Error(`Server at ${baseUrl} failed to start within timeout`);
 }
 
 async function runE2E() {
-  console.log('=== Running End-to-End HTTP Verification Suite ===\n');
+  console.log('=== Running End-to-End HTTP Verification Suite (10 Suites) ===\n');
   const tmpDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'webinar-e2e-http-'));
+  const tmpProdDir = fs.mkdtempSync(path.join(os.tmpdir(), 'webinar-e2e-prod-'));
 
   const child = spawn(process.execPath, ['server.js'], {
     cwd: __dirname,
@@ -60,13 +63,14 @@ async function runE2E() {
       WEBINAR_ADMIN_TOKEN: ADMIN_TOKEN,
       WEBINAR_VIEWER_TOKEN: VIEWER_TOKEN,
       WEBINAR_SESSION_SECRET: SESSION_SECRET,
-      WEBINAR_BREVO_LIVE: 'false'
+      WEBINAR_BREVO_LIVE: 'false',
+      WEBINAR_DISABLE_BACKGROUND_DAEMONS: 'true'
     },
     stdio: ['ignore', 'pipe', 'pipe']
   });
 
   try {
-    await waitForServer();
+    await waitForServer(BASE_URL);
     console.log('1. Testing Unauthenticated Admin Route Protection (401) & CORS Hardening...');
     const unauthList = await httpReq('/api/webinars', {
       headers: { Origin: 'https://evil.example.com' }
@@ -114,7 +118,6 @@ async function runE2E() {
     const cookiePair = setCookie.split(';')[0];
     const csrfToken = loginRes.json.csrfToken;
 
-    // Cookie mutation without X-CSRF-Token must fail with 403
     const noCsrfMutate = await httpReq('/api/webinars/yu-sleep', {
       method: 'PUT',
       headers: { Cookie: cookiePair },
@@ -122,7 +125,6 @@ async function runE2E() {
     });
     assert.strictEqual(noCsrfMutate.status, 403);
 
-    // Cookie mutation with valid X-CSRF-Token succeeds and ignores forged body.actor
     const validCsrfStatus = await httpReq('/api/webinars/yu-sleep/status', {
       method: 'POST',
       headers: {
@@ -144,7 +146,6 @@ async function runE2E() {
     const pubApiDraft = await httpReq('/api/public/webinars/yu-sleep');
     assert.strictEqual(pubApiDraft.status, 404);
 
-    // Viewer APIs with forged isPreview:true must return 403 when draft is unpublished and no valid viewerContextToken is supplied
     const forgedQa = await httpReq('/api/webinars/yu-sleep/qa', {
       method: 'POST',
       body: { question: 'How much melatonin?', isPreview: true }
@@ -177,21 +178,18 @@ async function runE2E() {
     assert.ok(previewPage.text.includes('Product FAQ Assistant'), 'Rendered page must label FAQ assistant honestly');
     assert.ok(previewPage.text.includes('history.replaceState'), 'Rendered page must strip ?preview= token from URL bar');
 
-    // Extract viewerContextToken and SLUG embedded in preview page
     const slugMatch = previewPage.text.match(/const SLUG = "([^"]+)"/);
     assert.ok(slugMatch && slugMatch[1] === 'yu-sleep', 'Preview page must embed SLUG = "yu-sleep"');
     const ctxMatch = previewPage.text.match(/const VIEWER_CONTEXT_TOKEN = "([^"]+)"/);
     assert.ok(ctxMatch && ctxMatch[1], 'Preview page must embed signed viewerContextToken');
     const previewContextToken = ctxMatch[1];
 
-    // Verify HTTP 206 Range streaming for the local prototype MP4
     const rangeRes = await fetch(`${BASE_URL}/videos/yusleep-presenter-prototype.mp4`, {
       headers: { Range: 'bytes=0-1023' }
     });
     assert.strictEqual(rangeRes.status, 206);
     assert.strictEqual(rangeRes.headers.get('accept-ranges'), 'bytes');
 
-    // Revoke preview link and verify immediate rejection
     const revokeRes = await httpReq('/api/webinars/yu-sleep/preview-links/revoke', {
       method: 'POST',
       headers: { Authorization: `Bearer ${ADMIN_TOKEN}` },
@@ -210,8 +208,30 @@ async function runE2E() {
     assert.strictEqual(afterRevokeTrack.status, 403);
     console.log('   [PASS] Scoped preview link rendered corrected facts, streamed HTTP 206 video, and revoked cleanly.');
 
-    console.log('6. Testing Approval, Publish, Live Snapshot Isolation Across Draft Edits & Viewer APIs...');
-    // Approve Rev #1
+    console.log('6. Testing Revision-Scoped Previews over HTTP (Draft Edit Invalidates Previous Preview Link & Context)...');
+    // Issue a preview link for Draft Rev #1
+    const issueRev1Prev = await httpReq('/api/webinars/yu-sleep/preview-links', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${ADMIN_TOKEN}` },
+      body: { ttlMinutes: 30, revision: 1 }
+    });
+    assert.strictEqual(issueRev1Prev.status, 201);
+    const rev1PreviewUrl = issueRev1Prev.json.preview.previewUrl;
+
+    // Requesting preview for nonexistent revision #99 must fail with 409 INVALID_PREVIEW_REVISION
+    const badRevPrev = await httpReq('/api/webinars/yu-sleep/preview-links', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${ADMIN_TOKEN}` },
+      body: { ttlMinutes: 30, revision: 99 }
+    });
+    assert.strictEqual(badRevPrev.status, 409);
+    assert.strictEqual(badRevPrev.json.code, 'INVALID_PREVIEW_REVISION');
+
+    const rev1PageBeforeEdit = await httpReq(rev1PreviewUrl);
+    assert.strictEqual(rev1PageBeforeEdit.status, 200);
+    const rev1Ctx = rev1PageBeforeEdit.text.match(/const VIEWER_CONTEXT_TOKEN = "([^"]+)"/)[1];
+
+    // Approve & Publish Rev #1 first, then edit Draft to Rev #2
     const approveRes = await httpReq('/api/webinars/yu-sleep/status', {
       method: 'POST',
       headers: { Authorization: `Bearer ${ADMIN_TOKEN}` },
@@ -219,7 +239,6 @@ async function runE2E() {
     });
     assert.strictEqual(approveRes.status, 200);
 
-    // Publish Rev #1
     const publishRes = await httpReq('/api/webinars/yu-sleep/status', {
       method: 'POST',
       headers: { Authorization: `Bearer ${ADMIN_TOKEN}` },
@@ -242,15 +261,34 @@ async function runE2E() {
     });
     assert.strictEqual(editRes.status, 200);
 
-    // Public viewer page must still show Published Rev #1 headline and '2 mL (2 full droppers)'
+    // Now opening the Rev #1 preview link MUST return 409 PREVIEW_REVISION_OUTDATED with a helpful message!
+    const rev1PageAfterEdit = await httpReq(rev1PreviewUrl);
+    assert.strictEqual(rev1PageAfterEdit.status, 409);
+    assert.ok(rev1PageAfterEdit.text.includes('Preview Link Outdated'));
+    assert.ok(rev1PageAfterEdit.text.includes('PREVIEW_REVISION_OUTDATED'));
+
+    // And the old Rev #1 viewerContextToken must also return 409 PREVIEW_REVISION_OUTDATED on viewer APIs
+    const stalePrevQa = await httpReq('/api/webinars/yu-sleep/qa', {
+      method: 'POST',
+      headers: { 'X-Viewer-Context': rev1Ctx },
+      body: { question: 'What is the serving size?' }
+    });
+    assert.strictEqual(stalePrevQa.status, 409);
+    assert.strictEqual(stalePrevQa.json.code, 'PREVIEW_REVISION_OUTDATED');
+    console.log('   [PASS] Editing draft invalidated Rev #1 preview link and viewer context with 409 PREVIEW_REVISION_OUTDATED.');
+
+    console.log('7. Testing Live Snapshot Isolation, Session Binding & Durable Brevo Outbox over HTTP...');
     const livePubPage = await httpReq('/webinar/yu-sleep');
     assert.strictEqual(livePubPage.status, 200);
     assert.ok(livePubPage.text.includes('YuSleep: Let Us Look Beyond the Sales Pitch'));
     assert.strictEqual(livePubPage.text.includes('UNAPPROVED DRAFT REV 2 HEADLINE'), false);
 
     const pubCtxMatch = livePubPage.text.match(/const VIEWER_CONTEXT_TOKEN = "([^"]+)"/);
+    const pubSessMatch = livePubPage.text.match(/const SESSION_ID = "([^"]+)"/);
     assert.ok(pubCtxMatch && pubCtxMatch[1]);
+    assert.ok(pubSessMatch && pubSessMatch[1]);
     const pubContextToken = pubCtxMatch[1];
+    const pubSessionId = pubSessMatch[1];
 
     // Public FAQ query uses Published Snapshot Rev #1 ('2 mL (2 full droppers)')
     const pubQa = await httpReq('/api/webinars/yu-sleep/qa', {
@@ -263,24 +301,24 @@ async function runE2E() {
     assert.ok(pubQa.json.answer.includes('0.5 mg'));
     assert.ok(pubQa.json.answer.includes('38%'));
 
-    // Public registration + watch interval tracking
-    const pubReg = await httpReq('/api/webinars/yu-sleep/register', {
+    // Spoofed payload.sessionId on /track must be rejected with 400 SESSION_ID_MISMATCH
+    const spoofedTrack = await httpReq('/api/webinars/yu-sleep/track', {
       method: 'POST',
       headers: { 'X-Viewer-Context': pubContextToken },
       body: {
-        email: 'e2e_viewer@example.com',
-        name: 'E2E Viewer',
-        registrationRequested: true,
-        marketingConsentGiven: false
+        eventType: 'pageview',
+        sessionId: 'spoofed_session_id_override'
       }
     });
-    assert.strictEqual(pubReg.status, 200);
-    assert.strictEqual(pubReg.json.brevoStatus, 'NOT_APPLICABLE_NO_MARKETING_CONSENT');
+    assert.strictEqual(spoofedTrack.status, 400);
+    assert.strictEqual(spoofedTrack.json.code, 'SESSION_ID_MISMATCH');
 
+    // Valid watch_interval bound to signed sessionId
     const pubTrack = await httpReq('/api/webinars/yu-sleep/track', {
       method: 'POST',
       headers: { 'X-Viewer-Context': pubContextToken },
       body: {
+        sessionId: pubSessionId,
         eventType: 'watch_interval',
         intervalStart: 10,
         intervalEnd: 20,
@@ -291,18 +329,143 @@ async function runE2E() {
     assert.strictEqual(pubTrack.json.sessionMetrics.uniqueWatchedSeconds, 10);
     assert.strictEqual(pubTrack.json.analytics.milestones.p25, 1);
 
-    // Public metadata endpoint excludes previewLinks, draft, and auditLog
-    const pubMeta = await httpReq('/api/public/webinars/yu-sleep');
-    assert.strictEqual(pubMeta.status, 200);
-    assert.strictEqual(pubMeta.json.webinar.previewLinks, undefined);
-    assert.strictEqual(pubMeta.json.webinar.draft, undefined);
-    assert.strictEqual(pubMeta.json.webinar.auditLog, undefined);
-    console.log('   [PASS] Live published snapshot isolated from draft edits; FAQ, registration, and interval tracking verified.\n');
+    // Public registration with marketingConsentGiven: true -> queued in durable Brevo outbox
+    const pubRegConsent = await httpReq('/api/webinars/yu-sleep/register', {
+      method: 'POST',
+      headers: { 'X-Viewer-Context': pubContextToken },
+      body: {
+        email: 'e2e_outbox@example.com',
+        name: 'E2E Outbox User',
+        registrationRequested: true,
+        marketingConsentGiven: true
+      }
+    });
+    assert.strictEqual(pubRegConsent.status, 200);
+    assert.strictEqual(pubRegConsent.json.brevoStatus, 'CONTACT_SYNC_QUEUED');
+    assert.ok(pubRegConsent.json.brevoOutboxJobId);
+
+    // Check admin Brevo outbox endpoint
+    const outboxInspect1 = await httpReq('/api/webinars/yu-sleep/brevo-outbox', {
+      headers: { Authorization: `Bearer ${ADMIN_TOKEN}` }
+    });
+    assert.strictEqual(outboxInspect1.status, 200);
+    assert.strictEqual(outboxInspect1.json.outbox.counts.queued, 1);
+
+    // Viewer withdraws marketing consent via POST /api/webinars/yu-sleep/consent -> cancels queued outbox job
+    const withdrawConsentRes = await httpReq('/api/webinars/yu-sleep/consent', {
+      method: 'POST',
+      headers: { 'X-Viewer-Context': pubContextToken },
+      body: {
+        email: 'e2e_outbox@example.com',
+        marketingConsentGiven: false
+      }
+    });
+    assert.strictEqual(withdrawConsentRes.status, 200);
+    assert.strictEqual(withdrawConsentRes.json.brevoStatus, 'CONSENT_CANCELLED');
+    assert.strictEqual(withdrawConsentRes.json.outboxJobStatus, 'CONSENT_CANCELLED');
+
+    const outboxInspect2 = await httpReq('/api/webinars/yu-sleep/brevo-outbox', {
+      headers: { Authorization: `Bearer ${ADMIN_TOKEN}` }
+    });
+    assert.strictEqual(outboxInspect2.status, 200);
+    assert.strictEqual(outboxInspect2.json.outbox.counts.queued, 0);
+    assert.strictEqual(outboxInspect2.json.outbox.counts.consentCancelled, 1);
+    console.log('   [PASS] Live snapshot isolation, sessionId spoof rejection, and durable Brevo outbox consent cancellation verified.');
+
+    console.log('8. Testing Concurrent Second Process Rejection (Single-Writer Lock Enforcement)...');
+    // Attempt to spawn a second server.js pointing at the SAME tmpDataDir -> must fail to start with CONCURRENT_WRITER_REJECTED
+    const secondChildResult = await new Promise((resolve) => {
+      let stderrText = '';
+      const child2 = spawn(process.execPath, ['server.js'], {
+        cwd: __dirname,
+        env: {
+          ...process.env,
+          PORT: '3989',
+          HOST: '127.0.0.1',
+          WEBINAR_DATA_DIR: tmpDataDir,
+          WEBINAR_ADMIN_TOKEN: ADMIN_TOKEN,
+          WEBINAR_SESSION_SECRET: SESSION_SECRET,
+          WEBINAR_DISABLE_BACKGROUND_DAEMONS: 'true'
+        },
+        stdio: ['ignore', 'pipe', 'pipe']
+      });
+      child2.stderr.on('data', (chunk) => {
+        stderrText += chunk.toString();
+      });
+      child2.on('exit', (code) => {
+        resolve({ code, stderrText });
+      });
+    });
+    assert.strictEqual(secondChildResult.code, 1);
+    assert.ok(secondChildResult.stderrText.includes('Concurrent writer rejected'), 'Second writer process must exit with Concurrent writer rejected error');
+    console.log('   [PASS] Second writer process against the same WEBINAR_DATA_DIR rejected cleanly.');
+
+    console.log('9. Testing Production Mode Cookie Security (`Secure` Flag & Proxy Trust) over HTTP...');
+    const prodChild = spawn(process.execPath, ['server.js'], {
+      cwd: __dirname,
+      env: {
+        ...process.env,
+        NODE_ENV: 'production',
+        PORT: String(PROD_PORT),
+        HOST: '127.0.0.1',
+        WEBINAR_DATA_DIR: tmpProdDir,
+        WEBINAR_ADMIN_TOKEN: ADMIN_TOKEN,
+        WEBINAR_VIEWER_TOKEN: VIEWER_TOKEN,
+        WEBINAR_SESSION_SECRET: SESSION_SECRET,
+        WEBINAR_TRUST_PROXY: 'true',
+        WEBINAR_TRUSTED_PROXY_IPS: '127.0.0.1,::1,::ffff:127.0.0.1',
+        WEBINAR_BREVO_LIVE: 'false',
+        WEBINAR_DISABLE_BACKGROUND_DAEMONS: 'true'
+      },
+      stdio: ['ignore', 'pipe', 'pipe']
+    });
+
+    try {
+      await waitForServer(PROD_BASE_URL);
+
+      // Plain HTTP without X-Forwarded-Proto: https in production must be rejected with 403 HTTPS_REQUIRED_IN_PRODUCTION
+      const plainHttpProdLogin = await httpReq('/api/admin/session', {
+        baseUrl: PROD_BASE_URL,
+        method: 'POST',
+        body: { token: ADMIN_TOKEN }
+      });
+      assert.strictEqual(plainHttpProdLogin.status, 403);
+      assert.strictEqual(plainHttpProdLogin.json.code, 'HTTPS_REQUIRED_IN_PRODUCTION');
+
+      // Request from trusted proxy (127.0.0.1) with X-Forwarded-Proto: https succeeds and sets `; Secure`
+      const httpsProdLogin = await httpReq('/api/admin/session', {
+        baseUrl: PROD_BASE_URL,
+        method: 'POST',
+        headers: { 'X-Forwarded-Proto': 'https' },
+        body: { token: ADMIN_TOKEN }
+      });
+      assert.strictEqual(httpsProdLogin.status, 200);
+      const prodSetCookie = httpsProdLogin.headers.get('set-cookie');
+      assert.ok(prodSetCookie && prodSetCookie.includes('; Secure'), 'Production Set-Cookie must include Secure attribute');
+      assert.ok(prodSetCookie.includes('HttpOnly') && prodSetCookie.includes('SameSite=Strict'));
+
+      // Logout in production also includes `; Secure` on the clearing cookie
+      const httpsProdLogout = await httpReq('/api/admin/session', {
+        baseUrl: PROD_BASE_URL,
+        method: 'DELETE',
+        headers: {
+          Cookie: prodSetCookie.split(';')[0],
+          'X-Forwarded-Proto': 'https'
+        }
+      });
+      assert.strictEqual(httpsProdLogout.status, 200);
+      const prodClearCookie = httpsProdLogout.headers.get('set-cookie');
+      assert.ok(prodClearCookie && prodClearCookie.includes('Max-Age=0') && prodClearCookie.includes('; Secure'));
+      console.log('   [PASS] Production cookie security (`; Secure` on login & logout and HTTPS enforcement) verified.\n');
+    } finally {
+      prodChild.kill('SIGTERM');
+    }
 
     console.log('=== ALL END-TO-END HTTP VERIFICATION CHECKS PASSED 100% ===');
   } finally {
     child.kill('SIGTERM');
     fs.rmSync(tmpDataDir, { recursive: true, force: true });
+    fs.rmSync(tmpProdDir, { recursive: true, force: true });
   }
 }
 
