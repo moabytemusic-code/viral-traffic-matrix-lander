@@ -1,0 +1,57 @@
+{
+  "voiceoverId": "8ef7f215-6377-4ea0-b57d-5f8b2fe04543",
+  "durationSeconds": 277.629388,
+  "charCount": 3918,
+  "audioUrl": "https://assets.vidiq.com/voiceovers/4decb1fe-53c9-4524-81a5-6698b40d81a9/8ef7f215-6377-4ea0-b57d-5f8b2fe04543.mp3",
+  "lines": [
+    {
+      "index": 0,
+      "audioUrl": "https://assets.vidiq.com/voiceovers/4decb1fe-53c9-4524-81a5-6698b40d81a9/91289d4d-16fa-449d-b8fe-4db008eb1eb2.mp3",
+      "startSeconds": 0,
+      "durationSeconds": 32.026122,
+      "charCount": 519
+    },
+    {
+      "index": 1,
+      "audioUrl": "https://assets.vidiq.com/voiceovers/4decb1fe-53c9-4524-81a5-6698b40d81a9/9bf18252-bf50-41ba-a4ba-a55d07950e56.mp3",
+      "startSeconds": 32.026122,
+      "durationSeconds": 37.250612,
+      "charCount": 573
+    },
+    {
+      "index": 2,
+      "audioUrl": "https://assets.vidiq.com/voiceovers/4decb1fe-53c9-4524-81a5-6698b40d81a9/5f418eac-2518-45ac-9a40-9ce3f4e87789.mp3",
+      "startSeconds": 69.276735,
+      "durationSeconds": 58.044082,
+      "charCount": 721
+    },
+    {
+      "index": 3,
+      "audioUrl": "https://assets.vidiq.com/voiceovers/4decb1fe-53c9-4524-81a5-6698b40d81a9/2d128970-ac6f-4e6f-a80a-89e6c89a66b5.mp3",
+      "startSeconds": 127.320816,
+      "durationSeconds": 39.88898,
+      "charCount": 607
+    },
+    {
+      "index": 4,
+      "audioUrl": "https://assets.vidiq.com/voiceovers/4decb1fe-53c9-4524-81a5-6698b40d81a9/9f6e6cb3-3058-4aaf-8875-abde43201d1c.mp3",
+      "startSeconds": 167.209796,
+      "durationSeconds": 64.835918,
+      "charCount": 834
+    },
+    {
+      "index": 5,
+      "audioUrl": "https://assets.vidiq.com/voiceovers/4decb1fe-53c9-4524-81a5-6698b40d81a9/d8de66e7-11e5-44fb-9167-69b67471c915.mp3",
+      "startSeconds": 232.045714,
+      "durationSeconds": 26.435918,
+      "charCount": 373
+    },
+    {
+      "index": 6,
+      "audioUrl": "https://assets.vidiq.com/voiceovers/4decb1fe-53c9-4524-81a5-6698b40d81a9/3c76f258-ec4a-48e3-871b-1eefbed11846.mp3",
+      "startSeconds": 258.481633,
+      "durationSeconds": 19.147755,
+      "charCount": 291
+    }
+  ]
+}
