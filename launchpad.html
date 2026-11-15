@@ -28,6 +28,47 @@
       transition: all 0.2s ease;
     }
     .cta-beam:hover { transform: translateY(-1px); box-shadow: 0 0 40px -2px rgba(16, 185, 129, 0.7); }
+    /* Collapsible Sections & View Controls */
+    .section-body {
+      transition: opacity 0.2s ease;
+    }
+    .section-collapsed .section-body {
+      display: none !important;
+    }
+    .section-collapsed-summary {
+      display: none;
+    }
+    .section-collapsed .section-collapsed-summary {
+      display: flex !important;
+    }
+    .toggle-icon {
+      display: inline-block;
+      transition: transform 0.2s ease;
+    }
+    .section-collapsed .toggle-icon {
+      transform: rotate(-90deg);
+    }
+    .section-header-clickable {
+      cursor: pointer;
+      user-select: none;
+    }
+    .section-header-clickable:hover {
+      opacity: 0.95;
+    }
+    /* Modal Subpanel Accordion */
+    .modal-subpanel-body {
+      transition: opacity 0.2s ease;
+    }
+    .modal-subpanel-collapsed .modal-subpanel-body {
+      display: none !important;
+    }
+    .modal-subpanel-collapsed .modal-subpanel-icon {
+      transform: rotate(-90deg);
+    }
+    .modal-subpanel-icon {
+      transition: transform 0.2s ease;
+      display: inline-block;
+    }
   </style>
 </head>
 <body class="min-h-screen pb-20">
@@ -64,15 +105,80 @@
     </div>
   </header>
 
+  <!-- Secondary Navigation & View Controls Toolbar -->
+  <nav class="sticky top-[61px] z-30 bg-slate-950/90 backdrop-blur-md border-b border-white/10 py-2.5 px-4 sm:px-6 shadow-lg">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
+      <!-- Quick Section Anchor Pills -->
+      <div class="flex items-center gap-1.5 overflow-x-auto py-0.5 scrollbar-none font-mono-code">
+        <span class="text-slate-500 uppercase text-[10px] pr-1 hidden sm:inline">Jump:</span>
+        <button type="button" onclick="jumpToSection('activeOffersSection')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-300 text-slate-300 border border-white/10 transition flex items-center gap-1 whitespace-nowrap cursor-pointer">
+          <span>⚡</span> Offers (<span id="jumpOffersCount">4</span>)
+        </button>
+        <button type="button" onclick="jumpToSection('predictionEngineSection')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-purple-500/20 hover:text-purple-300 text-slate-300 border border-white/10 transition flex items-center gap-1 whitespace-nowrap cursor-pointer">
+          <span>🔮</span> Prediction Radar
+        </button>
+        <button type="button" onclick="jumpToSection('predictionEngineSection', 'webinars')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-indigo-500/20 hover:text-indigo-300 text-slate-300 border border-white/10 transition flex items-center gap-1 whitespace-nowrap cursor-pointer">
+          <span>🎬</span> Webinars (<span id="jumpWebinarsCount">1</span>)
+        </button>
+        <button type="button" onclick="jumpToSection('nicheCatalystSection')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-amber-500/20 hover:text-amber-300 text-slate-300 border border-white/10 transition flex items-center gap-1 whitespace-nowrap cursor-pointer">
+          <span>💡</span> Niche Catalyst
+        </button>
+        <button type="button" onclick="jumpToSection('videoCadenceSection')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-purple-500/20 hover:text-purple-300 text-slate-300 border border-white/10 transition flex items-center gap-1 whitespace-nowrap cursor-pointer">
+          <span>📹</span> Video Cadence
+        </button>
+        <button type="button" onclick="jumpToSection('mainWorkspaceSection')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-blue-500/20 hover:text-blue-300 text-slate-300 border border-white/10 transition flex items-center gap-1 whitespace-nowrap cursor-pointer">
+          <span>🧬</span> Outlier Brain &amp; Form
+        </button>
+      </div>
+
+      <!-- Master View Controls -->
+      <div class="flex items-center gap-2 font-mono-code text-[11px]">
+        <button type="button" onclick="collapseAllSections()" class="px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 transition cursor-pointer flex items-center gap-1.5" title="Collapse all sections for a compact overview">
+          <span>📁</span> Collapse All
+        </button>
+        <button type="button" onclick="expandAllSections()" class="px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 transition cursor-pointer flex items-center gap-1.5" title="Expand all sections to view all details">
+          <span>📂</span> Expand All
+        </button>
+      </div>
+    </div>
+  </nav>
+
   <main class="max-w-7xl mx-auto px-4 sm:px-6 pt-8 space-y-10">
 
     <!-- Active Live Offers Bar -->
-    <section class="space-y-3">
-      <div class="flex items-center justify-between">
-        <h2 class="text-sm font-mono-code uppercase tracking-wider text-emerald-400">Active Live Offer Funnels</h2>
-        <span id="offerCountBadge" class="text-xs font-mono-code text-slate-400">Loading...</span>
+    <section id="activeOffersSection" class="glass-surface rounded-3xl p-5 sm:p-6 space-y-4 border border-emerald-500/30 transition-all">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3 section-header-clickable" onclick="toggleSectionCollapse('activeOffersSection')">
+        <div class="flex items-center gap-2.5">
+          <span id="activeOffersSectionIcon" class="toggle-icon text-emerald-400 font-mono-code text-base font-bold">▾</span>
+          <h2 class="text-sm font-mono-code uppercase tracking-wider text-emerald-400 font-bold flex items-center gap-2">
+            <span>⚡ Active Live Offer Funnels</span>
+            <span id="offerCountBadge" class="text-xs font-mono-code text-slate-400">Loading...</span>
+          </h2>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-[11px] font-mono-code text-slate-400 hidden sm:inline">Click bar to toggle</span>
+          <button type="button" id="activeOffersSectionToggleBtn" onclick="event.stopPropagation(); toggleSectionCollapse('activeOffersSection')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-mono-code border border-white/10 flex items-center gap-1 cursor-pointer">
+            <span class="toggle-label">Collapse</span>
+            <span class="toggle-icon text-[10px]">▾</span>
+          </button>
+        </div>
       </div>
-      <div id="activeOffersGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+
+      <!-- Collapsed Preview Bar -->
+      <div class="section-collapsed-summary p-3.5 rounded-2xl bg-black/40 border border-emerald-500/20 items-center justify-between gap-3 text-xs font-mono-code">
+        <div class="flex items-center gap-2 text-slate-300 truncate">
+          <span class="text-emerald-400 font-bold">● Active Funnels:</span>
+          <span id="collapsedOffersSummary" class="text-slate-400 truncate">YuSleep (/sleep), Santa Circle (/santa), Bellver Card (/card), Viral Traffic Matrix (/matrix)</span>
+        </div>
+        <button type="button" onclick="toggleSectionCollapse('activeOffersSection')" class="text-emerald-400 hover:text-emerald-300 font-bold px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 shrink-0 cursor-pointer">
+          Expand Offers ▾
+        </button>
+      </div>
+
+      <!-- Section Body -->
+      <div class="section-body">
+        <div id="activeOffersGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      </div>
     </section>
 
     <!-- ======================================================== -->
@@ -103,7 +209,7 @@
           </div>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2">
           <button
             type="button"
             id="scanPredictionMarketsBtn"
@@ -112,8 +218,32 @@
           >
             <span>⚡</span> Scan Markets Now
           </button>
+          <button
+            type="button"
+            id="predictionEngineSectionToggleBtn"
+            onclick="toggleSectionCollapse('predictionEngineSection')"
+            class="px-3 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-mono-code border border-white/10 flex items-center gap-1 cursor-pointer"
+            title="Toggle section"
+          >
+            <span class="toggle-label">Collapse</span>
+            <span class="toggle-icon text-xs">▾</span>
+          </button>
         </div>
       </div>
+
+      <!-- Collapsed Preview Bar -->
+      <div class="section-collapsed-summary p-4 rounded-2xl bg-black/50 border border-purple-500/30 items-center justify-between gap-3 text-xs font-mono-code">
+        <div class="flex items-center gap-2.5 text-slate-300 truncate">
+          <span class="text-purple-300 font-bold">🔮 Prediction Market Engine:</span>
+          <span id="collapsedPredictionSummary" class="text-slate-400 truncate">5 Ranked Opportunities • 1 Presenter Webinar (/webinar/yu-sleep) • Gamma API Stream Active</span>
+        </div>
+        <button type="button" onclick="toggleSectionCollapse('predictionEngineSection')" class="text-purple-300 hover:text-purple-200 font-bold px-3 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 shrink-0 cursor-pointer">
+          Expand Prediction Radar ▾
+        </button>
+      </div>
+
+      <!-- Section Body -->
+      <div class="section-body space-y-6">
 
       <!-- Metric KPI Counter Strip -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -309,10 +439,11 @@
           <div class="text-xs text-slate-400 font-mono-code p-4 rounded-xl bg-white/5">Authenticate above to load private webinar records...</div>
         </div>
       </div>
+      </div>
     </section>
 
     <!-- Problem-First Niche Catalyst Engine -->
-    <section class="glass-surface rounded-3xl p-6 sm:p-8 space-y-6 border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-slate-950/80 to-purple-950/20 shadow-2xl">
+    <section id="nicheCatalystSection" class="glass-surface rounded-3xl p-6 sm:p-8 space-y-6 border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-slate-950/80 to-purple-950/20 shadow-2xl">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-mono-code font-bold uppercase mb-2">
@@ -347,8 +478,31 @@
           >
             <span>🤖</span> Auto-Pilot Deploy
           </button>
+          <button
+            type="button"
+            id="nicheCatalystSectionToggleBtn"
+            onclick="toggleSectionCollapse('nicheCatalystSection')"
+            class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-mono-code border border-white/10 flex items-center gap-1 cursor-pointer whitespace-nowrap"
+          >
+            <span class="toggle-label">Collapse</span>
+            <span class="toggle-icon text-xs">▾</span>
+          </button>
         </div>
       </div>
+
+      <!-- Collapsed Preview Bar -->
+      <div class="section-collapsed-summary p-4 rounded-2xl bg-black/50 border border-amber-500/30 items-center justify-between gap-3 text-xs font-mono-code">
+        <div class="flex items-center gap-2.5 text-slate-300 truncate">
+          <span class="text-amber-400 font-bold">⚡ Niche Catalyst Engine:</span>
+          <span class="text-slate-400 truncate">Continuous Daemon ACTIVE (1 deploy / 24h) • 5 Resilience Pillars • Amazon Hardware + ClickBank Solutions</span>
+        </div>
+        <button type="button" onclick="toggleSectionCollapse('nicheCatalystSection')" class="text-amber-400 hover:text-amber-300 font-bold px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 shrink-0 cursor-pointer">
+          Expand Catalyst Engine ▾
+        </button>
+      </div>
+
+      <!-- Section Body -->
+      <div class="section-body space-y-6">
 
       <!-- Continuous Auto-Pilot Mode (Goldilocks Pace: 1 per 24h) -->
       <div id="continuousDaemonCard" class="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-slate-900/80 to-teal-950/40 border border-emerald-500/30 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 shadow-lg">
@@ -444,17 +598,18 @@
       <div id="catalystCard" class="p-6 rounded-2xl bg-black/50 border border-white/10 space-y-6">
         <div class="text-slate-400 text-xs">Loading Niche Catalysts...</div>
       </div>
+      </div>
     </section>
 
     <!-- 3-Part Video Series & Cadence Pipeline -->
-    <section class="glass-surface rounded-3xl p-6 sm:p-8 space-y-6 border border-purple-500/30 bg-gradient-to-br from-purple-950/20 via-slate-950/80 to-indigo-950/20 shadow-2xl">
+    <section id="videoCadenceSection" class="glass-surface rounded-3xl p-6 sm:p-8 space-y-6 border border-purple-500/30 bg-gradient-to-br from-purple-950/20 via-slate-950/80 to-indigo-950/20 shadow-2xl">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-500/40 text-purple-300 text-xs font-mono-code font-bold uppercase mb-2">
             <span>🎬</span> SUBSEQUENT VIDEO CADENCE
           </div>
           <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            3-Part Problem Video Series & Social Rotation
+            3-Part Problem Video Series &amp; Social Rotation
           </h2>
           <p class="text-xs sm:text-sm text-slate-300 max-w-2xl mt-1 leading-relaxed">
             Every problem is attacked across 3 psychological angles (Acute Dread ➔ The Trap ➔ DIY Breakthrough) rotated into Postiz / ContentStudio on autopilot.
@@ -471,7 +626,7 @@
             class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-white/10 text-white text-xs font-bold font-mono-code transition flex items-center gap-1.5 cursor-pointer shadow-md"
             title="Manage Central Postiz Hub & Multi-Project Integration"
           >
-            <span>🌐</span> Postiz Hub & Multi-Project
+            <span>🌐</span> Postiz Hub &amp; Multi-Project
           </button>
           <button
             type="button"
@@ -481,17 +636,76 @@
           >
             <span>🚀</span> Advance Next Video In Rotation
           </button>
+          <button
+            type="button"
+            id="videoCadenceSectionToggleBtn"
+            onclick="toggleSectionCollapse('videoCadenceSection')"
+            class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-mono-code border border-white/10 flex items-center gap-1 cursor-pointer whitespace-nowrap"
+          >
+            <span class="toggle-label">Collapse</span>
+            <span class="toggle-icon text-xs">▾</span>
+          </button>
         </div>
       </div>
 
-      <!-- Angles & Cadence Grid -->
-      <div id="cadenceOffersGrid" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="text-slate-400 text-xs font-mono-code">Loading Video Cadence Series...</div>
+      <!-- Collapsed Preview Bar -->
+      <div class="section-collapsed-summary p-4 rounded-2xl bg-black/50 border border-purple-500/30 items-center justify-between gap-3 text-xs font-mono-code">
+        <div class="flex items-center gap-2.5 text-slate-300 truncate">
+          <span class="text-purple-300 font-bold">🎬 Video Cadence Pipeline:</span>
+          <span class="text-slate-400 truncate">3 Psychological Angles in Rotation (Acute Dread → The Trap → DIY Breakthrough) • Postiz Dispatch</span>
+        </div>
+        <button type="button" onclick="toggleSectionCollapse('videoCadenceSection')" class="text-purple-300 hover:text-purple-200 font-bold px-3 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 shrink-0 cursor-pointer">
+          Expand Cadence ▾
+        </button>
+      </div>
+
+      <!-- Section Body -->
+      <div class="section-body space-y-6">
+        <!-- Angles & Cadence Grid -->
+        <div id="cadenceOffersGrid" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="text-slate-400 text-xs font-mono-code">Loading Video Cadence Series...</div>
+        </div>
       </div>
     </section>
 
-    <!-- Main 2-Column Workspace -->
-    <div class="grid lg:grid-cols-12 gap-8 items-start">
+    <!-- Main 2-Column Workspace Section -->
+    <section id="mainWorkspaceSection" class="glass-surface rounded-3xl p-6 sm:p-8 space-y-6 border border-blue-500/30 shadow-2xl">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-500/40 text-blue-300 text-xs font-mono-code font-bold uppercase mb-1">
+            <span>🧬</span> 1-CLICK RESEARCH &amp; FUNNEL WORKSPACE
+          </div>
+          <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">
+            Research Brain &amp; 1-Click Offer Builder
+          </h2>
+          <p class="text-xs text-slate-300 mt-0.5">
+            Query 530+ viral YouTube outliers via 9 Figure Buddy, research live search demand via vidIQ, and configure new glass landers with Brevo 4-day drips.
+          </p>
+        </div>
+        <button
+          type="button"
+          id="mainWorkspaceSectionToggleBtn"
+          onclick="toggleSectionCollapse('mainWorkspaceSection')"
+          class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-mono-code border border-white/10 flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+        >
+          <span class="toggle-label">Collapse</span>
+          <span class="toggle-icon text-xs">▾</span>
+        </button>
+      </div>
+
+      <!-- Collapsed Preview Bar -->
+      <div class="section-collapsed-summary p-4 rounded-2xl bg-black/50 border border-blue-500/30 items-center justify-between gap-3 text-xs font-mono-code">
+        <div class="flex items-center gap-2.5 text-slate-300 truncate">
+          <span class="text-blue-300 font-bold">🧬 Workspace:</span>
+          <span class="text-slate-400 truncate">Step 1: 9 Figure Buddy Outlier Brain (MCP Connected) • Step 2: 1-Click Lander &amp; Brevo Drip Generator</span>
+        </div>
+        <button type="button" onclick="toggleSectionCollapse('mainWorkspaceSection')" class="text-blue-300 hover:text-blue-200 font-bold px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 shrink-0 cursor-pointer">
+          Expand Workspace ▾
+        </button>
+      </div>
+
+      <div class="section-body">
+        <div class="grid lg:grid-cols-12 gap-8 items-start">
 
       <!-- LEFT COLUMN (5 cols): 9 Figure Buddy Outlier Discovery Engine -->
       <div class="lg:col-span-5 space-y-5">
@@ -817,16 +1031,132 @@
         </div>
       </div>
 
-    </div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <script>
+    // ========================================================
+    // SECTION COLLAPSIBILITY & NAVIGATION CONTROLLER
+    // ========================================================
+    const COLLAPSIBLE_SECTION_IDS = [
+      'activeOffersSection',
+      'predictionEngineSection',
+      'nicheCatalystSection',
+      'videoCadenceSection',
+      'mainWorkspaceSection'
+    ];
+
+    function toggleSectionCollapse(sectionId) {
+      const el = document.getElementById(sectionId);
+      if (!el) return;
+      const isCollapsed = el.classList.toggle('section-collapsed');
+      updateSectionToggleUI(sectionId, isCollapsed);
+      saveSectionCollapseStates();
+    }
+
+    function openSection(sectionId) {
+      const el = document.getElementById(sectionId);
+      if (!el) return;
+      if (el.classList.contains('section-collapsed')) {
+        el.classList.remove('section-collapsed');
+        updateSectionToggleUI(sectionId, false);
+        saveSectionCollapseStates();
+      }
+    }
+
+    function closeSection(sectionId) {
+      const el = document.getElementById(sectionId);
+      if (!el) return;
+      if (!el.classList.contains('section-collapsed')) {
+        el.classList.add('section-collapsed');
+        updateSectionToggleUI(sectionId, true);
+        saveSectionCollapseStates();
+      }
+    }
+
+    function collapseAllSections() {
+      COLLAPSIBLE_SECTION_IDS.forEach(id => closeSection(id));
+    }
+
+    function expandAllSections() {
+      COLLAPSIBLE_SECTION_IDS.forEach(id => openSection(id));
+    }
+
+    function updateSectionToggleUI(sectionId, isCollapsed) {
+      const btn = document.getElementById(sectionId + 'ToggleBtn');
+      if (btn) {
+        const label = btn.querySelector('.toggle-label');
+        const icon = btn.querySelector('.toggle-icon');
+        if (label) label.textContent = isCollapsed ? 'Expand' : 'Collapse';
+        if (icon) icon.textContent = isCollapsed ? '▸' : '▾';
+      }
+      const headerIcon = document.getElementById(sectionId + 'Icon');
+      if (headerIcon) {
+        headerIcon.textContent = isCollapsed ? '▸' : '▾';
+      }
+    }
+
+    function saveSectionCollapseStates() {
+      try {
+        const collapsed = [];
+        COLLAPSIBLE_SECTION_IDS.forEach(id => {
+          const el = document.getElementById(id);
+          if (el && el.classList.contains('section-collapsed')) {
+            collapsed.push(id);
+          }
+        });
+        localStorage.setItem('launchpad_collapsed_sections', JSON.stringify(collapsed));
+      } catch (e) {}
+    }
+
+    function restoreSectionCollapseStates() {
+      try {
+        const raw = localStorage.getItem('launchpad_collapsed_sections');
+        if (!raw) return;
+        const collapsed = JSON.parse(raw);
+        if (Array.isArray(collapsed)) {
+          collapsed.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+              el.classList.add('section-collapsed');
+              updateSectionToggleUI(id, true);
+            }
+          });
+        }
+      } catch (e) {}
+    }
+
+    function jumpToSection(sectionId, subTab) {
+      openSection(sectionId);
+      if (subTab && sectionId === 'predictionEngineSection' && typeof switchPredictionTab === 'function') {
+        switchPredictionTab(subTab);
+      }
+      const el = document.getElementById(sectionId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function toggleModalSubpanel(panelId) {
+      const el = document.getElementById(panelId);
+      if (!el) return;
+      el.classList.toggle('modal-subpanel-collapsed');
+    }
+
     // 1. Load Active Offers
     async function loadOffers() {
       const res = await fetch('/api/offers');
       const data = await res.json();
       const offers = Object.values(data.offers || {});
       document.getElementById('offerCountBadge').textContent = `${offers.length} Active Funnels`;
+      const jumpOffers = document.getElementById('jumpOffersCount');
+      if (jumpOffers) jumpOffers.textContent = offers.length;
+      const collapsedSummary = document.getElementById('collapsedOffersSummary');
+      if (collapsedSummary && offers.length > 0) {
+        collapsedSummary.textContent = offers.map(o => `${o.name} (/${o.slug})`).slice(0, 4).join(', ') + (offers.length > 4 ? ` +${offers.length - 4} more` : '');
+      }
 
       const grid = document.getElementById('activeOffersGrid');
       grid.innerHTML = offers.map(o => {
@@ -1881,6 +2211,7 @@ async function broadcastNewLaunch() {
       }
     });
 
+    restoreSectionCollapseStates();
     loadCatalysts();
     syncContinuousStatus();
     loadCadenceStatus();
@@ -2500,6 +2831,8 @@ async function broadcastNewLaunch() {
           activeWebinars = data.webinars;
           const badge = document.getElementById('tabWebinarsBadge');
           if (badge) badge.textContent = activeWebinars.length;
+          const jumpBadge = document.getElementById('jumpWebinarsCount');
+          if (jumpBadge) jumpBadge.textContent = activeWebinars.length;
           renderWebinarsList(activeWebinars);
         }
       } catch (err) {
@@ -3067,154 +3400,189 @@ await postiz.schedulePost({
       <form id="webinarEditorForm" onsubmit="saveWebinarForm(event)" class="space-y-6">
 
         <!-- 1. General & SEO -->
-        <div class="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4">
-          <h4 class="text-xs font-mono-code font-bold uppercase text-indigo-300">1. Overview &amp; Routing</h4>
-          <div class="grid sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weInternalTitle">Internal Title</label>
-              <input id="weInternalTitle" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" required>
+        <div id="weSubpanel1" class="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4 modal-subpanel">
+          <div class="flex items-center justify-between cursor-pointer section-header-clickable border-b border-white/5 pb-2" onclick="toggleModalSubpanel('weSubpanel1')">
+            <h4 class="text-xs font-mono-code font-bold uppercase text-indigo-300">1. Overview &amp; Routing</h4>
+            <span class="modal-subpanel-icon text-slate-400 font-mono-code text-xs">▾</span>
+          </div>
+          <div class="modal-subpanel-body space-y-4">
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weInternalTitle">Internal Title</label>
+                <input id="weInternalTitle" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" required>
+              </div>
+              <div>
+                <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weSlug">URL Slug (e.g. /webinar/yu-sleep)</label>
+                <input id="weSlug" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" required>
+              </div>
             </div>
             <div>
-              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weSlug">URL Slug (e.g. /webinar/yu-sleep)</label>
-              <input id="weSlug" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" required>
+              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weHeadline">Public Headline</label>
+              <input id="weHeadline" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" required>
             </div>
-          </div>
-          <div>
-            <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weHeadline">Public Headline</label>
-            <input id="weHeadline" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" required>
-          </div>
-          <div>
-            <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weSubheadline">Subheadline / Narrative Angle</label>
-            <textarea id="weSubheadline" rows="2" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500"></textarea>
+            <div>
+              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weSubheadline">Subheadline / Narrative Angle</label>
+              <textarea id="weSubheadline" rows="2" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500"></textarea>
+            </div>
           </div>
         </div>
 
         <!-- 2. Presenter & Transparency -->
-        <div class="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4">
-          <h4 class="text-xs font-mono-code font-bold uppercase text-purple-300">2. Presenter &amp; AI Disclosures</h4>
-          <div class="grid sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="wePresenterName">Presenter Name</label>
-              <input id="wePresenterName" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="e.g. Sarah">
+        <div id="weSubpanel2" class="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4 modal-subpanel">
+          <div class="flex items-center justify-between cursor-pointer section-header-clickable border-b border-white/5 pb-2" onclick="toggleModalSubpanel('weSubpanel2')">
+            <h4 class="text-xs font-mono-code font-bold uppercase text-purple-300">2. Presenter &amp; AI Disclosures</h4>
+            <span class="modal-subpanel-icon text-slate-400 font-mono-code text-xs">▾</span>
+          </div>
+          <div class="modal-subpanel-body space-y-4">
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-mono-code text-slate-300 mb-1" for="wePresenterName">Presenter Name</label>
+                <input id="wePresenterName" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="e.g. Sarah">
+              </div>
+              <div>
+                <label class="block text-xs font-mono-code text-slate-300 mb-1" for="wePresenterRole">Presenter Role / Designation</label>
+                <input id="wePresenterRole" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="e.g. Affiliate Overview Host">
+              </div>
+            </div>
+            <div class="flex items-center gap-2 pt-1">
+              <input type="checkbox" id="weIsAiPresenter" class="rounded border-slate-700 text-indigo-600 focus:ring-indigo-500">
+              <label for="weIsAiPresenter" class="text-xs text-slate-300 cursor-pointer">
+                Presenter is AI Generated (Enforces explicit on-screen disclosure and persistent badge)
+              </label>
             </div>
             <div>
-              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="wePresenterRole">Presenter Role / Designation</label>
-              <input id="wePresenterRole" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="e.g. Affiliate Overview Host">
+              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="wePresenterDisclosure">AI Presenter Disclosure Copy</label>
+              <textarea id="wePresenterDisclosure" rows="2" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500"></textarea>
             </div>
-          </div>
-          <div class="flex items-center gap-2 pt-1">
-            <input type="checkbox" id="weIsAiPresenter" class="rounded border-slate-700 text-indigo-600 focus:ring-indigo-500">
-            <label for="weIsAiPresenter" class="text-xs text-slate-300 cursor-pointer">
-              Presenter is AI Generated (Enforces explicit on-screen disclosure and persistent badge)
-            </label>
-          </div>
-          <div>
-            <label class="block text-xs font-mono-code text-slate-300 mb-1" for="wePresenterDisclosure">AI Presenter Disclosure Copy</label>
-            <textarea id="wePresenterDisclosure" rows="2" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500"></textarea>
           </div>
         </div>
 
         <!-- 3. Video Asset Delivery & VideoMan -->
-        <div class="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4">
-          <div class="flex items-center justify-between">
-            <h4 class="text-xs font-mono-code font-bold uppercase text-emerald-300">3. Video Asset &amp; VideoMan Engine</h4>
-            <span class="text-[10px] font-mono-code text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-              $0 Spending Limit Enforced
-            </span>
+        <div id="weSubpanel3" class="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4 modal-subpanel">
+          <div class="flex items-center justify-between cursor-pointer section-header-clickable border-b border-white/5 pb-2" onclick="toggleModalSubpanel('weSubpanel3')">
+            <div class="flex items-center gap-2">
+              <h4 class="text-xs font-mono-code font-bold uppercase text-emerald-300">3. Video Asset &amp; VideoMan Engine</h4>
+              <span class="text-[10px] font-mono-code text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                $0 Spending Limit Enforced
+              </span>
+            </div>
+            <span class="modal-subpanel-icon text-slate-400 font-mono-code text-xs">▾</span>
           </div>
-          <div class="grid sm:grid-cols-3 gap-4">
-            <div class="sm:col-span-2">
-              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weVideoUrl">Hosted MP4 Path</label>
-              <input id="weVideoUrl" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="/videos/yusleep-presenter-prototype.mp4" required>
+          <div class="modal-subpanel-body space-y-4">
+            <div class="grid sm:grid-cols-3 gap-4">
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weVideoUrl">Hosted MP4 Path</label>
+                <input id="weVideoUrl" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="/videos/yusleep-presenter-prototype.mp4" required>
+              </div>
+              <div>
+                <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weDurationSeconds">Duration (Seconds)</label>
+                <input id="weDurationSeconds" type="number" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="30" required>
+              </div>
             </div>
             <div>
-              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weDurationSeconds">Duration (Seconds)</label>
-              <input id="weDurationSeconds" type="number" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="30" required>
+              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="wePosterUrl">Poster Image URL</label>
+              <input id="wePosterUrl" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="/images/yusleep-presenter.jpg">
             </div>
-          </div>
-          <div>
-            <label class="block text-xs font-mono-code text-slate-300 mb-1" for="wePosterUrl">Poster Image URL</label>
-            <input id="wePosterUrl" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="/images/yusleep-presenter.jpg">
-          </div>
-          <div class="flex items-center gap-2 pt-1">
-            <input type="checkbox" id="weIsPrototype" class="rounded border-slate-700 text-indigo-600 focus:ring-indigo-500">
-            <label for="weIsPrototype" class="text-xs text-amber-300 cursor-pointer">
-              Mark as Demonstration Prototype (Displays transparent prototype banner to viewer)
-            </label>
-          </div>
-          <div>
-            <label class="block text-xs font-mono-code text-slate-300 mb-1" for="wePrototypeNotice">Prototype Notice Text</label>
-            <textarea id="wePrototypeNotice" rows="2" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500"></textarea>
+            <div class="flex items-center gap-2 pt-1">
+              <input type="checkbox" id="weIsPrototype" class="rounded border-slate-700 text-indigo-600 focus:ring-indigo-500">
+              <label for="weIsPrototype" class="text-xs text-amber-300 cursor-pointer">
+                Mark as Demonstration Prototype (Displays transparent prototype banner to viewer)
+              </label>
+            </div>
+            <div>
+              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="wePrototypeNotice">Prototype Notice Text</label>
+              <textarea id="wePrototypeNotice" rows="2" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500"></textarea>
+            </div>
           </div>
         </div>
 
         <!-- 4. Call-to-Action & Timing -->
-        <div class="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4">
-          <h4 class="text-xs font-mono-code font-bold uppercase text-indigo-300">4. Timed Call-to-Action (CTA)</h4>
-          <div class="grid sm:grid-cols-3 gap-4">
-            <div class="sm:col-span-2">
-              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weCtaText">CTA Button Text</label>
-              <input id="weCtaText" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" required>
-            </div>
-            <div>
-              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weCtaRevealSeconds">Reveal At (Seconds)</label>
-              <input id="weCtaRevealSeconds" type="number" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" required>
-            </div>
+        <div id="weSubpanel4" class="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4 modal-subpanel">
+          <div class="flex items-center justify-between cursor-pointer section-header-clickable border-b border-white/5 pb-2" onclick="toggleModalSubpanel('weSubpanel4')">
+            <h4 class="text-xs font-mono-code font-bold uppercase text-indigo-300">4. Timed Call-to-Action (CTA)</h4>
+            <span class="modal-subpanel-icon text-slate-400 font-mono-code text-xs">▾</span>
           </div>
-          <div>
-            <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weCtaUrl">Approved Destination URL (with tracking)</label>
-            <input id="weCtaUrl" type="url" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" required>
-          </div>
-          <div class="grid sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weCtaSubtext">CTA Subtext</label>
-              <input id="weCtaSubtext" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500">
+          <div class="modal-subpanel-body space-y-4">
+            <div class="grid sm:grid-cols-3 gap-4">
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weCtaText">CTA Button Text</label>
+                <input id="weCtaText" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" required>
+              </div>
+              <div>
+                <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weCtaRevealSeconds">Reveal At (Seconds)</label>
+                <input id="weCtaRevealSeconds" type="number" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" required>
+              </div>
             </div>
             <div>
-              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weCtaDisclosure">Affiliate Disclosure Statement</label>
-              <input id="weCtaDisclosure" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500">
+              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weCtaUrl">Approved Destination URL (with tracking)</label>
+              <input id="weCtaUrl" type="url" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" required>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weCtaSubtext">CTA Subtext</label>
+                <input id="weCtaSubtext" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500">
+              </div>
+              <div>
+                <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weCtaDisclosure">Affiliate Disclosure Statement</label>
+                <input id="weCtaDisclosure" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500">
+              </div>
             </div>
           </div>
         </div>
 
         <!-- 5. Lead Generation & Brevo -->
-        <div class="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4">
-          <h4 class="text-xs font-mono-code font-bold uppercase text-cyan-300">5. Brevo Lead Capture &amp; Consent</h4>
-          <div class="grid sm:grid-cols-3 gap-4">
-            <div>
-              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weBrevoListId">Brevo List ID</label>
-              <input id="weBrevoListId" type="number" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" value="80">
-            </div>
-            <div class="sm:col-span-2">
-              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weConsentText">Marketing Consent Checkbox Text</label>
-              <input id="weConsentText" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500">
+        <div id="weSubpanel5" class="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4 modal-subpanel">
+          <div class="flex items-center justify-between cursor-pointer section-header-clickable border-b border-white/5 pb-2" onclick="toggleModalSubpanel('weSubpanel5')">
+            <h4 class="text-xs font-mono-code font-bold uppercase text-cyan-300">5. Brevo Lead Capture &amp; Consent</h4>
+            <span class="modal-subpanel-icon text-slate-400 font-mono-code text-xs">▾</span>
+          </div>
+          <div class="modal-subpanel-body space-y-4">
+            <div class="grid sm:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weBrevoListId">Brevo List ID</label>
+                <input id="weBrevoListId" type="number" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" value="80">
+              </div>
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weConsentText">Marketing Consent Checkbox Text</label>
+                <input id="weConsentText" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500">
+              </div>
             </div>
           </div>
         </div>
 
         <!-- 6. Grounded Reference for AI Q&A -->
-        <div class="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4">
-          <h4 class="text-xs font-mono-code font-bold uppercase text-pink-300">6. Grounded Reference Data (AI Q&amp;A Sources)</h4>
-          <div class="grid sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weRefProductName">Verified Product Name</label>
-              <input id="weRefProductName" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500">
-            </div>
-            <div>
-              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weRefServingSize">Serving Size</label>
-              <input id="weRefServingSize" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500">
-            </div>
+        <div id="weSubpanel6" class="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4 modal-subpanel">
+          <div class="flex items-center justify-between cursor-pointer section-header-clickable border-b border-white/5 pb-2" onclick="toggleModalSubpanel('weSubpanel6')">
+            <h4 class="text-xs font-mono-code font-bold uppercase text-pink-300">6. Grounded Reference Data (AI Q&amp;A Sources)</h4>
+            <span class="modal-subpanel-icon text-slate-400 font-mono-code text-xs">▾</span>
           </div>
-          <div>
-            <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weRefRefundPolicy">Verified Guarantee / Refund Terms</label>
-            <textarea id="weRefRefundPolicy" rows="2" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500"></textarea>
+          <div class="modal-subpanel-body space-y-4">
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weRefProductName">Verified Product Name</label>
+                <input id="weRefProductName" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500">
+              </div>
+              <div>
+                <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weRefServingSize">Serving Size</label>
+                <input id="weRefServingSize" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500">
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weRefRefundPolicy">Verified Guarantee / Refund Terms</label>
+              <textarea id="weRefRefundPolicy" rows="2" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500"></textarea>
+            </div>
           </div>
         </div>
 
         <!-- 7. Audit Log -->
-        <div class="p-4 sm:p-5 rounded-2xl bg-black/40 border border-white/5 space-y-2">
-          <h4 class="text-xs font-mono-code font-bold uppercase text-slate-400">Version History &amp; Audit Trail</h4>
-          <ul id="weAuditList" class="space-y-1 max-h-32 overflow-y-auto"></ul>
+        <div id="weSubpanel7" class="p-4 sm:p-5 rounded-2xl bg-black/40 border border-white/5 space-y-2 modal-subpanel">
+          <div class="flex items-center justify-between cursor-pointer section-header-clickable border-b border-white/5 pb-2" onclick="toggleModalSubpanel('weSubpanel7')">
+            <h4 class="text-xs font-mono-code font-bold uppercase text-slate-400">7. Version History &amp; Audit Trail</h4>
+            <span class="modal-subpanel-icon text-slate-400 font-mono-code text-xs">▾</span>
+          </div>
+          <div class="modal-subpanel-body">
+            <ul id="weAuditList" class="space-y-1 max-h-32 overflow-y-auto"></ul>
+          </div>
         </div>
 
         <!-- Action Footer -->
