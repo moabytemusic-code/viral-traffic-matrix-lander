@@ -6,3 +6,5 @@ node_modules/
 .vercel/
 api/
 .vercelignore
+*.lock
+webinar-brevo-outbox.json
