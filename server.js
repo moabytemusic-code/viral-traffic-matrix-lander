@@ -710,15 +710,34 @@ Sitemap: https://${host}/sitemap.xml
     return res.end(`<h1>Webinar "${escapeHtml(rawSlug)}" not found</h1><p><a href="/launchpad">Open Launchpad</a></p>`);
   }
 
-  // GET /videos/:file -> Stream high-production Remotion & Webinar MP4s with Range Support (HTTP 206)
+  // GET /videos/:file -> Stream high-production Remotion & Webinar MP4s with Range Support (HTTP 206) and WebVTT captions
   if ((req.method === 'GET' || req.method === 'HEAD') && pathname.startsWith('/videos/')) {
     const videoName = path.basename(pathname);
     const videoFile = path.join(__dirname, 'public', 'videos', videoName);
     if (fs.existsSync(videoFile)) {
       const stat = fs.statSync(videoFile);
       const fileSize = stat.size;
-      const range = req.headers.range;
+      const ext = path.extname(videoFile).toLowerCase();
 
+      if (ext === '.vtt') {
+        res.writeHead(200, {
+          'Content-Length': fileSize,
+          'Content-Type': 'text/vtt; charset=utf-8',
+          'Cache-Control': 'no-cache'
+        });
+        return fs.createReadStream(videoFile).pipe(res);
+      }
+
+      if (ext === '.json') {
+        res.writeHead(200, {
+          'Content-Length': fileSize,
+          'Content-Type': 'application/json; charset=utf-8',
+          'Cache-Control': 'no-cache'
+        });
+        return fs.createReadStream(videoFile).pipe(res);
+      }
+
+      const range = req.headers.range;
       if (range) {
         const parts = range.replace(/bytes=/, '').split('-');
         const start = parseInt(parts[0], 10);

@@ -49,6 +49,8 @@ function renderWebinarViewer(accessContext) {
   const clinical = ref.clinicalEvidence || {};
   const pricing = ref.pricingAndPackages || {};
   const refund = ref.refundPolicy || {};
+  const sections = Array.isArray(snapshot.sections) ? snapshot.sections : [];
+  const packagesList = Array.isArray(pricing.packages) ? pricing.packages : [];
 
   // Append non-PII attribution tracking parameter to approved destination URL
   let trackedDestinationUrl = c.destinationUrl || 'https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=yusleep&op=glp&tid=webinar_yusleep';
@@ -170,38 +172,117 @@ function renderWebinarViewer(accessContext) {
       <div class="video-container shadow-2xl border border-white/10">
         <video id="webinarVideo" controls preload="metadata" playsinline poster="${escapeHtml(v.posterUrl || '/images/yusleep-presenter.jpg')}">
           <source src="${escapeHtml(v.videoUrl)}" type="video/mp4">
+          <track id="webinarCaptionsTrack" kind="captions" srclang="en" label="English Captions" src="${escapeHtml(v.captionsUrl || '/videos/yusleep-webinar-captions.vtt')}" default>
           Your browser does not support HTML5 video playback.
         </video>
       </div>
 
-      <!-- Player Status & Watch Progress Bar -->
-      <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400 font-mono bg-slate-900/60 px-4 py-2.5 rounded-xl border border-white/5">
-        <div class="flex items-center gap-3">
-          <span>Player State: <strong id="playerStateText" class="text-slate-200">Ready (On-Demand)</strong></span>
-          <span>·</span>
-          <span>Verified Watch Time: <strong id="watchedTimeCounter" class="text-indigo-300">0.0s</strong> / ${Number(v.durationSeconds) || 30}s</span>
+      <!-- Synchronized Live Caption & Chapter Bar -->
+      <div id="liveCaptionContainer" class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-slate-900/90 px-4 py-3 rounded-xl border border-indigo-500/25 text-xs">
+        <div class="flex items-start sm:items-center gap-2.5 flex-1">
+          <span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono font-bold text-[10px] shrink-0 border border-indigo-500/30">CC</span>
+          <p id="liveCaptionBanner" class="text-slate-100 leading-relaxed font-medium" aria-live="off">
+            [Captions Ready]: Press Play on the prerecorded presentation above or select any of the 7 sections below to jump directly to a chapter.
+          </p>
         </div>
-        <div id="ctaCountdownStatus" class="text-slate-400">
+        <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
+          <span id="activeChapterBadge" class="text-[10px] font-mono px-2 py-1 rounded bg-white/5 text-indigo-300 border border-white/10">Section 1 of 7</span>
+          <button id="toggleCaptionsBtn" type="button" onclick="toggleCustomCaptions()" class="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/15 text-slate-200 border border-white/15 transition">
+            Captions: ON
+          </button>
+        </div>
+      </div>
+
+      <!-- Player Status, Watch Progress & Explicit CTA Unlock Rule Bar -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-400 font-mono bg-slate-900/60 px-4 py-2.5 rounded-xl border border-white/5">
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+          <span>State: <strong id="playerStateText" class="text-slate-200">Ready (Prerecorded)</strong></span>
+          <span>·</span>
+          <span>Playback Position: <strong id="playbackPosCounter" class="text-slate-200">0.0s</strong></span>
+          <span>·</span>
+          <span>Accumulated Verified Watch Time: <strong id="watchedTimeCounter" class="text-indigo-300">0.0s</strong> / ${Number(v.durationSeconds) || 30}s</span>
+        </div>
+        <div id="ctaCountdownStatus" class="text-slate-300 font-semibold">
           ${c.hideUntilRevealed
-            ? `Offer link unlocks after ${Number(c.revealSeconds) || 15}s of actual watched playback`
+            ? `Unlocks after ${Number(c.revealSeconds) || 15}s of accumulated watched time (or at Section 5: 115s)`
             : 'Offer link active below'}
         </div>
       </div>
 
-      ${v.isPrototype ? `
-      <!-- Prototype Status Notice -->
+      <!-- Explicit Explanation of CTA Unlock Mechanism (Watch Time vs. Playback Position) -->
+      <div id="ctaUnlockPolicyBanner" class="p-3 rounded-xl bg-slate-900/50 border border-white/10 text-[11px] text-slate-300 flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <strong class="text-indigo-300">How Offer Link Unlocking Works:</strong>
+          <span>${escapeHtml(c.unlockRuleExplanation || `Unlocking depends on accumulated watched time (${Number(c.revealSeconds) || 15}s of verified active playback via server-validated watch_interval telemetry; forward scrubbing alone does not fabricate watch time) OR reaching Section 5 (Verified Merchant Offer at 1:55 / 115s) by playback position.`)}</span>
+        </div>
+      </div>
+
+      ${v.isPrototype || v.isRoughCut ? `
+      <!-- Prototype / Rough-Cut Status Notice -->
       <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-200 space-y-1">
-        <strong class="font-bold block text-amber-100">30-Second Production Prototype Notice</strong>
-        <p>${escapeHtml(v.prototypeNotice || 'This video is a 30-second production prototype of the opening segment, not the complete full-length webinar.')}</p>
+        <strong class="font-bold block text-amber-100">${v.isRoughCut ? '7-Section Local Rough-Cut Preview Notice ($0 External Generation Cost)' : '30-Second Production Prototype Notice'}</strong>
+        <p>${escapeHtml(v.prototypeNotice || 'This video is a production prototype of the opening segment, not the complete full-length webinar.')}</p>
       </div>
       ` : ''}
     </section>
+
+    ${sections.length > 0 ? `
+    <!-- 7-Section Interactive Presentation & Scene Plan Navigator -->
+    <section class="glass-surface p-5 sm:p-6 rounded-3xl space-y-4" aria-label="7-Section Presentation Chapters">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
+        <div>
+          <h2 class="font-bold text-sm sm:text-base text-white">7-Section Presentation Chapters &amp; Scene Plan</h2>
+          <p class="text-xs text-slate-400">Select any section to seek the player and inspect its purpose, visual composition, and verified script.</p>
+        </div>
+        <span class="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+          Prerecorded · 7 Sections (3:00 Total)
+        </span>
+      </div>
+
+      <div id="webinarChapterList" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        ${sections.map((sec) => {
+          const sNum = Number(sec.sectionNumber) || 1;
+          const startSec = Number(sec.startTimeSec) || 0;
+          const endSec = Number(sec.endTimeSec) || 30;
+          const startFmt = Math.floor(startSec / 60) + ':' + String(startSec % 60).padStart(2, '0');
+          const endFmt = Math.floor(endSec / 60) + ':' + String(endSec % 60).padStart(2, '0');
+          const isReusedProto = sNum === 1;
+          return `
+          <div id="chapterCard_${sNum}" class="p-3.5 rounded-2xl bg-slate-900/80 border border-white/10 hover:border-indigo-500/40 transition flex flex-col justify-between gap-2.5">
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between gap-1.5">
+                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-indigo-600/30 text-indigo-200 border border-indigo-500/30">
+                  Section ${sNum} · ${startFmt} - ${endFmt}
+                </span>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded ${isReusedProto ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'}">
+                  ${isReusedProto ? 'Reused 30s AI Prototype' : 'Rough-Cut Slide + Scratch Voice'}
+                </span>
+              </div>
+              <h3 class="font-bold text-xs text-white leading-snug">${escapeHtml(sec.title)}</h3>
+              <p class="text-[11px] text-slate-400 leading-normal">${escapeHtml(sec.purpose)}</p>
+              <p class="text-[10px] text-slate-500 font-mono">Visual: ${escapeHtml(sec.visualFormat)}</p>
+            </div>
+            <div class="pt-1 flex items-center justify-between gap-2 border-t border-white/5">
+              <button type="button" onclick="seekToSection(${startSec}, ${sNum})" class="text-[11px] font-semibold text-indigo-300 hover:text-indigo-200 inline-flex items-center gap-1">
+                <span>&#9654; Play Section ${sNum} (${startFmt})</span>
+              </button>
+              <details class="text-[10px] text-slate-400">
+                <summary class="cursor-pointer hover:text-slate-200">Script</summary>
+                <p class="mt-1.5 p-2 rounded bg-black/60 text-slate-300 leading-relaxed">${escapeHtml(sec.spokenScript)}</p>
+              </details>
+            </div>
+          </div>
+          `;
+        }).join('')}
+      </div>
+    </section>
+    ` : ''}
 
     <!-- Timed Call to Action Section -->
     <section id="ctaContainer" class="${c.hideUntilRevealed ? 'hidden' : ''} transition-all duration-500" aria-live="polite">
       <div class="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-indigo-950/70 via-slate-900/95 to-purple-950/60 border-2 border-indigo-500/40 shadow-2xl space-y-4 text-center">
         <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-          <span>Merchant Presentation Link</span>
+          <span>Optional Affiliate Offer Link</span>
         </div>
         <h2 class="text-xl sm:text-2xl font-bold text-white max-w-xl mx-auto">
           Inspect the Current Label, Package Totals, and Written Terms on the Merchant Page
@@ -221,6 +302,47 @@ function renderWebinarViewer(accessContext) {
       </div>
     </section>
 
+    <!-- Verified Merchant Offer & Terms Summary Card (Observed 2026-11-15) -->
+    <section id="verifiedMerchantOfferCard" class="glass-surface p-6 rounded-3xl space-y-4" aria-label="Verified Merchant Offer Terms">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
+        <div>
+          <h2 class="font-bold text-sm sm:text-base text-white">Verified Merchant Offer, Shipping &amp; Refund Terms</h2>
+          <span class="text-[11px] text-slate-400 font-mono block">Observed: ${escapeHtml(pricing.observedAt || '2026-11-15')} · Sources: joinyusleep.com/buy, getyusleep.com/shipping-policy/, getyusleep.com/refund-policy/</span>
+        </div>
+        <span class="text-[10px] font-mono px-2.5 py-1 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+          Minimum Purchase: 2 Bottles ($138 + Shipping)
+        </span>
+      </div>
+
+      ${packagesList.length > 0 ? `
+      <div class="grid sm:grid-cols-3 gap-3 text-xs">
+        ${packagesList.map((pkg) => `
+          <div class="p-3.5 rounded-2xl bg-black/40 border border-white/10 space-y-1.5">
+            <div class="font-bold text-white">${escapeHtml(pkg.tier)}</div>
+            <div class="text-indigo-300 font-mono font-bold text-sm">$${escapeHtml(pkg.perBottleUsd)}/bottle ($${escapeHtml(pkg.totalOneTimeUsd)} one-time)</div>
+            <div class="text-[11px] text-slate-300"><strong>Billing Option:</strong> ${escapeHtml(pkg.autoShipOption)}</div>
+            <div class="text-[11px] text-slate-300"><strong>Shipping:</strong> ${escapeHtml(pkg.shipping)}</div>
+          </div>
+        `).join('')}
+      </div>
+      ` : ''}
+
+      <div class="grid sm:grid-cols-2 gap-3 text-xs">
+        <div class="p-3.5 rounded-2xl bg-black/30 border border-white/5 space-y-1 text-slate-300">
+          <strong class="text-white block">Written 60-Day Refund Policy (Observed ${escapeHtml(refund.observedAt || '2026-11-15')}):</strong>
+          <p class="text-[11px] leading-relaxed">${escapeHtml(refund.terms || '')}</p>
+        </div>
+        <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 space-y-1 text-amber-200">
+          <strong class="text-amber-100 block">Details Marked Unverified or Ambiguous (Confirm at Checkout):</strong>
+          <ul class="list-disc list-inside text-[11px] space-y-1 leading-relaxed">
+            <li><strong>Location-Based Checkout Tax:</strong> Exact state/local sales tax or VAT is calculated dynamically on <code class="text-amber-100">yusleep.pay.clickbank.net</code> after entering your billing ZIP/country.</li>
+            <li><strong>2-Bottle Shipping Fee Discrepancy:</strong> <code class="text-amber-100">getyusleep.com/shipping-policy/</code> lists <strong>$14.95</strong> US shipping in its rate table, while a separate FAQ line on the same page mentions <strong>$9.95</strong>.</li>
+            <li><strong>Opened vs. Unopened Bottle Return Wording:</strong> While promotional copy headlines a 60-day trial guarantee (21 nights recommended), the written email instructions on <code class="text-amber-100">getyusleep.com/refund-policy/</code> state <em>"exact bottles you are returning (unopened bottles)"</em>.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
     <!-- Two-Column Grid: Reference-Driven Product FAQ & Supplied Label Facts -->
     <div class="grid lg:grid-cols-2 gap-8 items-start">
 
@@ -228,14 +350,14 @@ function renderWebinarViewer(accessContext) {
       <section class="glass-surface p-6 rounded-3xl space-y-4" aria-label="Product FAQ Assistant">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
           <div class="flex items-center gap-2">
-            <span class="px-2 py-0.5 rounded bg-indigo-600/30 text-indigo-300 text-xs font-mono font-bold border border-indigo-500/30">FAQ</span>
+            <span class="px-2 py-0.5 rounded bg-indigo-600/30 text-indigo-300 text-xs font-mono font-bold border border-indigo-500/30">SEPARATE FAQ TOOL</span>
             <h2 class="font-bold text-sm text-white">Product FAQ Assistant (Reference-Driven)</h2>
           </div>
           <span class="text-[10px] text-slate-400 font-mono bg-white/5 px-2 py-0.5 rounded">Non-AI · Reference Rev #${escapeHtml(revision)}</span>
         </div>
 
         <p class="text-xs text-slate-300 leading-relaxed">
-          This assistant looks up verified entries from our approved reference dataset for <strong>${escapeHtml(ref.productVersion || 'the supplied label artwork')}</strong>. It does not use an autonomous generative language model and cannot provide medical advice.
+          This separate lookup tool retrieves recorded entries from our versioned reference dataset for <strong>${escapeHtml(ref.productVersion || 'the supplied label artwork')}</strong>. Reference-based answers reflect our recorded snapshot and do not guarantee completeness, real-time merchant pricing, or personal medical suitability.
         </p>
 
         <!-- Starter Question Buttons -->
@@ -246,11 +368,11 @@ function renderWebinarViewer(accessContext) {
           <button type="button" onclick="askPresetQuestion('What is inside the 637 mg proprietary blend?')" class="text-[11px] px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10 transition">
             What is in the 637 mg blend?
           </button>
-          <button type="button" onclick="askPresetQuestion('Are there independent clinical trials on this finished formula?')" class="text-[11px] px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10 transition">
-            Clinical evidence status?
+          <button type="button" onclick="askPresetQuestion('What is the minimum bottle purchase and shipping cost?')" class="text-[11px] px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10 transition">
+            2-bottle minimum &amp; shipping?
           </button>
           <button type="button" onclick="askPresetQuestion('What are the package prices and refund terms?')" class="text-[11px] px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10 transition">
-            Prices &amp; refund policy?
+            Prices &amp; 60-day refund policy?
           </button>
         </div>
 
@@ -432,6 +554,7 @@ function renderWebinarViewer(accessContext) {
     const VIDEO_DURATION_SEC = ${JSON.stringify(Number(v.durationSeconds) || 30)};
     const CTA_REVEAL_SECONDS = ${JSON.stringify(Number(c.revealSeconds) || 15)};
     const HIDE_CTA_UNTIL_REVEALED = ${JSON.stringify(Boolean(c.hideUntilRevealed))};
+    const WEBINAR_SECTIONS = ${JSON.stringify(sections)};
 
     // Strip any ?preview=... query token from the address bar immediately so it cannot be leaked or shoulder-surfed
     if (window.location.search && window.location.search.includes('preview=')) {
@@ -445,17 +568,81 @@ function renderWebinarViewer(accessContext) {
     const ctaContainer = document.getElementById('ctaContainer');
     const ctaLink = document.getElementById('ctaAffiliateLink');
     const playerStateText = document.getElementById('playerStateText');
+    const playbackPosCounter = document.getElementById('playbackPosCounter');
     const watchedTimeCounter = document.getElementById('watchedTimeCounter');
     const ctaCountdownStatus = document.getElementById('ctaCountdownStatus');
+    const liveCaptionBanner = document.getElementById('liveCaptionBanner');
+    const activeChapterBadge = document.getElementById('activeChapterBadge');
+    const toggleCaptionsBtn = document.getElementById('toggleCaptionsBtn');
 
     let eventCounter = 0;
     let ctaRevealed = !HIDE_CTA_UNTIL_REVEALED;
     let verifiedUniqueWatchedSec = 0;
+    let customCaptionsEnabled = true;
 
     // Interval tracking state
     let isPlaying = false;
     let segmentMediaStart = null;
     let segmentWallStartMs = null;
+
+    function toggleCustomCaptions() {
+      customCaptionsEnabled = !customCaptionsEnabled;
+      if (toggleCaptionsBtn) {
+        toggleCaptionsBtn.textContent = customCaptionsEnabled ? 'Captions: ON' : 'Captions: OFF';
+      }
+      if (liveCaptionBanner) {
+        liveCaptionBanner.textContent = customCaptionsEnabled
+          ? getCaptionForTime(video ? video.currentTime : 0)
+          : '[Captions hidden by viewer]';
+      }
+      if (video && video.textTracks && video.textTracks.length > 0) {
+        video.textTracks[0].mode = customCaptionsEnabled ? 'showing' : 'hidden';
+      }
+    }
+
+    function getCaptionForTime(tSec) {
+      const t = Number(tSec) || 0;
+      if (!Array.isArray(WEBINAR_SECTIONS) || WEBINAR_SECTIONS.length === 0) {
+        return '[Sarah - AI Presenter]: Prerecorded YuSleep label and merchant overview.';
+      }
+      const sec = WEBINAR_SECTIONS.find((s) => t >= Number(s.startTimeSec) && t < Number(s.endTimeSec)) || WEBINAR_SECTIONS[WEBINAR_SECTIONS.length - 1];
+      if (!sec) return '';
+      if (activeChapterBadge) {
+        activeChapterBadge.textContent = 'Section ' + sec.sectionNumber + ' of ' + WEBINAR_SECTIONS.length;
+      }
+      return '[Section ' + sec.sectionNumber + ' - ' + sec.title + ']: ' + sec.spokenScript;
+    }
+
+    function syncPositionAndCaptions() {
+      if (!video) return;
+      const cur = Number(video.currentTime) || 0;
+      if (playbackPosCounter) {
+        playbackPosCounter.textContent = cur.toFixed(1) + 's';
+      }
+      if (customCaptionsEnabled && liveCaptionBanner) {
+        liveCaptionBanner.textContent = getCaptionForTime(cur);
+      }
+      // Also allow CTA unlock if viewer reaches Section 5 (115s, Verified Merchant Offer & Terms) in the full rough cut
+      if (!ctaRevealed && cur >= 115) {
+        ctaRevealed = true;
+        if (ctaContainer) ctaContainer.classList.remove('hidden');
+        if (ctaCountdownStatus) {
+          ctaCountdownStatus.textContent = 'Offer link unlocked (Section 5 reached at ' + cur.toFixed(1) + 's)';
+        }
+        sendTrackingEvent('cta_impression');
+      }
+    }
+
+    function seekToSection(startSec, secNum) {
+      if (!video) return;
+      try {
+        video.currentTime = Number(startSec) || 0;
+      } catch (e) {}
+      syncPositionAndCaptions();
+      if (playerStateText) {
+        playerStateText.textContent = 'Seeked to Section ' + secNum;
+      }
+    }
 
     function nextEventId(prefix) {
       eventCounter += 1;
@@ -498,12 +685,12 @@ function renderWebinarViewer(accessContext) {
         ctaRevealed = true;
         ctaContainer.classList.remove('hidden');
         if (ctaCountdownStatus) {
-          ctaCountdownStatus.textContent = 'Offer link unlocked below';
+          ctaCountdownStatus.textContent = 'Offer link unlocked below (' + verifiedUniqueWatchedSec.toFixed(1) + 's accumulated watch time)';
         }
         sendTrackingEvent('cta_impression');
       } else if (!ctaRevealed && ctaCountdownStatus) {
         const rem = Math.max(0, CTA_REVEAL_SECONDS - verifiedUniqueWatchedSec).toFixed(1);
-        ctaCountdownStatus.textContent = 'Watch ' + rem + 's more to unlock offer link';
+        ctaCountdownStatus.textContent = 'Watch ' + rem + 's more accumulated playback (or jump to Section 5) to unlock offer link';
       }
     }
 
@@ -574,7 +761,12 @@ function renderWebinarViewer(accessContext) {
       segmentWallStartMs = null;
     });
 
+    video.addEventListener('timeupdate', () => {
+      syncPositionAndCaptions();
+    });
+
     video.addEventListener('seeked', () => {
+      syncPositionAndCaptions();
       sendTrackingEvent('seek', { currentTime: Number(video.currentTime.toFixed(2)) });
       if (!video.paused) {
         segmentMediaStart = video.currentTime;

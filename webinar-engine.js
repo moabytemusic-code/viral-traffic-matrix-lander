@@ -190,23 +190,51 @@ function getYuSleepApprovedReference() {
     },
 
     pricingAndPackages: {
-      summary: 'Current package prices, per-bottle prices, total charges, shipping fees, taxes, and whether an order is one-time or recurring are not verified in this static reference and can change at any time.',
-      instructions: 'Review the live merchant presentation and official checkout page before ordering to confirm the exact package total, number of bottles, shipping charges, and billing terms.',
-      source: 'full-production-script.json & https://getyusleep.com/aff-th/',
-      observedAt: '2026-11-14',
-      productVersion: 'Current Merchant Checkout (Live Verification Required)',
+      summary: 'Observed on 2026-11-15 at https://joinyusleep.com/buy and https://mygetfitchallenge.lpages.co/yu-sleep-homepage-300-aov-clickbank: Minimum order is 2 bottles (no 1-bottle option on the standard order page). Verified tiers: (1) 2 Bottles (60-day supply): $69/bottle ($138 one-time + paid shipping, item cbitems=2reg), or optional VIP Auto-Ship modal at $49/bottle ($98 bi-monthly recurring, cancel anytime, item cbitems=2rec2m); (2) 3 Bottles (90-day supply): $59/bottle ($177 one-time + Free US Shipping + digital bonuses, item cbitems=2&template=3yun); (3) 6 Bottles (180-day supply): $49/bottle ($294 one-time + Free US Shipping + digital bonuses, item cbitems=3new&template=6yun). Paid shipping on 2 bottles: https://getyusleep.com/shipping-policy/ table lists $14.95 US (5-7 business days via UPS) and $29.95 Canada (14-21 business days), while a separate FAQ paragraph on the same page mentions $9.95. Exact state/local taxes and real-time checkout changes are not verified in this static reference and can change at any time.',
+      instructions: 'Review the live merchant presentation and official ClickBank checkout page before ordering to confirm the exact package total, whether you selected one-time billing or bi-monthly auto-ship, shipping charges ($14.95 vs. $9.95 on 2-bottle orders), and applicable tax.',
+      minimumPurchase: '2 bottles ($138 one-time + shipping, or $98 bi-monthly auto-ship modal). No single-bottle package is offered on the standard order page.',
+      packages: [
+        {
+          tier: '2 Bottles (60-Day Supply / Minimum Purchase)',
+          perBottleUsd: 69,
+          totalOneTimeUsd: 138,
+          autoShipOption: '$49/bottle ($98 billed every 2 months via homepage VIP modal; cancel anytime)',
+          shipping: '$14.95 US (5-7 business days via UPS) per shipping table ($29.95 Canada); note that a separate FAQ paragraph on the shipping policy page mentions $9.95.'
+        },
+        {
+          tier: '3 Bottles (90-Day Supply)',
+          perBottleUsd: 59,
+          totalOneTimeUsd: 177,
+          autoShipOption: 'One-time payment on standard order page',
+          shipping: 'FREE US Standard Shipping (includes digital bonuses)'
+        },
+        {
+          tier: '6 Bottles (180-Day Supply)',
+          perBottleUsd: 49,
+          totalOneTimeUsd: 294,
+          autoShipOption: 'One-time payment on standard order page',
+          shipping: 'FREE US Standard Shipping (includes digital bonuses)'
+        }
+      ],
+      source: 'https://joinyusleep.com/buy, https://mygetfitchallenge.lpages.co/yu-sleep-homepage-300-aov-clickbank, https://getyusleep.com/shipping-policy/, https://getyusleep.com/aff-th/',
+      observedAt: '2026-11-15',
+      productVersion: 'Verified Merchant Offer Snapshot (2026-11-15) + Live Checkout Check Required',
       verificationStatus: 'UNVERIFIED_REQUIRES_CURRENT_MERCHANT_CHECK',
-      limitation: 'Do not rely on static or historical price estimates; always verify live checkout totals before payment.'
+      snapshotVerificationStatus: 'VERIFIED_MERCHANT_SNAPSHOT_2026_11_15_WITH_DYNAMIC_TAX_AND_SHIPPING_NOTE',
+      limitation: 'State/local sales tax is calculated dynamically on yusleep.pay.clickbank.net by billing ZIP/country, and the merchant shipping policy page shows $14.95 in its rate table vs. $9.95 in its FAQ text; always verify live checkout totals before payment.'
     },
 
     refundPolicy: {
-      headlineClaim: 'Merchant promotional materials reference a 60-day guarantee headline.',
-      terms: 'Specific return deadlines, return shipping costs, RMA requirements, and conditions for opened or empty bottles are not verified in this static reference and can change. Open and read the current refund policy on the official merchant page before ordering.',
-      source: 'full-production-script.json & https://getyusleep.com/aff-th/',
-      observedAt: '2026-11-14',
-      productVersion: 'Current Merchant Refund Policy (Live Verification Required)',
+      headlineClaim: 'Merchant sales and refund pages state a 60-day money-back guarantee from the date of purchase (postmark date applies; merchant recommends trying for 21 nights).',
+      terms: 'Observed on 2026-11-15 at https://getyusleep.com/refund-policy/: Buyers must email support@yu-sleep.com with full name, email, ClickBank invoice, order number, and bottles being returned; place the order number inside the package; mail returns to YU SLEEP, 19655 E 35th Drive, Suite 100, Aurora, CO 80011; and email back the return tracking number. Customer pays return shipping, original shipping and handling charges are non-refundable, and the guarantee is strictly limited to a one-time refund per customer. Ambiguity note: while the page headlines a 60-day guarantee after trying the product for 21 nights, the written email instructions on https://getyusleep.com/refund-policy/ also include the phrase "exact bottles you are returning (unopened bottles)". Therefore, how opened or empty bottles are treated is ambiguous and not verified in this static reference and can change. Open and read the current refund policy on the official merchant page before ordering.',
+      returnAddress: 'YU SLEEP, 19655 E 35th Drive, Suite 100, Aurora, CO 80011',
+      supportEmail: 'support@yu-sleep.com',
+      source: 'https://getyusleep.com/refund-policy/ & https://getyusleep.com/aff-th/',
+      observedAt: '2026-11-15',
+      productVersion: 'Verified Merchant Refund Policy Snapshot (2026-11-15)',
       verificationStatus: 'UNVERIFIED_REQUIRES_CURRENT_MERCHANT_CHECK',
-      limitation: 'Headline guarantee statements do not replace the merchant full written refund terms.'
+      snapshotVerificationStatus: 'VERIFIED_WRITTEN_POLICY_2026_11_15_WITH_OPENED_BOTTLE_AMBIGUITY_FLAGGED',
+      limitation: 'Written policy contains conflicting language between trying YuSleep for 21 nights and returning "(unopened bottles)"; confirm opened-bottle eligibility with support@yu-sleep.com or ClickBank before ordering.'
     },
 
     disallowedClaims: [
@@ -241,40 +269,55 @@ function createEmptyAnalyticsBucket() {
   };
 }
 
+function loadYuSleepProductionPlan() {
+  try {
+    const planPath = path.join(__dirname, 'yusleep-full-production-plan.json');
+    if (fs.existsSync(planPath)) {
+      return JSON.parse(fs.readFileSync(planPath, 'utf8'));
+    }
+  } catch (_) {}
+  return null;
+}
+
 function getSeedDraftContent() {
+  const prodPlan = loadYuSleepProductionPlan();
   return {
     revision: 1,
     updatedAt: '2026-11-14T23:00:00.000Z',
     updatedBy: 'system:seed',
     internalTitle: 'YuSleep Tart Cherry Label Walkthrough and Buying Guide',
     headline: 'YuSleep: Let Us Look Beyond the Sales Pitch',
-    subheadline: 'An independent, recorded affiliate overview examining the supplied Supplement Facts label, what is disclosed vs. undisclosed, and what to check on the merchant page before deciding.',
+    subheadline: 'An independent, prerecorded affiliate overview examining the supplied Supplement Facts label, what is disclosed vs. undisclosed, and what we verified on the merchant page before you decide.',
     presenter: {
       name: 'Sarah',
-      role: 'Recorded Affiliate Overview Presenter',
+      role: 'Prerecorded Affiliate Overview Presenter',
       isAiGenerated: true,
-      disclosureText: 'AI presenter · Recorded affiliate overview. Original fictional AI character and synthesized narration; not a customer testimonial or healthcare professional.'
+      disclosureText: 'AI presenter · Prerecorded affiliate overview. Original fictional AI character and synthesized narration; not a customer testimonial or healthcare professional.'
     },
     video: {
       sourceType: 'LOCAL_MP4',
       videoUrl: '/videos/yusleep-presenter-prototype.mp4',
       posterUrl: '/images/yusleep-presenter.jpg',
+      captionsUrl: '/videos/yusleep-webinar-captions.vtt',
       durationSeconds: 30,
       isPrototype: true,
-      prototypeNotice: '30-second AI-presenter production prototype (1280x720 H.264/AAC). This is a production test of the opening section, not the full 7-section webinar.',
+      isRoughCut: false,
+      prototypeNotice: '30-second AI-presenter production prototype (1280x720 H.264/AAC). This is a production test of the opening section, not the full 7-section webinar. Import /videos/yusleep-full-rough-cut.mp4 (180s) to review the complete 7-section rough cut.',
       width: 1280,
       height: 720,
       codec: 'H.264 / AAC'
     },
+    sections: prodPlan && Array.isArray(prodPlan.sections) ? prodPlan.sections : [],
+    costEstimateAndApprovalGate: prodPlan ? prodPlan.costEstimateAndApprovalGate : null,
     videoMan: {
       manifestId: 'vm_manifest_yusleep_v1',
       status: 'PROTOTYPE_VERIFIED',
       allocatedBudget: 0.00,
       currency: 'USD',
       prototypeJobCost: 0.751,
-      fullVideoEstimatedCostRange: '$54.00 - $72.00 (if continuous 720p avatar) or local Remotion B-roll assembly ($0 external render fee)',
+      fullVideoEstimatedCostRange: 'Option A Hybrid (Recommended): $1.38 - $12.75 ($15 cap) | Option B Full 180s Avatar: $3.75 - $27.00 ($30 cap) | Option C Local Rough Cut: $0.00',
       spendingLimitApproved: false,
-      scriptVersion: 'full-production-script.v1',
+      scriptVersion: 'full-production-script.v2-2026-11-15',
       disclosuresEnforced: true,
       llmAdapter: {
         enabled: false,
@@ -295,10 +338,11 @@ function getSeedDraftContent() {
     },
     cta: {
       buttonText: 'Review Merchant Presentation & Current Terms',
-      subtext: 'Opens the merchant presentation via our ClickBank affiliate link. Check current package totals, shipping, and refund terms before ordering.',
+      subtext: 'Opens the merchant presentation via our ClickBank affiliate link. Check current package totals (2-bottle minimum order), shipping, and refund terms before ordering.',
       destinationUrl: 'https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=yusleep&op=glp&tid=webinar_yusleep',
       revealSeconds: 15,
       hideUntilRevealed: true,
+      unlockRuleExplanation: 'Unlocks automatically after 15.0 seconds of accumulated watched playback (tracked via server-verified watch_interval telemetry; forward scrubbing alone does not credit watch time) or when you reach Section 5 (Verified Merchant Offer).',
       affiliateDisclosure: 'Affiliate Disclosure: If you purchase through our link, we may earn a commission at no additional cost to you.'
     },
     reference: getYuSleepApprovedReference()
@@ -2282,6 +2326,10 @@ class WebinarEngine {
           ...deepClone(prevDraft.video),
           ...(data.video || {})
         },
+        sections: Array.isArray(data.sections) ? deepClone(data.sections) : deepClone(prevDraft.sections || []),
+        costEstimateAndApprovalGate: data.costEstimateAndApprovalGate !== undefined
+          ? deepClone(data.costEstimateAndApprovalGate)
+          : deepClone(prevDraft.costEstimateAndApprovalGate || null),
         videoMan: {
           ...deepClone(prevDraft.videoMan),
           ...(data.videoMan || {}),
@@ -2544,14 +2592,20 @@ class WebinarEngine {
     }
 
     const dur = Number(durationSeconds) || 30;
+    const isRoughCutAsset = cleanVideoPath.includes('rough-cut');
     const updated = await this.saveWebinar({
       slug,
       video: {
         sourceType: 'LOCAL_MP4',
         videoUrl: cleanVideoPath,
         posterUrl: posterPath || webinar.draft.video?.posterUrl || '/images/yusleep-presenter.jpg',
+        captionsUrl: webinar.draft.video?.captionsUrl || '/videos/yusleep-webinar-captions.vtt',
         durationSeconds: dur,
         isPrototype: dur < 120,
+        isRoughCut: isRoughCutAsset,
+        prototypeNotice: isRoughCutAsset
+          ? '180-second (7-section) local rough-cut preview ($0 external generation cost). Section 1 (0:00-0:30) reuses the approved 30s Sarah AI presenter prototype; Sections 2-7 (0:30-3:00) combine local slide/label/bottle composites with local macOS scratch narration while awaiting approval for paid TTS/avatar generation.'
+          : (dur < 120 ? '30-second AI-presenter production prototype (1280x720 H.264/AAC). This is a production test of the opening section, not the full 7-section webinar.' : null),
         width: Number(width) || 1280,
         height: Number(height) || 720,
         codec: 'H.264 / AAC',
@@ -2798,10 +2852,10 @@ class WebinarEngine {
     }
 
     // 5. Manufacturer / Company Lookup
-    if (/\b(who makes|manufacturer|manufactured|company|where is it made|wilmington|women's health|seller|merchant|vendor)\b/i.test(qLower) && ref.manufacturer) {
+    if (/\b(who makes|manufacturer|manufactured|company|where is it made|wilmington|women's health|seller|merchant|vendor|clickbank|quantum wealth)\b/i.test(qLower) && ref.manufacturer) {
       const m = ref.manufacturer;
       answerBlocks.push(
-        `The supplied label artwork states: Manufactured for ${m.entity}, ${m.address} (website printed on label: ${m.websitePrintedOnLabel}, UPC: ${m.upc}). ${m.limitation || ''}`.trim()
+        `The supplied label artwork states: Manufactured for ${m.entity}, ${m.address} (website printed on label: ${m.websitePrintedOnLabel}, UPC: ${m.upc}). Note: On the live merchant pages observed 2026-11-15, checkout is processed by Click Sales Inc. (ClickBank) and policy pages reference Quantum Wealth LLC with a US returns warehouse in Aurora, CO. ${m.limitation || ''}`.trim()
       );
       addCitation('Label Manufacturer Statement', m);
     }
@@ -2815,8 +2869,8 @@ class WebinarEngine {
       addCitation('Clinical Evidence Status', ce);
     }
 
-    // 7. Pricing, Packages, Shipping & Billing Terms Lookup
-    if (/\b(price\w*|pricing|cost\w*|how much does it cost|package\w*|bundle\w*|shipping|subscription|recurring|auto-ship|autoship|billing|charge\w*|discount\w*)\b/i.test(qLower) && ref.pricingAndPackages) {
+    // 7. Pricing, Packages, Minimum Purchase, Shipping & Billing Terms Lookup
+    if (/\b(price\w*|pricing|cost\w*|how much|minimum|1\s*bottle|single\s*bottle|one\s*bottle|2\s*bottle\w*|two\s*bottle\w*|3\s*bottle\w*|three\s*bottle\w*|6\s*bottle\w*|six\s*bottle\w*|package\w*|bundle\w*|shipping|14\.95|9\.95|138|177|294|subscription|recurring|auto-ship|autoship|billing|charge\w*|discount\w*)\b/i.test(qLower) && ref.pricingAndPackages) {
       const pp = ref.pricingAndPackages;
       answerBlocks.push(
         `Pricing and billing status (${pp.verificationStatus}): ${pp.summary} ${pp.instructions || ''}`.trim()
@@ -2825,7 +2879,7 @@ class WebinarEngine {
     }
 
     // 8. Refund / Guarantee / Return Policy Lookup
-    if (/\b(refund\w*|return\w*|money back|money-back|60-day|60 day|guarantee|policy|rma)\b/i.test(qLower) && ref.refundPolicy) {
+    if (/\b(refund\w*|return\w*|money back|money-back|60-day|60 day|guarantee|policy|rma|aurora|unopened|opened|empty bottle\w*)\b/i.test(qLower) && ref.refundPolicy) {
       const rp = ref.refundPolicy;
       answerBlocks.push(
         `Refund policy status (${rp.verificationStatus}): ${rp.headlineClaim ? rp.headlineClaim + ' ' : ''}${rp.terms}`.trim()

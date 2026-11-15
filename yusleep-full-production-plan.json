@@ -1,0 +1,266 @@
+{
+  "productionId": "yusleep_webinar_full_v2_2026_11_15",
+  "slug": "yu-sleep",
+  "title": "YuSleep: Let Us Look Beyond the Sales Pitch",
+  "subtitle": "A prerecorded 7-section label walkthrough, clinical evidence review, and verified merchant offer guide",
+  "preparedAt": "2026-11-15T13:50:00.000Z",
+  "presentationClassification": "PRERECORDED_AFFILIATE_OVERVIEW",
+  "presenter": {
+    "name": "Sarah",
+    "role": "Prerecorded AI Affiliate Overview Presenter",
+    "isAiGenerated": true,
+    "voiceProvider": "vidIQ / ElevenLabs (Voice ID: EXAVITQu4vr4xnSDxMaL)",
+    "avatarProvider": "inference.sh (veed/fabric-1.0 720p portrait animation)",
+    "disclosure": "Sarah is an original AI presenter for this prerecorded affiliate overview. She is not a healthcare professional or a personal customer testimonial. If you purchase through our affiliate link, we may earn a commission at no additional cost to you."
+  },
+  "ctaUnlockPolicy": {
+    "unlockMode": "ACCUMULATED_VERIFIED_WATCH_SECONDS_OR_CHAPTER_REACHED",
+    "primaryRule": "Unlocks automatically after 15 seconds of verified active playback (tracked via server-validated watch_interval events) OR when the viewer reaches Section 5 (Verified Merchant Offer & Terms at 1:50).",
+    "uiExplanation": "The optional merchant offer link unlocks after 15.0 seconds of accumulated watched playback (not forward scrubbing alone), or you can reveal it manually when reviewing Section 5."
+  },
+  "verifiedMerchantOffer": {
+    "observedAt": "2026-11-15",
+    "configuredAffiliateUrl": "https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=yusleep&op=glp&tid=webinar_yusleep",
+    "resolvedLandingUrl": "https://getyusleep.com/glp/",
+    "directOrderPageUrl": "https://joinyusleep.com/buy",
+    "homepageOrderUrl": "https://mygetfitchallenge.lpages.co/yu-sleep-homepage-300-aov-clickbank",
+    "shippingPolicyUrl": "https://getyusleep.com/shipping-policy/",
+    "refundPolicyUrl": "https://getyusleep.com/refund-policy/",
+    "affiliateResourcesUrl": "https://getyusleep.com/aff-th/",
+    "minimumPurchase": "2 bottles (60-day supply). No single-bottle option is offered on the standard merchant order page.",
+    "packages": [
+      {
+        "tier": "2 Bottles (60-Day Supply / Minimum Order)",
+        "oneTimePrice": "$69 per bottle ($138 total before shipping and tax)",
+        "subscriptionModalOption": "$49 per bottle ($98 bi-monthly recurring VIP auto-ship offered via homepage pop-up modal; cancel anytime)",
+        "shipping": "Paid shipping: merchant shipping policy table lists $14.95 US (5 to 7 business days via UPS) and $29.95 Canada (14 to 21 business days), while a separate FAQ paragraph on the same page mentions $9.95. Confirm exact shipping line item on the ClickBank checkout form.",
+        "bonuses": "None listed on 2-bottle tier",
+        "checkoutItemCode": "cbitems=2reg (one-time) / cbitems=2rec2m (bi-monthly auto-ship)"
+      },
+      {
+        "tier": "3 Bottles (90-Day Supply)",
+        "oneTimePrice": "$59 per bottle ($177 total one-time payment before tax)",
+        "subscriptionModalOption": "One-time purchase on standard order page",
+        "shipping": "FREE US Standard Shipping",
+        "bonuses": "Includes digital bonus materials listed on sales page",
+        "checkoutItemCode": "cbitems=2&template=3yun"
+      },
+      {
+        "tier": "6 Bottles (180-Day Supply)",
+        "oneTimePrice": "$49 per bottle ($294 total one-time payment before tax)",
+        "subscriptionModalOption": "One-time purchase on standard order page",
+        "shipping": "FREE US Standard Shipping",
+        "bonuses": "Includes digital bonus materials listed on sales page",
+        "checkoutItemCode": "cbitems=3new&template=6yun"
+      }
+    ],
+    "refundPolicy": {
+      "window": "60 days from the date of purchase (postmark date of return shipment counts; merchant recommends trying for 21 nights).",
+      "returnAddress": "YU SLEEP, 19655 E 35th Drive, Suite 100, Aurora, CO 80011",
+      "supportEmail": "support@yu-sleep.com",
+      "procedure": "Email support@yu-sleep.com with full name, email, ClickBank invoice, order number, and bottles being returned; place the order number inside the package; mail to the Aurora, CO return warehouse; and email back the tracking number.",
+      "nonRefundableItems": "Customer pays return shipping; original shipping and handling charges are non-refundable.",
+      "oneTimeLimit": "Strictly limited to one refund per customer (subsequent orders after a prior refund are ineligible).",
+      "ambiguityFlag": "AMBIGUOUS_OPENED_BOTTLE_WORDING: While the sales page headlines a 60-day money-back guarantee after trying the product for 21 nights, the written refund policy page includes the phrase 'exact bottles you are returning (unopened bottles)' in its email instructions. Whether opened or empty bottles are refunded in full or prorated is marked UNVERIFIED / AMBIGUOUS; confirm with support@yu-sleep.com or ClickBank before ordering."
+    },
+    "unverifiedAtStaticStage": [
+      "Exact state/local sales tax or international VAT (calculated dynamically on yusleep.pay.clickbank.net after entering billing ZIP/country).",
+      "Whether opened or empty bottles are refunded in full or restricted to unopened bottles under the conflicting wording on https://getyusleep.com/refund-policy/."
+    ],
+    "corporateEntities": {
+      "printedOnSuppliedLabel": "For Women's Health LLC, 19C TROLLEYSQ, Wilmington, DE 19801 (www.getyusleep.com, UPC 7 42259 22192 7)",
+      "merchantWebsiteEntity": "Quantum Wealth LLC (UAE) with US returns warehouse at 19655 E 35th Drive, Suite 100, Aurora, CO 80011",
+      "checkoutRetailerOfRecord": "Click Sales Inc. (ClickBank), 1444 S. Entertainment Ave., Suite 410, Boise, ID 83709"
+    }
+  },
+  "sections": [
+    {
+      "sectionNumber": 1,
+      "id": "section_1_opening",
+      "title": "Opening Situation & Transparent Disclosures",
+      "purpose": "Acknowledge the viewer's search for a calmer night, set a warm no-hype tone, and state the AI presenter and affiliate commission disclosures upfront.",
+      "startTimeSec": 0,
+      "endTimeSec": 30,
+      "durationSec": 30,
+      "visualFormat": "Animated AI Presenter (Reused 30s Prototype Video) + Lower-Third Disclosure Banner",
+      "productionAssetStatus": "REUSED_EXISTING_PROTOTYPE ($0 incremental cost; uses public/videos/yusleep-presenter-prototype.mp4)",
+      "spokenScript": "If you are watching this late at night after another long stretch of staring at the ceiling, take a breath. You do not need another loud sales pitch promising miracles by tomorrow morning. I am Sarah, an AI presenter for this prerecorded affiliate overview. If you decide to purchase YuSleep through our link, we may earn a commission at no extra cost to you. Over the next few minutes, we will look calmly at the actual Supplement Facts label, what is disclosed, what is not, and how to decide if it fits your routine.",
+      "existingPrototypeSpokenText": "When nights get broken up and you still have to function the next day, it is easy to end up reading product pages at midnight. Before you buy anything, let us slow this down and look at what YuSleep actually is. I am Sarah, an AI presenter for this recorded affiliate overview, and if you use our link, we may earn a commission.",
+      "onScreenText": [
+        "SECTION 1 OF 7 · OPENING & DISCLOSURES",
+        "Prerecorded Affiliate Overview · AI Presenter: Sarah",
+        "Affiliate Disclosure: Purchases via our link may earn a commission"
+      ]
+    },
+    {
+      "sectionNumber": 2,
+      "id": "section_2_product_overview",
+      "title": "What YuSleep Is: Bottle & Serving Walkthrough",
+      "purpose": "Show the physical bottle artwork, explain that YuSleep is a liquid dietary supplement rather than a prescription drug, and note the serving size and corporate entities.",
+      "startTimeSec": 30,
+      "endTimeSec": 55,
+      "durationSec": 25,
+      "visualFormat": "Split-Screen: Sarah Presenter PIP + High-Resolution YuSleep Bottle Close-Up + Readable Callout Cards",
+      "productionAssetStatus": "ROUGH_CUT_COMPOSITE ($0 local slide + bottle composite with local scratch narration; awaits approval for paid TTS/avatar)",
+      "spokenScript": "So, what is YuSleep on paper? According to the supplied label artwork, it is a liquid dietary supplement in a two fluid ounce, or sixty milliliter, dropper bottle. One serving is two milliliters, which is two full droppers, giving you roughly thirty servings per bottle. Notice one practical detail right away: the Supplement Facts panel does not print a specific minute-by-minute bedtime window, so you should check the physical bottle before use. Also note that while the label lists For Women's Health LLC in Wilmington, Delaware, the checkout is processed by ClickBank.",
+      "onScreenText": [
+        "SECTION 2 OF 7 · BOTTLE & SERVING WALKTHROUGH",
+        "Form: Liquid Dietary Supplement · 2 fl. oz. (60 mL) Bottle",
+        "Serving Size: 2 mL (2 Full Droppers) · Approx. 30 Servings",
+        "Label Entity: For Women's Health LLC (DE) · Retailer: ClickBank"
+      ]
+    },
+    {
+      "sectionNumber": 3,
+      "id": "section_3_supplement_facts",
+      "title": "Supplement Facts Close-Up: Exact Milligrams vs. The 637 mg Blend",
+      "purpose": "Zoom directly into the supplied Supplement Facts panel to distinguish individually disclosed amounts (0.5 mg B2, 0.5 mg B6, 0.9 mg Melatonin) from the 637 mg Proprietary Blend.",
+      "startTimeSec": 55,
+      "endTimeSec": 90,
+      "durationSec": 35,
+      "visualFormat": "High-Resolution Supplement Facts Label Zoom + Highlighted Callout Boxes + Presenter PIP",
+      "productionAssetStatus": "ROUGH_CUT_COMPOSITE ($0 local label zoom + callout slide with local scratch narration; awaits approval for paid TTS)",
+      "spokenScript": "Let us zoom in on the Supplement Facts panel, because this is where smart buyers pause and read closely. Three nutrients have exact individual amounts per two-milliliter serving: Vitamin B2 as riboflavin 5-phosphate at 0.5 milligrams, or 38 percent of the Daily Value; Vitamin B6 as pyridoxal 5-phosphate at 0.5 milligrams, or 29 percent of the Daily Value; and melatonin at 0.9 milligrams. Below that is a 637 milligram Proprietary Blend combining Red Tart Cherry Juice Concentrate, Magnesium Glycinate, Apigenin, Lemon Balm Extract, 5-HTP from Griffonia seed, L-Theanine, and GABA. Have you ever noticed how blends work? You get the combined 637 milligram total, not the individual dose of each botanical or amino acid.",
+      "onScreenText": [
+        "SECTION 3 OF 7 · SUPPLEMENT FACTS CLOSE-UP",
+        "Vitamin B2 (Riboflavin 5-phosphate): 0.5 mg (38% DV)",
+        "Vitamin B6 (Pyridoxal 5 Phosphate): 0.5 mg (29% DV) · Melatonin: 0.9 mg (*)",
+        "Proprietary Blend: 637 mg Total (7 Ingredients; Individual Doses Undisclosed)",
+        "Note: Magnesium Glycinate, Apigenin & Lemon Balm also appear in Other Ingredients"
+      ]
+    },
+    {
+      "sectionNumber": 4,
+      "id": "section_4_evidence_boundaries",
+      "title": "Evidence Boundaries & Personal Suitability",
+      "purpose": "Separate general ingredient familiarity from finished-product clinical proof and remind viewers to review melatonin, 5-HTP, and GABA with a clinician or pharmacist.",
+      "startTimeSec": 90,
+      "endTimeSec": 115,
+      "durationSec": 25,
+      "visualFormat": "Presenter PIP + Two-Column Evidence Comparison Slide (What Is Known vs. What Is Not Established)",
+      "productionAssetStatus": "ROUGH_CUT_COMPOSITE ($0 local slide + PIP composite with local scratch narration; awaits approval for paid TTS/avatar)",
+      "spokenScript": "Now, how should we think about the science? Many adults recognize ingredients like melatonin, magnesium glycinate, L-theanine, or tart cherry from general nutrition articles. However, familiarity with individual ingredients is not the same thing as an independent clinical trial on this finished combined liquid formula. We have not verified clinical study proof for the finished YuSleep product. And because this formula combines melatonin with 5-HTP and GABA, anyone taking prescription medications, especially antidepressants or sedatives, should show this exact label to a physician or pharmacist first.",
+      "onScreenText": [
+        "SECTION 4 OF 7 · EVIDENCE & SAFETY BOUNDARIES",
+        "Finished-Formula Clinical Trials: Not Established in Our Reference",
+        "Ingredient Familiarity != Guaranteed Personal Sleep Outcome",
+        "Contains Melatonin (0.9 mg), 5-HTP & GABA: Consult Your Physician or Pharmacist"
+      ]
+    },
+    {
+      "sectionNumber": 5,
+      "id": "section_5_verified_offer_terms",
+      "title": "Verified Merchant Offer: 2-Bottle Minimum, Pricing, Shipping & 60-Day Refund Terms",
+      "purpose": "Walk through the live merchant terms verified on 2026-11-15, including the 2-bottle minimum order, one-time vs. auto-ship options, shipping fee discrepancy, and written refund rules.",
+      "startTimeSec": 115,
+      "endTimeSec": 150,
+      "durationSec": 35,
+      "visualFormat": "Verified Merchant Pricing & Policy Comparison Table + Presenter PIP (CTA Unlocks Here)",
+      "productionAssetStatus": "ROUGH_CUT_COMPOSITE ($0 local comparison table + PIP with local scratch narration; awaits approval for paid TTS)",
+      "spokenScript": "If you decide to inspect the merchant page, here is what we verified on November 15, 2026. First, there is no single-bottle option on the standard order page; the minimum purchase is two bottles for 69 dollars per bottle, or 138 dollars total plus shipping, though a homepage pop-up also offers a 49 dollar per bottle bi-monthly auto-ship subscription. Three bottles cost 177 dollars one-time, and six bottles cost 294 dollars one-time, both with free US shipping. For two-bottle orders, the shipping table lists 14 dollars and 95 cents in the US while an FAQ line mentions 9 dollars and 95 cents, so check your cart total. The written 60-day refund policy requires emailing support@yu-sleep.com and returning bottles to Aurora, Colorado at your own shipping cost, and its text references unopened bottles, which we flag as ambiguous.",
+      "onScreenText": [
+        "SECTION 5 OF 7 · VERIFIED MERCHANT TERMS (OBSERVED 2026-11-15)",
+        "Minimum Purchase: 2 Bottles ($138 One-Time + Shipping, or $98 Bi-Monthly Auto-Ship)",
+        "3 Bottles: $177 One-Time (Free US Shipping) · 6 Bottles: $294 One-Time (Free US Shipping)",
+        "2-Bottle US Shipping: Policy Table Lists $14.95 (FAQ Text Mentions $9.95)",
+        "60-Day Refund: Return to Aurora, CO · Shipping Non-Refundable · Opened-Bottle Wording Ambiguous"
+      ]
+    },
+    {
+      "sectionNumber": 6,
+      "id": "section_6_buyer_checkpoints",
+      "title": "Three Calm Buyer Checkpoints Before You Decide",
+      "purpose": "Give viewers a self-screening checklist so they can decide at their own pace without urgency or pressure.",
+      "startTimeSec": 150,
+      "endTimeSec": 168,
+      "durationSec": 18,
+      "visualFormat": "Presenter PIP + Three Numbered Buyer Checkpoint Cards",
+      "productionAssetStatus": "ROUGH_CUT_COMPOSITE ($0 local checklist slide + PIP with local scratch narration; awaits approval for paid TTS/avatar)",
+      "spokenScript": "Before clicking any order button, ask yourself three calm questions. First, am I comfortable with a 0.9 milligram melatonin liquid formula that uses a 637 milligram proprietary blend? Second, have I checked whether I am selecting one-time billing or bi-monthly auto-ship on the two-bottle package? And third, have I cleared the ingredient list with my doctor or pharmacist?",
+      "onScreenText": [
+        "SECTION 6 OF 7 · THREE BUYER CHECKPOINTS",
+        "1. Formula Fit: 0.9 mg Melatonin + 637 mg Blend (Individual Blend Doses Undisclosed)",
+        "2. Billing & Package Check: 2-Bottle Minimum ($138 One-Time vs. $98 Auto-Ship Modal)",
+        "3. Clinical & Policy Check: Confirm With Your Doctor & Read Refund Rules First"
+      ]
+    },
+    {
+      "sectionNumber": 7,
+      "id": "section_7_closing_and_faq",
+      "title": "Closing Summary, Separate Reference FAQ Assistant & Optional Link",
+      "purpose": "Explain the separate non-AI Reference FAQ Assistant on the page, restate its limitations honestly, and close warmly with the optional affiliate link.",
+      "startTimeSec": 168,
+      "endTimeSec": 180,
+      "durationSec": 12,
+      "visualFormat": "Presenter PIP + Bottle + Reference FAQ Assistant Callout Card",
+      "productionAssetStatus": "ROUGH_CUT_COMPOSITE ($0 local closing card + PIP with local scratch narration; awaits approval for paid TTS/avatar)",
+      "spokenScript": "Below this video, you can also use our separate reference-based FAQ lookup tool to inspect the recorded label and merchant facts. Remember that reference lookups only reflect our saved snapshot and cannot guarantee medical suitability. Thank you for watching, and take all the time you need.",
+      "onScreenText": [
+        "SECTION 7 OF 7 · CLOSING & SEPARATE FAQ LOOKUP TOOL",
+        "Separate Reference FAQ Assistant Below (Non-LLM Snapshot Lookup; Not Medical Advice)",
+        "Optional Affiliate Link Unlocked Below · Purchases May Earn a Commission"
+      ]
+    }
+  ],
+  "costEstimateAndApprovalGate": {
+    "status": "STOPPED_BEFORE_PAID_GENERATION_AWAITING_USER_APPROVAL",
+    "externalSpendExecutedTodayUsd": 0.0,
+    "reusedAssetsAtZeroCost": [
+      "public/videos/yusleep-presenter-prototype.mp4 (30.0s, 1280x720 H.264/AAC, already generated on 2026-11-14 for $0.751)",
+      "public/images/yusleep-presenter.jpg (1280x720 portrait of Sarah)",
+      "public/images/yusleep-bottle.png (YuSleep bottle render)",
+      "public/images/yusleep-supplement-facts.jpg (Supplied Supplement Facts label artwork)",
+      "public/videos/yusleep-full-rough-cut.mp4 (180.0s complete 7-section playable local rough cut generated with FFmpeg + Pillow + macOS say scratch audio at $0 external cost)",
+      "public/videos/yusleep-webinar-captions.vtt (Synchronized WebVTT captions for all 7 sections at $0 cost)"
+    ],
+    "paidProductionOptions": [
+      {
+        "optionId": "OPTION_A_HYBRID_PRESENTER_AND_SLIDES_RECOMMENDED",
+        "name": "Option A (Recommended): Hybrid Presenter + Readable Slide/Label Cutaways",
+        "description": "Generate Sarah voiceover (vidIQ/ElevenLabs EXAVITQu4vr4xnSDxMaL) for all 7 revised sections (~2,650 characters / ~180s audio), animate Sarah on-camera via inference.sh (veed/fabric-1.0 at 720p) ONLY for the presenter-led bookend and transition segments (Sections 1, 4, 6, 7 = 85s total, or 55s net new if reusing the 30s opening prototype), and keep high-resolution animated Supplement Facts / Bottle / Pricing table composites over Sarah's real voice during Sections 2, 3, and 5 (95s).",
+        "estimatedUsage": {
+          "ttsCharacters": 2650,
+          "ttsCredits": "84 vidIQ/ElevenLabs credits (at 28 credits per 1,000 chars rounded up per chunk, ~$0.00 incremental cash on existing plan)",
+          "newAvatarSeconds720p": "55 seconds (reusing Section 1 prototype) to 85 seconds (if re-rendering Section 1 with revised script)",
+          "inferenceShListedRatePerSec": 0.15,
+          "inferenceShObservedPrototypeRatePerSec": 0.025
+        },
+        "estimatedIncrementalCostUsd": {
+          "atObservedPrototypeRate": "$1.38 - $2.13",
+          "atListedPublicRate": "$8.25 - $12.75",
+          "recommendedHardSpendingCapUsd": 15.00
+        }
+      },
+      {
+        "optionId": "OPTION_B_FULL_CONTINUOUS_AVATAR",
+        "name": "Option B: Continuous 180-Second 720p Avatar Animation (PIP + Full Screen)",
+        "description": "Generate Sarah voiceover for all 7 sections (~2,650 characters) and run inference.sh Fabric 1.0 720p lip-sync animation across all 180 seconds (150s net new or 180s complete).",
+        "estimatedUsage": {
+          "ttsCharacters": 2650,
+          "ttsCredits": "84 vidIQ/ElevenLabs credits",
+          "newAvatarSeconds720p": "150 to 180 seconds"
+        },
+        "estimatedIncrementalCostUsd": {
+          "atObservedPrototypeRate": "$3.75 - $4.50",
+          "atListedPublicRate": "$22.50 - $27.00",
+          "recommendedHardSpendingCapUsd": 30.00
+        }
+      },
+      {
+        "optionId": "OPTION_C_VOICEOVER_PLUS_LOCAL_REMOTION_SLIDES_ONLY",
+        "name": "Option C: Paid Sarah Voiceover Only + Local Remotion/FFmpeg Composites (Reusing 30s Opening Video)",
+        "description": "Keep the existing 30s animated Sarah opening video for Section 1, generate real Sarah TTS voiceover (vidIQ/ElevenLabs) for Sections 2-7 (~2,150 characters), and pair Sections 2-7 with local high-res bottle, Supplement Facts zoom, and pricing slides without running additional inference.sh avatar jobs.",
+        "estimatedUsage": {
+          "ttsCharacters": 2150,
+          "ttsCredits": "60 vidIQ/ElevenLabs credits",
+          "newAvatarSeconds720p": "0 seconds"
+        },
+        "estimatedIncrementalCostUsd": {
+          "atObservedPrototypeRate": "$0.00 incremental cash (uses existing vidIQ/ElevenLabs credit balance)",
+          "atListedPublicRate": "$0.00 - $0.50",
+          "recommendedHardSpendingCapUsd": 1.00
+        }
+      }
+    ]
+  }
+}

@@ -1414,9 +1414,54 @@ async function runTests() {
     } finally {
       fs.rmSync(outboxRunnerDir, { recursive: true, force: true });
     }
-    console.log('   [PASS] Brevo outbox operating modes, bounded recurring runner, overlap prevention, and restart retry persistence verified.\n');
+    console.log('   [PASS] Brevo outbox operating modes, bounded recurring runner, overlap prevention, and restart retry persistence verified.');
 
-    console.log('=== ALL 18 UNIT & INTEGRATION TEST SUITES PASSED 100% ===');
+    // ---------------------------------------------------------
+    // 19. 7-Section Rough-Cut Import, Verified 2026-11-15 Merchant Terms & Zero Em Dashes
+    // ---------------------------------------------------------
+    console.log('19. Testing 7-Section Production Plan, Rough-Cut Import & Verified 2026-11-15 Merchant Offer...');
+    const importedDraft = await engine.importVideoManAsset('yu-sleep', {
+      videoPath: '/videos/yusleep-full-rough-cut.mp4',
+      posterUrl: '/images/yusleep-presenter.jpg',
+      durationSeconds: 180,
+      width: 1280,
+      height: 720,
+      notes: 'Imported 180s 7-section local rough-cut preview ($0 external generation cost)'
+    }, 'admin:primary');
+    assert.strictEqual(importedDraft.draft.video.videoUrl, '/videos/yusleep-full-rough-cut.mp4');
+    assert.strictEqual(importedDraft.draft.video.durationSeconds, 180);
+    assert.strictEqual(importedDraft.draft.video.isRoughCut, true);
+    assert.strictEqual(importedDraft.draft.video.captionsUrl, '/videos/yusleep-webinar-captions.vtt');
+    assert.strictEqual(Array.isArray(importedDraft.draft.sections), true);
+    assert.strictEqual(importedDraft.draft.sections.length, 7);
+
+    const roughCutPrev = await engine.createPreviewLink('yu-sleep', { ttlSeconds: 1800 }, 'admin:primary');
+    const roughCutAccess = engine.resolveViewerPageAccess('yu-sleep', roughCutPrev.previewToken);
+    assert.strictEqual(roughCutAccess.allowed, true);
+
+    const qaMinOrder = await engine.answerViewerQuestion(
+      'yu-sleep',
+      'What is the minimum bottle purchase and shipping cost for 2 bottles, 3 bottles, and 6 bottles?',
+      { viewerContextToken: roughCutAccess.viewerContextToken, ip: '10.8.8.1' }
+    );
+    assert.ok(qaMinOrder.answer.includes('2 bottles'));
+    assert.ok(qaMinOrder.answer.includes('$138'));
+    assert.ok(qaMinOrder.answer.includes('$177'));
+    assert.ok(qaMinOrder.answer.includes('$294'));
+    assert.ok(qaMinOrder.answer.includes('$14.95'));
+    assert.ok(qaMinOrder.answer.includes('$9.95'));
+
+    const qaRefundDetails = await engine.answerViewerQuestion(
+      'yu-sleep',
+      'Where do I mail a return for the 60-day refund policy and what about unopened bottles?',
+      { viewerContextToken: roughCutAccess.viewerContextToken, ip: '10.8.8.2' }
+    );
+    assert.ok(qaRefundDetails.answer.includes('19655 E 35th Drive, Suite 100, Aurora, CO 80011'));
+    assert.ok(qaRefundDetails.answer.includes('support@yu-sleep.com'));
+    assert.ok(qaRefundDetails.answer.includes('unopened bottles'));
+    console.log('   [PASS] 7-section rough-cut import and verified 2026-11-15 merchant offer answers verified.\n');
+
+    console.log('=== ALL 19 UNIT & INTEGRATION TEST SUITES PASSED 100% ===');
   } finally {
     if (engine) {
       engine.close();
