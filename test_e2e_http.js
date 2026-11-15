@@ -368,9 +368,19 @@ async function runE2E() {
       headers: { Authorization: `Bearer ${ADMIN_TOKEN}` }
     });
     assert.strictEqual(outboxInspect2.status, 200);
+    assert.strictEqual(outboxInspect2.json.outbox.processingMode, 'DISABLED');
+    assert.strictEqual(outboxInspect2.json.outbox.autoRunnerEnabled, false);
+    assert.strictEqual(outboxInspect2.json.outbox.emailDeliveryMode, 'CONTACT_SYNC_ONLY_NO_EMAIL_SENT');
     assert.strictEqual(outboxInspect2.json.outbox.counts.queued, 0);
     assert.strictEqual(outboxInspect2.json.outbox.counts.consentCancelled, 1);
-    console.log('   [PASS] Live snapshot isolation, sessionId spoof rejection, and durable Brevo outbox consent cancellation verified.');
+
+    const listWithHealth = await httpReq('/api/webinars', {
+      headers: { Authorization: `Bearer ${ADMIN_TOKEN}` }
+    });
+    assert.strictEqual(listWithHealth.status, 200);
+    assert.strictEqual(listWithHealth.json.storeHealth.healthy, true);
+    assert.strictEqual(listWithHealth.json.webinars[0].persistenceModel.supportsSharedVolumeAcrossHosts, false);
+    console.log('   [PASS] Live snapshot isolation, sessionId spoof rejection, storeHealth, and durable Brevo outbox consent cancellation verified.');
 
     console.log('8. Testing Concurrent Second Process Rejection (Single-Writer Lock Enforcement)...');
     // Attempt to spawn a second server.js pointing at the SAME tmpDataDir -> must fail to start with CONCURRENT_WRITER_REJECTED

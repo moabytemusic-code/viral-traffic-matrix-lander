@@ -2638,7 +2638,7 @@ async function broadcastNewLaunch() {
               </div>
               <div class="flex flex-wrap items-center gap-3 text-[11px] text-slate-400">
                 <span>Preview Sessions: <strong>${prevA.uniqueSessions || 0}</strong> | Preview Watch: <strong>${prevA.averageUniqueWatchSeconds || 0}s</strong></span>
-                <span>Brevo Outbox: <strong class="text-amber-300">Q:${w.brevoOutbox?.counts?.queued || 0}</strong> / <strong class="text-emerald-400">Sync:${w.brevoOutbox?.counts?.synchronized || 0}</strong> / <strong class="text-rose-400">Fail:${w.brevoOutbox?.counts?.failed || 0}</strong></span>
+                <span>Brevo Outbox (<strong class="text-cyan-300">${escapeHtml(w.brevoOutbox?.processingMode || 'DISABLED')}</strong>): <strong class="text-amber-300">Q:${(w.brevoOutbox?.counts?.queued || 0) + (w.brevoOutbox?.counts?.retryScheduled || 0)}</strong> / <strong class="text-emerald-400">Sync:${w.brevoOutbox?.counts?.synchronized || 0}</strong> / <strong class="text-rose-400">Fail:${w.brevoOutbox?.counts?.failed || 0}</strong> / <strong class="text-slate-300">Cancelled:${w.brevoOutbox?.counts?.consentCancelled || 0}</strong></span>
                 <span>Sales: <strong class="text-amber-400">${w.analytics?.salesAttributionStatus || 'NOT_CONNECTED'}</strong></span>
               </div>
             </div>

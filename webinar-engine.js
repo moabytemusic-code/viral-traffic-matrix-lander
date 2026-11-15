@@ -421,10 +421,30 @@ class WebinarEngine {
       : (process.env.WEBINAR_BREVO_LIVE === 'true');
     this.brevoApiKey = options.brevoApiKey !== undefined ? options.brevoApiKey : (process.env.BREVO_API_KEY || '');
     this.brevoTransport = options.brevoTransport || null; // Injectable for testing retries/timeouts/failures
+    this.brevoOutboxAutoProcess = options.brevoOutboxAutoProcess !== undefined
+      ? Boolean(options.brevoOutboxAutoProcess)
+      : (process.env.WEBINAR_BREVO_OUTBOX_AUTO_PROCESS === 'true');
+    this.brevoOutboxIntervalMs = Math.min(
+      Math.max(Number(options.brevoOutboxIntervalMs || process.env.WEBINAR_BREVO_OUTBOX_INTERVAL_MS) || 15000, 40),
+      3600000
+    );
+    this.brevoOutboxBatchSize = Math.min(
+      Math.max(Number(options.brevoOutboxBatchSize || process.env.WEBINAR_BREVO_OUTBOX_BATCH_SIZE) || 10, 1),
+      50
+    );
     this.outboxMaxAttempts = options.outboxMaxAttempts || 3;
     this.outboxBaseBackoffMs = options.outboxBaseBackoffMs !== undefined ? Number(options.outboxBaseBackoffMs) : 5000;
     this.outboxLockTtlMs = options.outboxLockTtlMs !== undefined ? Number(options.outboxLockTtlMs) : 30000;
     this.outboxRequestTimeoutMs = options.outboxRequestTimeoutMs !== undefined ? Number(options.outboxRequestTimeoutMs) : 4000;
+    this._outboxTimer = null;
+    this._outboxRunnerInFlight = false;
+    this._activeOutboxPromise = null;
+    this.outboxRunnerStats = {
+      ticksRun: 0,
+      skippedOverlappingTicks: 0,
+      lastRunAt: null,
+      lastError: null
+    };
 
     // Retention & Abuse Bounds
     this.maxSessions = options.maxSessions || 2000;
@@ -451,6 +471,9 @@ class WebinarEngine {
     this._simulateWriteFailure = false;
     this._failOnWriteIndex = null;
     this._failOnFileKey = null;
+    this._failOnRollbackRestore = false;
+    this._failOnJournalCleanup = false;
+    this._failOnStartupRecoveryRestore = Boolean(options.failOnStartupRecoveryRestore);
     this._simulateActiveLockPid = options.simulateActiveLockPid || null;
 
     // Validate production security requirements before acquiring lock or loading state
@@ -466,6 +489,10 @@ class WebinarEngine {
     } catch (initErr) {
       this.close();
       throw initErr;
+    }
+
+    if (this.brevoOutboxAutoProcess && !this.readOnly) {
+      this.startBrevoOutboxRunner();
     }
 
     this._exitHandler = () => {
@@ -506,7 +533,8 @@ class WebinarEngine {
   }
 
   /**
-   * Check whether a process PID is alive on this host
+   * Check whether a process PID is alive on this host.
+   * Only returns false when process.kill(pid, 0) confirms ESRCH (No such process).
    */
   _isPidAlive(pid) {
     const numPid = Number(pid);
@@ -518,23 +546,31 @@ class WebinarEngine {
       process.kill(numPid, 0);
       return true;
     } catch (err) {
-      return err && err.code === 'EPERM';
+      if (err && err.code === 'ESRCH') {
+        return false;
+      }
+      // Treat EPERM or any other non-ESRCH error conservatively as alive
+      return true;
     }
   }
 
   /**
-   * Enforce Single-Writer Persistence Model via cross-process and in-process lockfile
+   * Enforce Single-Host, Single-Writer Persistence Model via cross-process and in-process lockfile.
+   * - Never automatically reclaims a lock belonging to another hostname or an unknown/ambiguous owner.
+   * - Automatically reclaims ONLY a valid same-host lock whose owning process is confirmed dead (ESRCH).
+   * - Rejects malformed, incomplete, or ambiguous locks with a clear recovery instruction without deleting them.
    */
   _acquireSingleWriterLock() {
     if (!fs.existsSync(this.dataDir)) {
       fs.mkdirSync(this.dataDir, { recursive: true });
     }
     const resolvedLockPath = path.resolve(this.lockFile);
+    const currentHostname = os.hostname();
 
     if (ACTIVE_PROCESS_LOCKS.has(resolvedLockPath)) {
       const holderId = ACTIVE_PROCESS_LOCKS.get(resolvedLockPath);
       const err = new Error(
-        `Concurrent writer rejected: WebinarEngine instance "${holderId}" in PID ${process.pid} already holds the single-writer lock on ${this.dataDir}. This JSON persistence store requires a single-writer deployment or an external transactional database.`
+        `Concurrent writer rejected: WebinarEngine instance "${holderId}" in PID ${process.pid} on host "${currentHostname}" already holds the single-writer lock on ${this.dataDir}. This JSON store supports one writer on one host only.`
       );
       err.code = 'CONCURRENT_WRITER_REJECTED';
       err.statusCode = 503;
@@ -544,9 +580,9 @@ class WebinarEngine {
     const lockPayload = {
       instanceId: this.instanceId,
       pid: process.pid,
-      hostname: os.hostname(),
+      hostname: currentHostname,
       dataDir: this.dataDir,
-      persistenceModel: 'SINGLE_WRITER_JSON_STORE_WITH_JOURNAL',
+      persistenceModel: 'SINGLE_HOST_SINGLE_WRITER_JSON_STORE_WITH_JOURNAL',
       acquiredAt: new Date().toISOString()
     };
 
@@ -568,45 +604,78 @@ class WebinarEngine {
         throw err;
       }
 
-      // Lockfile exists: inspect whether the holder is still alive or stale from a crashed process
+      // Lockfile exists: strictly validate structure, owner identity, and hostname before considering reclamation
       let existingLock = null;
+      let parseErr = null;
       try {
         existingLock = JSON.parse(fs.readFileSync(this.lockFile, 'utf8'));
-      } catch (_) {}
+      } catch (readErr) {
+        parseErr = readErr;
+      }
 
-      const existingPid = existingLock?.pid ? Number(existingLock.pid) : null;
-      const sameHost = !existingLock?.hostname || existingLock.hostname === os.hostname();
-      const pidAlive = existingPid && sameHost ? this._isPidAlive(existingPid) : false;
+      const isPlainObject = Boolean(existingLock && typeof existingLock === 'object' && !Array.isArray(existingLock));
+      const hasValidInstanceId = isPlainObject && typeof existingLock.instanceId === 'string' && existingLock.instanceId.trim().length > 0;
+      const hasValidHostname = isPlainObject && typeof existingLock.hostname === 'string' && existingLock.hostname.trim().length > 0;
+      const rawPid = isPlainObject ? existingLock.pid : null;
+      const existingPid = typeof rawPid === 'number' && Number.isInteger(rawPid) && rawPid > 0 ? rawPid : null;
 
-      if (pidAlive && existingPid !== process.pid) {
+      if (parseErr || !isPlainObject || !hasValidInstanceId || !hasValidHostname || !existingPid) {
+        const ambiguousErr = new Error(
+          `Cannot acquire single-writer lock at ${this.lockFile}: lock file is malformed, incomplete, or has an ambiguous owner. Recovery instruction: verify that no WebinarEngine writer process is running against ${this.dataDir}, then manually remove ${this.lockFile} before restarting.`
+        );
+        ambiguousErr.code = 'AMBIGUOUS_OR_CORRUPT_STORE_LOCK';
+        ambiguousErr.statusCode = 503;
+        ambiguousErr.lockFile = this.lockFile;
+        ambiguousErr.lockPreserved = true;
+        throw ambiguousErr;
+      }
+
+      const lockHost = existingLock.hostname.trim();
+      if (lockHost !== currentHostname) {
+        const foreignErr = new Error(
+          `Cannot acquire single-writer lock at ${this.lockFile}: lock is owned by foreign host "${lockHost}" (PID ${existingPid}, instance "${existingLock.instanceId}"). This JSON store supports one writer on one host (${currentHostname}) and is unsuitable for shared-volume deployments across containers or hosts. Recovery instruction: verify no writer is active on "${lockHost}" and manually remove ${this.lockFile} if the foreign host is permanently retired.`
+        );
+        foreignErr.code = 'FOREIGN_HOST_STORE_LOCK';
+        foreignErr.statusCode = 503;
+        foreignErr.lockFile = this.lockFile;
+        foreignErr.ownerHostname = lockHost;
+        foreignErr.currentHostname = currentHostname;
+        foreignErr.lockPreserved = true;
+        throw foreignErr;
+      }
+
+      const pidAlive = existingPid === process.pid || this._isPidAlive(existingPid);
+      if (pidAlive) {
         const lockErr = new Error(
-          `Concurrent writer rejected: PID ${existingPid} (instance ${existingLock.instanceId || 'unknown'}) already holds the active single-writer lock at ${this.lockFile}. Do not run multiple writer replicas against the same JSON data directory.`
+          `Concurrent writer rejected: PID ${existingPid} (instance "${existingLock.instanceId}" on host "${currentHostname}") already holds the active single-writer lock at ${this.lockFile}. Do not run multiple writer replicas against the same JSON data directory.`
         );
         lockErr.code = 'CONCURRENT_WRITER_REJECTED';
         lockErr.statusCode = 503;
+        lockErr.lockFile = this.lockFile;
+        lockErr.lockPreserved = true;
         throw lockErr;
       }
 
-      // Stale lock left behind by a dead/crashed process: reclaim safely
+      // Confirmed dead same-host process: reclaim safely
       this.lastStaleLockRecovery = {
         recoveredAt: new Date().toISOString(),
         stalePid: existingPid,
-        staleInstanceId: existingLock?.instanceId || null,
-        staleAcquiredAt: existingLock?.acquiredAt || null
+        staleHostname: lockHost,
+        staleInstanceId: existingLock.instanceId,
+        staleAcquiredAt: existingLock.acquiredAt || null
       };
-      try {
-        fs.unlinkSync(this.lockFile);
-      } catch (_) {}
+      fs.unlinkSync(this.lockFile);
       writeLockExclusive();
     }
   }
 
   /**
-   * Release the single-writer lock cleanly
+   * Stop background runners and release the single-writer lock cleanly
    */
   close() {
     if (this._closed) return;
     this._closed = true;
+    this.stopBrevoOutboxRunner();
     const resolvedLockPath = path.resolve(this.lockFile);
     if (ACTIVE_PROCESS_LOCKS.get(resolvedLockPath) === this.instanceId) {
       ACTIVE_PROCESS_LOCKS.delete(resolvedLockPath);
@@ -614,7 +683,12 @@ class WebinarEngine {
     try {
       if (fs.existsSync(this.lockFile)) {
         const current = JSON.parse(fs.readFileSync(this.lockFile, 'utf8'));
-        if (current && current.instanceId === this.instanceId) {
+        if (
+          current &&
+          current.instanceId === this.instanceId &&
+          current.hostname === os.hostname() &&
+          Number(current.pid) === process.pid
+        ) {
           fs.unlinkSync(this.lockFile);
         }
       }
@@ -626,31 +700,65 @@ class WebinarEngine {
   }
 
   /**
-   * Describe the active persistence deployment model and lock status
+   * Return current store health and administrative recovery diagnostics
+   */
+  getStoreHealthStatus() {
+    return {
+      healthy: !this.corruptStateError,
+      status: this.corruptStateError ? 'UNHEALTHY' : 'HEALTHY',
+      errorCode: this.corruptStateError ? (this.corruptStateError.code || 'STORE_UNHEALTHY') : null,
+      errorMessage: this.corruptStateError ? this.corruptStateError.message : null,
+      journalPreserved: Boolean(this.corruptStateError?.journalPreserved || fs.existsSync(this.journalFile)),
+      journalFile: this.journalFile,
+      lastJournalRecovery: this.lastJournalRecovery
+    };
+  }
+
+  /**
+   * Describe the active persistence deployment model and lock status.
+   * Documents that this JSON store supports one writer on one host and is unsuitable for
+   * shared-volume deployments across containers or hosts without stronger coordination.
    */
   getPersistenceModelInfo() {
     return {
-      model: 'SINGLE_WRITER_JSON_STORE_WITH_JOURNAL',
+      model: 'SINGLE_HOST_SINGLE_WRITER_JSON_STORE_WITH_JOURNAL',
+      supportsSingleHostSingleWriter: true,
+      supportsSharedVolumeAcrossHosts: false,
       supportsHorizontalMultiWriter: false,
-      horizontalScalingRequirement: 'Requires single-writer deployment topology for JSON files or migration to PostgreSQL/Redis before running multiple writer replicas.',
+      deploymentConstraint:
+        'This JSON store supports one writer process on one host only. It is unsuitable for shared-volume deployments across containers or hosts without stronger external coordination.',
+      horizontalScalingRequirement:
+        'Requires single-host, single-writer deployment topology for JSON files or migration to PostgreSQL/Redis before running multiple writer replicas or shared volumes across containers/hosts.',
+      hostname: os.hostname(),
       instanceId: this.instanceId,
       pid: process.pid,
       dataDir: this.dataDir,
       lockFile: this.lockFile,
       journalFile: this.journalFile,
       outboxFile: this.outboxFile,
+      storeHealth: this.getStoreHealthStatus(),
       lastJournalRecovery: this.lastJournalRecovery,
       lastStaleLockRecovery: this.lastStaleLockRecovery
     };
   }
 
   /**
-   * Configure fault injection for testing single-file and multi-file transactional rollback
+   * Configure fault injection for testing single-file, multi-file, rollback restoration, and journal cleanup failures
    */
-  configureWriteFaultInjection({ failAll = false, failOnWriteIndex = null, failOnFileKey = null } = {}) {
+  configureWriteFaultInjection({
+    failAll = false,
+    failOnWriteIndex = null,
+    failOnFileKey = null,
+    failOnRollbackRestore = false,
+    failOnJournalCleanup = false,
+    failOnStartupRecoveryRestore = false
+  } = {}) {
     this._simulateWriteFailure = Boolean(failAll);
     this._failOnWriteIndex = failOnWriteIndex !== null && failOnWriteIndex !== undefined ? Number(failOnWriteIndex) : null;
     this._failOnFileKey = failOnFileKey || null;
+    this._failOnRollbackRestore = failOnRollbackRestore;
+    this._failOnJournalCleanup = Boolean(failOnJournalCleanup);
+    this._failOnStartupRecoveryRestore = Boolean(failOnStartupRecoveryRestore);
   }
 
   /**
@@ -712,43 +820,132 @@ class WebinarEngine {
   }
 
   /**
-   * Recover any uncommitted multi-file transaction journal left behind by an interrupted write or crash
+   * Recover any uncommitted multi-file transaction journal left behind by an interrupted write or crash.
+   * CRITICAL SAFETY RULES:
+   * - Never silently discard an unreadable, malformed, or corrupt journal!
+   * - Never delete the recovery journal unless every required file restoration succeeds!
+   * - If any restoration or journal cleanup fails, preserve the journal, mark the store unhealthy, and throw.
    */
   _recoverTransactionJournalSync() {
     if (!fs.existsSync(this.journalFile)) return;
     let journal = null;
     try {
-      journal = JSON.parse(fs.readFileSync(this.journalFile, 'utf8'));
-    } catch (err) {
-      // Corrupt journal file itself means no target file write was started yet; remove corrupt journal
-      try { fs.unlinkSync(this.journalFile); } catch (_) {}
-      return;
+      const rawJournal = fs.readFileSync(this.journalFile, 'utf8');
+      journal = JSON.parse(rawJournal);
+    } catch (parseErr) {
+      const err = new Error(
+        `[WebinarEngine] Startup transaction recovery failed: unreadable or corrupt recovery journal at ${this.journalFile} (${parseErr.message}). Recovery journal was preserved on disk; inspect and restore state files before restarting.`
+      );
+      err.code = 'CORRUPT_TRANSACTION_JOURNAL';
+      err.statusCode = 503;
+      err.journalFile = this.journalFile;
+      err.journalPreserved = true;
+      this.corruptStateError = err;
+      throw err;
     }
 
-    if (journal && Array.isArray(journal.files)) {
-      const restoredKeys = [];
-      for (const entry of journal.files) {
-        if (!entry || !entry.filePath) continue;
-        if (entry.existedBefore && entry.beforeData !== undefined) {
+    if (
+      !journal ||
+      typeof journal !== 'object' ||
+      Array.isArray(journal) ||
+      !Array.isArray(journal.files) ||
+      journal.files.length === 0
+    ) {
+      const err = new Error(
+        `[WebinarEngine] Startup transaction recovery failed: recovery journal at ${this.journalFile} is malformed or missing a valid files list. Recovery journal was preserved on disk.`
+      );
+      err.code = 'CORRUPT_TRANSACTION_JOURNAL';
+      err.statusCode = 503;
+      err.journalFile = this.journalFile;
+      err.journalPreserved = true;
+      this.corruptStateError = err;
+      throw err;
+    }
+
+    for (const entry of journal.files) {
+      if (
+        !entry ||
+        typeof entry !== 'object' ||
+        typeof entry.filePath !== 'string' ||
+        !entry.filePath.trim() ||
+        typeof entry.existedBefore !== 'boolean' ||
+        (entry.existedBefore && entry.beforeData === undefined)
+      ) {
+        const err = new Error(
+          `[WebinarEngine] Startup transaction recovery failed: recovery journal at ${this.journalFile} contains an incomplete or invalid file restoration entry. Recovery journal was preserved on disk.`
+        );
+        err.code = 'CORRUPT_TRANSACTION_JOURNAL';
+        err.statusCode = 503;
+        err.journalFile = this.journalFile;
+        err.journalPreserved = true;
+        this.corruptStateError = err;
+        throw err;
+      }
+    }
+
+    const restoredKeys = [];
+    const restorationErrors = [];
+
+    for (const entry of journal.files) {
+      try {
+        if (this._failOnStartupRecoveryRestore) {
+          throw new Error(`SIMULATED_STARTUP_RECOVERY_RESTORE_FAILURE_FOR_${entry.key || path.basename(entry.filePath)}`);
+        }
+        if (entry.existedBefore) {
           this._rawAtomicWriteJsonSync(entry.filePath, entry.beforeData);
           restoredKeys.push(entry.key || path.basename(entry.filePath));
-        } else if (!entry.existedBefore && fs.existsSync(entry.filePath)) {
-          try { fs.unlinkSync(entry.filePath); } catch (_) {}
+        } else {
+          if (fs.existsSync(entry.filePath)) {
+            fs.unlinkSync(entry.filePath);
+          }
           restoredKeys.push(entry.key || path.basename(entry.filePath));
         }
+      } catch (restoreErr) {
+        restorationErrors.push({
+          key: entry.key || path.basename(entry.filePath),
+          filePath: entry.filePath,
+          error: restoreErr.message
+        });
       }
-      this.lastJournalRecovery = {
-        recoveredAt: new Date().toISOString(),
-        txId: journal.txId || 'unknown',
-        filesRestored: restoredKeys
-      };
+    }
+
+    if (restorationErrors.length > 0) {
+      const err = new Error(
+        `[WebinarEngine] Startup transaction recovery failed: unable to restore all files from ${this.journalFile} (${restorationErrors.map((e) => `${e.key}: ${e.error}`).join('; ')}). Recovery journal was preserved on disk.`
+      );
+      err.code = 'JOURNAL_RECOVERY_FAILED';
+      err.statusCode = 503;
+      err.restorationErrors = restorationErrors;
+      err.journalFile = this.journalFile;
+      err.journalPreserved = true;
+      this.corruptStateError = err;
+      throw err;
     }
 
     try {
+      if (this._failOnJournalCleanup) {
+        throw new Error('SIMULATED_JOURNAL_CLEANUP_FAILURE_ON_RECOVERY');
+      }
       if (fs.existsSync(this.journalFile)) {
         fs.unlinkSync(this.journalFile);
       }
-    } catch (_) {}
+    } catch (cleanupErr) {
+      const err = new Error(
+        `[WebinarEngine] Startup transaction recovery restored files, but failed to remove recovery journal at ${this.journalFile} (${cleanupErr.message}). Store marked unhealthy until journal cleanup succeeds.`
+      );
+      err.code = 'JOURNAL_CLEANUP_FAILED';
+      err.statusCode = 503;
+      err.journalFile = this.journalFile;
+      err.journalPreserved = true;
+      this.corruptStateError = err;
+      throw err;
+    }
+
+    this.lastJournalRecovery = {
+      recoveredAt: new Date().toISOString(),
+      txId: journal.txId || 'unknown',
+      filesRestored: restoredKeys
+    };
   }
 
   /**
@@ -756,8 +953,14 @@ class WebinarEngine {
    * - Clones working state before running `mutatorFn(workingState, markTouched)`.
    * - Validates all inputs before committing.
    * - Writes a rollback journal (`webinar-tx-journal.json`) before modifying target files.
-   * - If any target file write fails (including the 2nd or 3rd file in a multi-file write),
-   *   restores all touched disk files from the journal and leaves `this.*` in-memory state untouched.
+   * - If any target file write fails:
+   *   - Restores every touched disk file from the journal.
+   *   - Only deletes the journal if EVERY required restoration succeeds.
+   *   - If any rollback restoration fails, preserves the journal on disk, marks the store unhealthy,
+   *     rejects all further mutations, and throws `STORE_UNHEALTHY_ROLLBACK_FAILED`.
+   * - If journal cleanup fails after target writes succeed:
+   *   - Reverts target files to `beforeData`, marks the store unhealthy, does NOT update in-memory state,
+   *     and throws `JOURNAL_CLEANUP_FAILED` so a successful response can never be silently undone on restart.
    */
   async _commitTransaction(mutatorFn) {
     return this.withWriteLock(async () => {
@@ -839,6 +1042,85 @@ class WebinarEngine {
           this._atomicWriteJsonSync(desc.filePath, desc.afterData, i, key);
         }
       } catch (writeErr) {
+        const rollbackErrors = [];
+        for (let rIdx = 0; rIdx < journalPayload.files.length; rIdx++) {
+          const backup = journalPayload.files[rIdx];
+          try {
+            if (
+              this._failOnRollbackRestore === true ||
+              (typeof this._failOnRollbackRestore === 'number' && this._failOnRollbackRestore === rIdx) ||
+              (typeof this._failOnRollbackRestore === 'string' && this._failOnRollbackRestore === backup.key)
+            ) {
+              const simErr = new Error(`SIMULATED_ROLLBACK_RESTORATION_FAILURE_FOR_${backup.key}`);
+              simErr.code = 'SIMULATED_ROLLBACK_FAILURE';
+              throw simErr;
+            }
+            if (backup.existedBefore) {
+              this._rawAtomicWriteJsonSync(backup.filePath, backup.beforeData);
+            } else if (fs.existsSync(backup.filePath)) {
+              fs.unlinkSync(backup.filePath);
+            }
+          } catch (restoreErr) {
+            rollbackErrors.push({
+              key: backup.key,
+              filePath: backup.filePath,
+              error: restoreErr.message
+            });
+          }
+        }
+
+        if (rollbackErrors.length > 0) {
+          // NEVER delete the recovery journal when any required restoration fails!
+          const unhealthyErr = new Error(
+            `[WebinarEngine] Store marked unhealthy: rollback restoration failed after write error (${writeErr.message}). Failed restorations: ${rollbackErrors.map((e) => `${e.key}: ${e.error}`).join('; ')}. Recovery journal preserved at ${this.journalFile}.`
+          );
+          unhealthyErr.code = 'STORE_UNHEALTHY_ROLLBACK_FAILED';
+          unhealthyErr.statusCode = 503;
+          unhealthyErr.originalWriteError = writeErr.message;
+          unhealthyErr.rollbackErrors = rollbackErrors;
+          unhealthyErr.journalFile = this.journalFile;
+          unhealthyErr.journalPreserved = true;
+          this.corruptStateError = unhealthyErr;
+          throw unhealthyErr;
+        }
+
+        // Every required restoration succeeded: now remove the recovery journal explicitly
+        try {
+          if (this._failOnJournalCleanup) {
+            throw new Error('SIMULATED_JOURNAL_CLEANUP_FAILURE_AFTER_ROLLBACK');
+          }
+          if (fs.existsSync(this.journalFile)) {
+            fs.unlinkSync(this.journalFile);
+          }
+        } catch (cleanupErr) {
+          const unhealthyCleanupErr = new Error(
+            `[WebinarEngine] Store marked unhealthy: rollback restored files after write error (${writeErr.message}), but failed to remove recovery journal at ${this.journalFile} (${cleanupErr.message}).`
+          );
+          unhealthyCleanupErr.code = 'JOURNAL_CLEANUP_FAILED';
+          unhealthyCleanupErr.statusCode = 503;
+          unhealthyCleanupErr.journalFile = this.journalFile;
+          unhealthyCleanupErr.journalPreserved = true;
+          this.corruptStateError = unhealthyCleanupErr;
+          throw unhealthyCleanupErr;
+        }
+
+        throw writeErr;
+      }
+
+      // 3. Remove journal explicitly BEFORE swapping committed working state into memory or returning success.
+      // If removing the journal fails, a lingering journal would undo the transaction on restart, so we must
+      // revert disk files to beforeData, mark the store unhealthy, and throw JOURNAL_CLEANUP_FAILED.
+      try {
+        if (this._failOnJournalCleanup) {
+          const simCleanErr = new Error('SIMULATED_JOURNAL_CLEANUP_FAILURE');
+          simCleanErr.code = 'EPERM';
+          throw simCleanErr;
+        }
+        if (fs.existsSync(this.journalFile)) {
+          fs.unlinkSync(this.journalFile);
+        }
+      } catch (cleanupErr) {
+        const revertErrors = [];
         for (const backup of journalPayload.files) {
           try {
             if (backup.existedBefore) {
@@ -846,22 +1128,23 @@ class WebinarEngine {
             } else if (fs.existsSync(backup.filePath)) {
               fs.unlinkSync(backup.filePath);
             }
-          } catch (_) {}
-        }
-        try {
-          if (fs.existsSync(this.journalFile)) {
-            fs.unlinkSync(this.journalFile);
+          } catch (revErr) {
+            revertErrors.push({ key: backup.key, error: revErr.message });
           }
-        } catch (_) {}
-        throw writeErr;
-      }
-
-      // 3. Remove journal and swap committed working state into memory
-      try {
-        if (fs.existsSync(this.journalFile)) {
-          fs.unlinkSync(this.journalFile);
         }
-      } catch (_) {}
+
+        const err = new Error(
+          `[WebinarEngine] Transaction aborted and store marked unhealthy: failed to remove recovery journal at ${this.journalFile} (${cleanupErr.message}). Transaction was not committed to prevent silent rollback on restart.`
+        );
+        err.code = 'JOURNAL_CLEANUP_FAILED';
+        err.statusCode = 503;
+        err.cleanupCause = cleanupErr.message;
+        err.revertErrors = revertErrors;
+        err.journalFile = this.journalFile;
+        err.journalPreserved = fs.existsSync(this.journalFile);
+        this.corruptStateError = err;
+        throw err;
+      }
 
       if (touchedKeys.has('webinars')) this.webinars = workingState.webinars;
       if (touchedKeys.has('registrations')) this.registrations = workingState.registrations;
@@ -2970,7 +3253,73 @@ class WebinarEngine {
   }
 
   /**
+   * Return the active Brevo Outbox operating mode:
+   * - 'DISABLED': Neither live Brevo sync nor a test/mock transport is enabled.
+   * - 'AUTOMATIC': Bounded recurring background runner is active within this single-writer process.
+   * - 'MANUAL': Transport is enabled, and jobs are processed on explicit admin/worker invocation.
+   */
+  getBrevoOutboxOperatingMode() {
+    const canDispatch = Boolean(this.brevoTransport || (this.brevoLiveEnabled && this.brevoApiKey));
+    if (this.brevoOutboxAutoProcess && Boolean(this._outboxTimer) && canDispatch) {
+      return 'AUTOMATIC';
+    }
+    if (canDispatch) {
+      return 'MANUAL';
+    }
+    return 'DISABLED';
+  }
+
+  /**
+   * Start the bounded, non-overlapping recurring Brevo outbox runner within the single-writer process.
+   * Disabled by default unless explicitly enabled via options.brevoOutboxAutoProcess or WEBINAR_BREVO_OUTBOX_AUTO_PROCESS=true.
+   */
+  startBrevoOutboxRunner({ intervalMs } = {}) {
+    if (this.readOnly || this._closed) return false;
+    if (intervalMs !== undefined && intervalMs !== null) {
+      this.brevoOutboxIntervalMs = Math.min(Math.max(Number(intervalMs) || 15000, 40), 3600000);
+    }
+    this.brevoOutboxAutoProcess = true;
+    if (this._outboxTimer) {
+      clearInterval(this._outboxTimer);
+      this._outboxTimer = null;
+    }
+    this._outboxTimer = setInterval(() => {
+      this.runBrevoOutboxTick().catch(() => {});
+    }, this.brevoOutboxIntervalMs);
+    if (typeof this._outboxTimer.unref === 'function') {
+      this._outboxTimer.unref();
+    }
+    return true;
+  }
+
+  /**
+   * Stop the recurring Brevo outbox runner cleanly
+   */
+  stopBrevoOutboxRunner() {
+    if (this._outboxTimer) {
+      clearInterval(this._outboxTimer);
+      this._outboxTimer = null;
+    }
+    this.brevoOutboxAutoProcess = false;
+  }
+
+  /**
+   * Execute a single bounded tick of the recurring Brevo outbox runner, preventing overlapping runs
+   */
+  async runBrevoOutboxTick() {
+    if (this._closed || this.readOnly || this.corruptStateError) {
+      return { ok: false, skipped: true, reason: 'ENGINE_CLOSED_OR_UNHEALTHY' };
+    }
+    return this.processBrevoOutbox({
+      workerId: `auto_runner:${this.instanceId}`,
+      nowMs: Date.now(),
+      batchSize: this.brevoOutboxBatchSize
+    });
+  }
+
+  /**
    * Process pending jobs in the durable Brevo Outbox.
+   * - Prevents overlapping runs within the single-writer process (`_outboxRunnerInFlight`).
    * - Rechecks current registration consent before dispatching; cancels job if consent was withdrawn.
    * - Acquires crash-safe per-job worker locks (`PROCESSING`, `lockedBy`, `lockExpiresAt`) and recovers expired locks from crashed workers.
    * - Leaves jobs `QUEUED` without network calls when `brevoLiveEnabled === false` and no `brevoTransport` is configured.
@@ -2979,310 +3328,343 @@ class WebinarEngine {
   async processBrevoOutbox({ workerId = `worker_${process.pid}`, nowMs = Date.now(), batchSize = 10 } = {}) {
     this._ensureHealthyState();
     const canDispatch = Boolean(this.brevoTransport || (this.brevoLiveEnabled && this.brevoApiKey));
+
+    if (this._outboxRunnerInFlight) {
+      this.outboxRunnerStats.skippedOverlappingTicks += 1;
+      return {
+        ok: true,
+        skippedOverlappingRun: true,
+        workerId,
+        processingMode: this.getBrevoOutboxOperatingMode(),
+        liveSyncEnabled: canDispatch,
+        emailDeliveryMode: 'CONTACT_SYNC_ONLY_NO_EMAIL_SENT',
+        processedCount: 0,
+        cancelledCount: 0,
+        skippedDisabledCount: 0,
+        processedJobs: [],
+        cancelledJobIds: [],
+        summary: this.getBrevoOutboxSummary()
+      };
+    }
+
+    this._outboxRunnerInFlight = true;
     const nowIso = new Date(nowMs).toISOString();
 
-    // Step 1: Transactionally verify consent, cancel withdrawn jobs, and lock eligible jobs for this worker
-    const { claimedJobs, cancelledJobIds, skippedDisabledCount } = await this._commitTransaction(async (workingState, markTouched) => {
-      const claimed = [];
-      const cancelled = [];
-      let skippedDisabled = 0;
+    try {
+      // Step 1: Transactionally verify consent, cancel withdrawn jobs, and lock eligible jobs for this worker
+      const { claimedJobs, cancelledJobIds, skippedDisabledCount } = await this._commitTransaction(async (workingState, markTouched) => {
+        const claimed = [];
+        const cancelled = [];
+        let skippedDisabled = 0;
 
-      for (const job of workingState.brevoOutbox) {
-        if (claimed.length >= batchSize) break;
+        for (const job of workingState.brevoOutbox) {
+          if (claimed.length >= batchSize) break;
 
-        const isQueuedOrReadyRetry =
-          job.status === 'QUEUED' ||
-          (job.status === 'RETRY_SCHEDULED' && (!job.nextAttemptAt || Date.parse(job.nextAttemptAt) <= nowMs));
+          const isQueuedOrReadyRetry =
+            job.status === 'QUEUED' ||
+            (job.status === 'RETRY_SCHEDULED' && (!job.nextAttemptAt || Date.parse(job.nextAttemptAt) <= nowMs));
 
-        const isStaleLocked =
-          job.status === 'PROCESSING' &&
-          job.lockExpiresAt &&
-          Date.parse(job.lockExpiresAt) <= nowMs;
+          const isStaleLocked =
+            job.status === 'PROCESSING' &&
+            job.lockExpiresAt &&
+            Date.parse(job.lockExpiresAt) <= nowMs;
 
-        if (!isQueuedOrReadyRetry && !isStaleLocked) {
-          continue;
-        }
-
-        // Look up current registration record to verify consent was not withdrawn before processing
-        const reg = workingState.registrations.find(
-          (r) => r.registrationId === job.registrationId || (r.slug === job.slug && r.email === job.email && !r.isPreview)
-        );
-
-        if (!reg || !reg.consent || reg.consent.marketingConsentGiven !== true) {
-          job.status = 'CONSENT_CANCELLED';
-          job.cancelledAt = nowIso;
-          job.updatedAt = nowIso;
-          job.lockedBy = null;
-          job.lockedAt = null;
-          job.lockExpiresAt = null;
-          job.lastError = 'Cancelled by outbox processor because marketing consent was withdrawn prior to dispatch.';
-          if (reg) {
-            reg.brevoSync.status = 'CONSENT_CANCELLED';
-            reg.brevoSync.listId = null;
-            reg.updatedAt = nowIso;
-            markTouched('registrations');
+          if (!isQueuedOrReadyRetry && !isStaleLocked) {
+            continue;
           }
-          cancelled.push(job.jobId);
+
+          // Look up current registration record to verify consent was not withdrawn before processing
+          const reg = workingState.registrations.find(
+            (r) => r.registrationId === job.registrationId || (r.slug === job.slug && r.email === job.email && !r.isPreview)
+          );
+
+          if (!reg || !reg.consent || reg.consent.marketingConsentGiven !== true) {
+            job.status = 'CONSENT_CANCELLED';
+            job.cancelledAt = nowIso;
+            job.updatedAt = nowIso;
+            job.lockedBy = null;
+            job.lockedAt = null;
+            job.lockExpiresAt = null;
+            job.lastError = 'Cancelled by outbox processor because marketing consent was withdrawn prior to dispatch.';
+            if (reg) {
+              reg.brevoSync.status = 'CONSENT_CANCELLED';
+              reg.brevoSync.listId = null;
+              reg.updatedAt = nowIso;
+              markTouched('registrations');
+            }
+            cancelled.push(job.jobId);
+            markTouched('brevoOutbox');
+            continue;
+          }
+
+          // If external live Brevo is disabled and no test transport is injected, keep job safely QUEUED
+          if (!canDispatch) {
+            skippedDisabled += 1;
+            continue;
+          }
+
+          if (isStaleLocked) {
+            job.attemptHistory = Array.isArray(job.attemptHistory) ? job.attemptHistory : [];
+            job.attemptHistory.push({
+              attemptNumber: job.attempts,
+              timestamp: nowIso,
+              status: 'STALE_LOCK_RECOVERED',
+              previousWorker: job.lockedBy,
+              note: `Reclaimed expired lock from ${job.lockedBy} (expired at ${job.lockExpiresAt})`
+            });
+          }
+
+          job.status = 'PROCESSING';
+          job.lockedBy = workerId;
+          job.lockedAt = nowIso;
+          job.lockExpiresAt = new Date(nowMs + this.outboxLockTtlMs).toISOString();
+          job.updatedAt = nowIso;
+
+          claimed.push(deepClone(job));
           markTouched('brevoOutbox');
-          continue;
         }
 
-        // If external live Brevo is disabled and no test transport is injected, keep job safely QUEUED
-        if (!canDispatch) {
-          skippedDisabled += 1;
-          continue;
-        }
+        return {
+          claimedJobs: claimed,
+          cancelledJobIds: cancelled,
+          skippedDisabledCount: skippedDisabled
+        };
+      });
 
-        if (isStaleLocked) {
-          job.attemptHistory = Array.isArray(job.attemptHistory) ? job.attemptHistory : [];
-          job.attemptHistory.push({
-            attemptNumber: job.attempts,
-            timestamp: nowIso,
-            status: 'STALE_LOCK_RECOVERED',
-            previousWorker: job.lockedBy,
-            note: `Reclaimed expired lock from ${job.lockedBy} (expired at ${job.lockExpiresAt})`
-          });
-        }
+      const processedResults = [];
 
-        job.status = 'PROCESSING';
-        job.lockedBy = workerId;
-        job.lockedAt = nowIso;
-        job.lockExpiresAt = new Date(nowMs + this.outboxLockTtlMs).toISOString();
-        job.updatedAt = nowIso;
+      // Step 2: Execute transport for each claimed job and persist outcome transactionally
+      for (const claimedJob of claimedJobs) {
+        const startMs = Date.now();
+        let transportOutcome = {
+          ok: false,
+          status: 0,
+          providerResponseId: null,
+          error: null
+        };
 
-        claimed.push(deepClone(job));
-        markTouched('brevoOutbox');
-      }
+        try {
+          const currentReg = this.registrations.find(
+            (r) => r.registrationId === claimedJob.registrationId || (r.slug === claimedJob.slug && r.email === claimedJob.email && !r.isPreview)
+          );
+          if (!currentReg || !currentReg.consent || currentReg.consent.marketingConsentGiven !== true) {
+            transportOutcome = {
+              ok: false,
+              consentCancelled: true,
+              status: 0,
+              error: 'Marketing consent withdrawn prior to transport invocation.'
+            };
+          } else {
+            const payload = {
+              email: claimedJob.email,
+              attributes: {
+                FIRSTNAME: claimedJob.name || '',
+                WEBINAR_SLUG: claimedJob.slug,
+                WEBINAR_REVISION: String(claimedJob.revision),
+                CONSENT_VERSION: claimedJob.consentVersion,
+                CONSENT_TIMESTAMP: claimedJob.consentTimestamp
+              },
+              listIds: [Number(claimedJob.listId || 80)],
+              updateEnabled: true
+            };
 
-      return {
-        claimedJobs: claimed,
-        cancelledJobIds: cancelled,
-        skippedDisabledCount: skippedDisabled
-      };
-    });
+            const attemptNumber = (Number(claimedJob.attempts) || 0) + 1;
+            const response = await this._invokeBrevoTransportWithTimeout(payload, {
+              attempt: attemptNumber,
+              jobId: claimedJob.jobId,
+              workerId
+            });
 
-    const processedResults = [];
-
-    // Step 2: Execute transport for each claimed job and persist outcome transactionally
-    for (const claimedJob of claimedJobs) {
-      const startMs = Date.now();
-      let transportOutcome = {
-        ok: false,
-        status: 0,
-        providerResponseId: null,
-        error: null
-      };
-
-      try {
-        const currentReg = this.registrations.find(
-          (r) => r.registrationId === claimedJob.registrationId || (r.slug === claimedJob.slug && r.email === claimedJob.email && !r.isPreview)
-        );
-        if (!currentReg || !currentReg.consent || currentReg.consent.marketingConsentGiven !== true) {
+            const httpStatus = Number(response?.status) || 0;
+            const isSuccess = Boolean(response?.ok && (httpStatus === 200 || httpStatus === 201 || httpStatus === 204));
+            transportOutcome = {
+              ok: isSuccess,
+              status: httpStatus,
+              providerResponseId: isSuccess
+                ? (response.body?.id ? String(response.body.id) : `http_${httpStatus}`)
+                : null,
+              error: isSuccess ? null : (response?.body?.message || response?.error || `Brevo HTTP ${httpStatus}`)
+            };
+          }
+        } catch (err) {
           transportOutcome = {
             ok: false,
-            consentCancelled: true,
-            status: 0,
-            error: 'Marketing consent withdrawn prior to transport invocation.'
-          };
-        } else {
-          const payload = {
-            email: claimedJob.email,
-            attributes: {
-              FIRSTNAME: claimedJob.name || '',
-              WEBINAR_SLUG: claimedJob.slug,
-              WEBINAR_REVISION: String(claimedJob.revision),
-              CONSENT_VERSION: claimedJob.consentVersion,
-              CONSENT_TIMESTAMP: claimedJob.consentTimestamp
-            },
-            listIds: [Number(claimedJob.listId || 80)],
-            updateEnabled: true
-          };
-
-          const attemptNumber = (Number(claimedJob.attempts) || 0) + 1;
-          const response = await this._invokeBrevoTransportWithTimeout(payload, {
-            attempt: attemptNumber,
-            jobId: claimedJob.jobId,
-            workerId
-          });
-
-          const httpStatus = Number(response?.status) || 0;
-          const isSuccess = Boolean(response?.ok && (httpStatus === 200 || httpStatus === 201 || httpStatus === 204));
-          transportOutcome = {
-            ok: isSuccess,
-            status: httpStatus,
-            providerResponseId: isSuccess
-              ? (response.body?.id ? String(response.body.id) : `http_${httpStatus}`)
-              : null,
-            error: isSuccess ? null : (response?.body?.message || response?.error || `Brevo HTTP ${httpStatus}`)
+            status: err.statusCode || 0,
+            providerResponseId: null,
+            error: err.name === 'AbortError' || err.code === 'ETIMEDOUT'
+              ? `Brevo request timed out after ${this.outboxRequestTimeoutMs}ms`
+              : err.message
           };
         }
-      } catch (err) {
-        transportOutcome = {
-          ok: false,
-          status: err.statusCode || 0,
-          providerResponseId: null,
-          error: err.name === 'AbortError' || err.code === 'ETIMEDOUT'
-            ? `Brevo request timed out after ${this.outboxRequestTimeoutMs}ms`
-            : err.message
-        };
-      }
 
-      const durationMs = Math.max(1, Date.now() - startMs);
-      const finishIso = new Date(nowMs + durationMs).toISOString();
+        const durationMs = Math.max(1, Date.now() - startMs);
+        const finishIso = new Date(nowMs + durationMs).toISOString();
 
-      // Step 3: Commit job attempt result and update registration record atomically
-      const jobResult = await this._commitTransaction(async (workingState, markTouched) => {
-        const job = workingState.brevoOutbox.find((j) => j.jobId === claimedJob.jobId);
-        if (!job) return null;
+        // Step 3: Commit job attempt result and update registration record atomically
+        const jobResult = await this._commitTransaction(async (workingState, markTouched) => {
+          const job = workingState.brevoOutbox.find((j) => j.jobId === claimedJob.jobId);
+          if (!job) return null;
 
-        // Verify this worker still owns the lock (or job was not already finalized by another recovery)
-        if (job.status === 'SYNCHRONIZED' || job.status === 'CONSENT_CANCELLED') {
-          return deepClone(job);
-        }
+          // Verify this worker still owns the lock (or job was not already finalized by another recovery)
+          if (job.status === 'SYNCHRONIZED' || job.status === 'CONSENT_CANCELLED') {
+            return deepClone(job);
+          }
 
-        const reg = workingState.registrations.find(
-          (r) => r.registrationId === job.registrationId || (r.slug === job.slug && r.email === job.email && !r.isPreview)
-        );
+          const reg = workingState.registrations.find(
+            (r) => r.registrationId === job.registrationId || (r.slug === job.slug && r.email === job.email && !r.isPreview)
+          );
 
-        // If consent was withdrawn while in-flight, mark CONSENT_CANCELLED
-        if (transportOutcome.consentCancelled || !reg || !reg.consent || reg.consent.marketingConsentGiven !== true) {
-          job.status = 'CONSENT_CANCELLED';
-          job.cancelledAt = finishIso;
+          // If consent was withdrawn while in-flight, mark CONSENT_CANCELLED
+          if (transportOutcome.consentCancelled || !reg || !reg.consent || reg.consent.marketingConsentGiven !== true) {
+            job.status = 'CONSENT_CANCELLED';
+            job.cancelledAt = finishIso;
+            job.updatedAt = finishIso;
+            job.lockedBy = null;
+            job.lockedAt = null;
+            job.lockExpiresAt = null;
+            job.lastError = 'Cancelled because marketing consent was withdrawn.';
+            if (reg) {
+              reg.brevoSync.status = 'CONSENT_CANCELLED';
+              reg.brevoSync.listId = null;
+              reg.updatedAt = finishIso;
+              markTouched('registrations');
+            }
+            markTouched('brevoOutbox');
+            return deepClone(job);
+          }
+
+          job.attempts = (Number(job.attempts) || 0) + 1;
           job.updatedAt = finishIso;
           job.lockedBy = null;
           job.lockedAt = null;
           job.lockExpiresAt = null;
-          job.lastError = 'Cancelled because marketing consent was withdrawn.';
-          if (reg) {
-            reg.brevoSync.status = 'CONSENT_CANCELLED';
-            reg.brevoSync.listId = null;
-            reg.updatedAt = finishIso;
-            markTouched('registrations');
-          }
-          markTouched('brevoOutbox');
-          return deepClone(job);
-        }
+          job.lastHttpStatus = transportOutcome.status;
 
-        job.attempts = (Number(job.attempts) || 0) + 1;
-        job.updatedAt = finishIso;
-        job.lockedBy = null;
-        job.lockedAt = null;
-        job.lockExpiresAt = null;
-        job.lastHttpStatus = transportOutcome.status;
+          if (!Array.isArray(job.attemptHistory)) job.attemptHistory = [];
+          job.attemptHistory.push({
+            attemptNumber: job.attempts,
+            workerId,
+            timestamp: finishIso,
+            durationMs,
+            status: transportOutcome.ok ? 'SYNCHRONIZED' : 'ERROR',
+            httpStatus: transportOutcome.status,
+            error: transportOutcome.error || null
+          });
 
-        if (!Array.isArray(job.attemptHistory)) job.attemptHistory = [];
-        job.attemptHistory.push({
-          attemptNumber: job.attempts,
-          workerId,
-          timestamp: finishIso,
-          durationMs,
-          status: transportOutcome.ok ? 'SYNCHRONIZED' : 'ERROR',
-          httpStatus: transportOutcome.status,
-          error: transportOutcome.error || null
-        });
+          const webinar = workingState.webinars[job.slug];
 
-        const webinar = workingState.webinars[job.slug];
-
-        if (transportOutcome.ok) {
-          job.status = 'SYNCHRONIZED';
-          job.synchronizedAt = finishIso;
-          job.nextAttemptAt = null;
-          job.providerResponseId = transportOutcome.providerResponseId;
-          job.lastError = null;
-
-          reg.brevoSync = {
-            ...reg.brevoSync,
-            status: 'CONTACT_SYNCHRONIZED',
-            outboxJobId: job.jobId,
-            attempts: job.attempts,
-            lastAttemptAt: finishIso,
-            syncedAt: finishIso,
-            providerResponseId: transportOutcome.providerResponseId,
-            lastError: null,
-            emailDeliveryStatus: 'NOT_CONFIGURED_CONTACT_SYNC_ONLY'
-          };
-          reg.updatedAt = finishIso;
-
-          if (webinar) {
-            webinar.auditLog.push({
-              timestamp: finishIso,
-              action: 'BREVO_CONTACT_SYNCHRONIZED',
-              actor: workerId,
-              revision: job.revision,
-              note: `Synchronized contact ${job.email} to Brevo list #${job.listId} on attempt #${job.attempts} (contact sync only; no email dispatched).`
-            });
-            markTouched('webinars');
-          }
-        } else {
-          job.lastError = transportOutcome.error || 'Brevo contact synchronization failed';
-          const isPermanentClientError =
-            transportOutcome.status >= 400 &&
-            transportOutcome.status < 500 &&
-            transportOutcome.status !== 429;
-          const retriesRemaining = job.attempts < (Number(job.maxAttempts) || this.outboxMaxAttempts);
-
-          if (retriesRemaining && !isPermanentClientError) {
-            const backoffDelayMs = this.outboxBaseBackoffMs * Math.pow(2, Math.max(0, job.attempts - 1));
-            job.status = 'RETRY_SCHEDULED';
-            job.nextAttemptAt = new Date(nowMs + backoffDelayMs).toISOString();
-
-            reg.brevoSync = {
-              ...reg.brevoSync,
-              status: 'RETRY_SCHEDULED',
-              outboxJobId: job.jobId,
-              attempts: job.attempts,
-              lastAttemptAt: finishIso,
-              lastError: job.lastError
-            };
-            reg.updatedAt = finishIso;
-          } else {
-            job.status = 'FAILED';
+          if (transportOutcome.ok) {
+            job.status = 'SYNCHRONIZED';
+            job.synchronizedAt = finishIso;
             job.nextAttemptAt = null;
+            job.providerResponseId = transportOutcome.providerResponseId;
+            job.lastError = null;
 
             reg.brevoSync = {
               ...reg.brevoSync,
-              status: 'FAILED',
+              status: 'CONTACT_SYNCHRONIZED',
               outboxJobId: job.jobId,
               attempts: job.attempts,
               lastAttemptAt: finishIso,
-              lastError: job.lastError
+              syncedAt: finishIso,
+              providerResponseId: transportOutcome.providerResponseId,
+              lastError: null,
+              emailDeliveryStatus: 'NOT_CONFIGURED_CONTACT_SYNC_ONLY'
             };
             reg.updatedAt = finishIso;
 
             if (webinar) {
               webinar.auditLog.push({
                 timestamp: finishIso,
-                action: 'BREVO_CONTACT_SYNC_FAILED',
+                action: 'BREVO_CONTACT_SYNCHRONIZED',
                 actor: workerId,
                 revision: job.revision,
-                note: `Brevo contact sync failed after ${job.attempts} attempt(s) for ${job.email}: ${job.lastError}`
+                note: `Synchronized contact ${job.email} to Brevo list #${job.listId} on attempt #${job.attempts} (contact sync only; no email dispatched).`
               });
               markTouched('webinars');
             }
+          } else {
+            job.lastError = transportOutcome.error || 'Brevo contact synchronization failed';
+            const isPermanentClientError =
+              transportOutcome.status >= 400 &&
+              transportOutcome.status < 500 &&
+              transportOutcome.status !== 429;
+            const retriesRemaining = job.attempts < (Number(job.maxAttempts) || this.outboxMaxAttempts);
+
+            if (retriesRemaining && !isPermanentClientError) {
+              const backoffDelayMs = this.outboxBaseBackoffMs * Math.pow(2, Math.max(0, job.attempts - 1));
+              job.status = 'RETRY_SCHEDULED';
+              job.nextAttemptAt = new Date(nowMs + backoffDelayMs).toISOString();
+
+              reg.brevoSync = {
+                ...reg.brevoSync,
+                status: 'RETRY_SCHEDULED',
+                outboxJobId: job.jobId,
+                attempts: job.attempts,
+                lastAttemptAt: finishIso,
+                lastError: job.lastError
+              };
+              reg.updatedAt = finishIso;
+            } else {
+              job.status = 'FAILED';
+              job.nextAttemptAt = null;
+
+              reg.brevoSync = {
+                ...reg.brevoSync,
+                status: 'FAILED',
+                outboxJobId: job.jobId,
+                attempts: job.attempts,
+                lastAttemptAt: finishIso,
+                lastError: job.lastError
+              };
+              reg.updatedAt = finishIso;
+
+              if (webinar) {
+                webinar.auditLog.push({
+                  timestamp: finishIso,
+                  action: 'BREVO_CONTACT_SYNC_FAILED',
+                  actor: workerId,
+                  revision: job.revision,
+                  note: `Brevo contact sync failed after ${job.attempts} attempt(s) for ${job.email}: ${job.lastError}`
+                });
+                markTouched('webinars');
+              }
+            }
           }
+
+          markTouched('brevoOutbox', 'registrations');
+          return deepClone(job);
+        });
+
+        if (jobResult) {
+          processedResults.push(jobResult);
         }
-
-        markTouched('brevoOutbox', 'registrations');
-        return deepClone(job);
-      });
-
-      if (jobResult) {
-        processedResults.push(jobResult);
       }
-    }
 
-    return {
-      ok: true,
-      workerId,
-      liveSyncEnabled: canDispatch,
-      emailDeliveryMode: 'CONTACT_SYNC_ONLY_NO_EMAIL_SENT',
-      processedCount: processedResults.length,
-      cancelledCount: cancelledJobIds.length,
-      skippedDisabledCount,
-      processedJobs: processedResults,
-      cancelledJobIds,
-      summary: this.getBrevoOutboxSummary()
-    };
+      this.outboxRunnerStats.ticksRun += 1;
+      this.outboxRunnerStats.lastRunAt = new Date().toISOString();
+      this.outboxRunnerStats.lastError = null;
+
+      return {
+        ok: true,
+        skippedOverlappingRun: false,
+        workerId,
+        processingMode: this.getBrevoOutboxOperatingMode(),
+        liveSyncEnabled: canDispatch,
+        emailDeliveryMode: 'CONTACT_SYNC_ONLY_NO_EMAIL_SENT',
+        processedCount: processedResults.length,
+        cancelledCount: cancelledJobIds.length,
+        skippedDisabledCount,
+        processedJobs: processedResults,
+        cancelledJobIds,
+        summary: this.getBrevoOutboxSummary()
+      };
+    } catch (runErr) {
+      this.outboxRunnerStats.lastError = runErr.message;
+      throw runErr;
+    } finally {
+      this._outboxRunnerInFlight = false;
+    }
   }
 
   async _invokeBrevoTransportWithTimeout(payload, meta) {
@@ -3332,7 +3714,7 @@ class WebinarEngine {
   }
 
   /**
-   * Return durable Brevo outbox summary and job states for admin visibility
+   * Return durable Brevo outbox summary, operating mode, and job states for admin visibility
    */
   getBrevoOutboxSummary(slug = null) {
     this._ensureHealthyState();
@@ -3360,7 +3742,15 @@ class WebinarEngine {
     }
 
     return {
+      processingMode: this.getBrevoOutboxOperatingMode(),
       liveSyncEnabled: Boolean(this.brevoLiveEnabled && this.brevoApiKey),
+      transportConfigured: Boolean(this.brevoTransport || (this.brevoLiveEnabled && this.brevoApiKey)),
+      autoRunnerEnabled: Boolean(this._outboxTimer),
+      autoRunnerIntervalMs: this.brevoOutboxIntervalMs,
+      runnerStats: {
+        ...this.outboxRunnerStats,
+        inFlight: this._outboxRunnerInFlight
+      },
       emailDeliveryMode: 'CONTACT_SYNC_ONLY_NO_EMAIL_SENT',
       counts,
       jobs

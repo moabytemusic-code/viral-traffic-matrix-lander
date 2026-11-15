@@ -760,6 +760,16 @@ function renderWebinarViewer(accessContext) {
           metaP.className = 'text-[10px] font-mono opacity-85';
           metaP.textContent = 'Status: ' + data.brevoStatus + ' · Consent Version: ' + data.consentVersion;
           statusBox.appendChild(metaP);
+
+          if (data.marketingConsentGiven) {
+            const withdrawBtn = document.createElement('button');
+            withdrawBtn.type = 'button';
+            withdrawBtn.id = 'withdrawConsentBtn';
+            withdrawBtn.className = 'mt-2 px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border border-rose-500/40 text-[11px] font-mono font-bold transition cursor-pointer block';
+            withdrawBtn.textContent = 'Withdraw Marketing Consent & Cancel Pending Sync';
+            withdrawBtn.onclick = () => withdrawMarketingConsent(email);
+            statusBox.appendChild(withdrawBtn);
+          }
         } else {
           statusBox.className = 'p-3 rounded-xl text-xs block bg-red-500/10 text-red-300 border border-red-500/30';
           statusBox.textContent = data.error || 'Registration failed.';
@@ -770,6 +780,50 @@ function renderWebinarViewer(accessContext) {
       } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Save Registration Preferences';
+      }
+    }
+
+    async function withdrawMarketingConsent(email) {
+      const statusBox = document.getElementById('leadStatusBox');
+      const consentCheckbox = document.getElementById('leadMarketingConsent');
+      if (consentCheckbox) consentCheckbox.checked = false;
+
+      statusBox.className = 'p-3 rounded-xl text-xs block bg-white/5 text-slate-300 border border-white/10';
+      statusBox.textContent = 'Withdrawing marketing consent and cancelling pending Brevo sync...';
+
+      try {
+        const res = await fetch('/api/webinars/' + encodeURIComponent(SLUG) + '/consent', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Viewer-Context': VIEWER_CONTEXT_TOKEN
+          },
+          body: JSON.stringify({
+            email,
+            marketingConsentGiven: false
+          })
+        });
+        const data = await res.json();
+        if (res.ok && data.ok) {
+          statusBox.className = 'p-3 rounded-xl text-xs block bg-emerald-500/10 text-emerald-200 border border-emerald-500/30 space-y-1';
+          statusBox.textContent = '';
+
+          const msgP = document.createElement('div');
+          msgP.className = 'font-semibold';
+          msgP.textContent = 'Marketing consent withdrawn. Any pending Brevo contact synchronization has been cancelled.';
+          statusBox.appendChild(msgP);
+
+          const metaP = document.createElement('div');
+          metaP.className = 'text-[10px] font-mono opacity-85';
+          metaP.textContent = 'Status: ' + data.brevoStatus + ' · Outbox Job: ' + (data.outboxJobStatus || 'CONSENT_CANCELLED');
+          statusBox.appendChild(metaP);
+        } else {
+          statusBox.className = 'p-3 rounded-xl text-xs block bg-red-500/10 text-red-300 border border-red-500/30';
+          statusBox.textContent = data.error || 'Could not update consent preferences.';
+        }
+      } catch (err) {
+        statusBox.className = 'p-3 rounded-xl text-xs block bg-red-500/10 text-red-300 border border-red-500/30';
+        statusBox.textContent = 'Network error while updating consent preferences.';
       }
     }
   </script>

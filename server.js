@@ -1331,10 +1331,20 @@ Sitemap: https://${host}/sitemap.xml
       res.writeHead(auth.statusCode || 401, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
       return res.end(JSON.stringify({ ok: false, code: auth.code, error: auth.error }));
     }
-    const slug = pathname.split('/')[3];
-    const outbox = webinarEngine.getBrevoOutboxSummary(slug);
-    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
-    return res.end(JSON.stringify({ ok: true, slug, outbox }));
+    try {
+      const slug = pathname.split('/')[3];
+      const outbox = webinarEngine.getBrevoOutboxSummary(slug);
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: true, slug, outbox }));
+    } catch (err) {
+      res.writeHead(err.statusCode || 503, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({
+        ok: false,
+        code: err.code || 'STORE_UNHEALTHY',
+        error: err.message,
+        storeHealth: webinarEngine.getStoreHealthStatus()
+      }));
+    }
   }
 
   // POST /api/webinars/:slug/brevo-outbox/process -> Run durable Brevo outbox worker pass (requires webinar:write)
@@ -1358,8 +1368,13 @@ Sitemap: https://${host}/sitemap.xml
         webinarOutbox: webinarEngine.getBrevoOutboxSummary(slug)
       }));
     } catch (err) {
-      res.writeHead(err.statusCode || 500, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
-      return res.end(JSON.stringify({ ok: false, code: err.code || 'OUTBOX_PROCESS_ERROR', error: err.message }));
+      res.writeHead(err.statusCode || 503, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({
+        ok: false,
+        code: err.code || 'OUTBOX_PROCESS_ERROR',
+        error: err.message,
+        storeHealth: webinarEngine.getStoreHealthStatus()
+      }));
     }
   }
 
@@ -1373,10 +1388,19 @@ Sitemap: https://${host}/sitemap.xml
     try {
       const webinars = webinarEngine.getAllWebinarsForAdmin();
       res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
-      return res.end(JSON.stringify({ ok: true, webinars }));
+      return res.end(JSON.stringify({
+        ok: true,
+        storeHealth: webinarEngine.getStoreHealthStatus(),
+        webinars
+      }));
     } catch (err) {
-      res.writeHead(500, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
-      return res.end(JSON.stringify({ ok: false, error: err.message }));
+      res.writeHead(err.statusCode || 503, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({
+        ok: false,
+        code: err.code || 'STORE_UNHEALTHY',
+        error: err.message,
+        storeHealth: webinarEngine.getStoreHealthStatus()
+      }));
     }
   }
 
@@ -1497,32 +1521,43 @@ Sitemap: https://${host}/sitemap.xml
       res.writeHead(auth.statusCode || 401, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
       return res.end(JSON.stringify({ ok: false, code: auth.code, error: auth.error }));
     }
-    const slug = pathname.split('/')[3];
-    const webinar = webinarEngine.getWebinarForAdmin(slug);
-    if (!webinar) {
-      res.writeHead(404, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
-      return res.end(JSON.stringify({ ok: false, error: 'Webinar not found' }));
+    try {
+      const slug = pathname.split('/')[3];
+      const webinar = webinarEngine.getWebinarForAdmin(slug);
+      if (!webinar) {
+        res.writeHead(404, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+        return res.end(JSON.stringify({ ok: false, error: 'Webinar not found' }));
+      }
+      const registrations = webinarEngine.getRegistrationsForWebinar(slug);
+      const brevoOutbox = webinarEngine.getBrevoOutboxSummary(slug);
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({
+        ok: true,
+        analytics: webinar.analytics,
+        telemetryTrustLevel: 'CLIENT_REPORTED_BOUND_TO_SIGNED_SESSION',
+        sessionRefreshPolicy: 'NEW_SIGNED_SESSION_ON_PAGE_LOAD',
+        brevoOutbox,
+        persistenceModel: webinar.persistenceModel,
+        storeHealth: webinarEngine.getStoreHealthStatus(),
+        auditLog: webinar.auditLog,
+        versionHistory: webinar.versionHistory,
+        approval: webinar.approval,
+        hasUnpublishedDraftChanges: webinar.hasUnpublishedDraftChanges,
+        status: webinar.status,
+        draftRevision: webinar.draft?.revision || 1,
+        publishedRevision: webinar.publishedSnapshot?.revision || null,
+        registrationsCount: registrations.length,
+        registrations
+      }));
+    } catch (err) {
+      res.writeHead(err.statusCode || 503, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({
+        ok: false,
+        code: err.code || 'STORE_UNHEALTHY',
+        error: err.message,
+        storeHealth: webinarEngine.getStoreHealthStatus()
+      }));
     }
-    const registrations = webinarEngine.getRegistrationsForWebinar(slug);
-    const brevoOutbox = webinarEngine.getBrevoOutboxSummary(slug);
-    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
-    return res.end(JSON.stringify({
-      ok: true,
-      analytics: webinar.analytics,
-      telemetryTrustLevel: 'CLIENT_REPORTED_BOUND_TO_SIGNED_SESSION',
-      sessionRefreshPolicy: 'NEW_SIGNED_SESSION_ON_PAGE_LOAD',
-      brevoOutbox,
-      persistenceModel: webinar.persistenceModel,
-      auditLog: webinar.auditLog,
-      versionHistory: webinar.versionHistory,
-      approval: webinar.approval,
-      hasUnpublishedDraftChanges: webinar.hasUnpublishedDraftChanges,
-      status: webinar.status,
-      draftRevision: webinar.draft?.revision || 1,
-      publishedRevision: webinar.publishedSnapshot?.revision || null,
-      registrationsCount: registrations.length,
-      registrations
-    }));
   }
 
   // GET /api/webinars/:slug -> Get single webinar with full audit trail & analytics (requires webinar:read)
@@ -1532,15 +1567,25 @@ Sitemap: https://${host}/sitemap.xml
       res.writeHead(auth.statusCode || 401, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
       return res.end(JSON.stringify({ ok: false, code: auth.code, error: auth.error }));
     }
-    const slug = pathname.split('/')[3];
-    const webinar = webinarEngine.getWebinarForAdmin(slug);
-    if (!webinar) {
-      res.writeHead(404, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
-      return res.end(JSON.stringify({ ok: false, error: 'Webinar not found' }));
+    try {
+      const slug = pathname.split('/')[3];
+      const webinar = webinarEngine.getWebinarForAdmin(slug);
+      if (!webinar) {
+        res.writeHead(404, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+        return res.end(JSON.stringify({ ok: false, error: 'Webinar not found' }));
+      }
+      const registrations = webinarEngine.getRegistrationsForWebinar(slug);
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: true, webinar, registrations }));
+    } catch (err) {
+      res.writeHead(err.statusCode || 503, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({
+        ok: false,
+        code: err.code || 'STORE_UNHEALTHY',
+        error: err.message,
+        storeHealth: webinarEngine.getStoreHealthStatus()
+      }));
     }
-    const registrations = webinarEngine.getRegistrationsForWebinar(slug);
-    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
-    return res.end(JSON.stringify({ ok: true, webinar, registrations }));
   }
 
   // POST /api/webinars -> Create new webinar draft (requires webinar:write)

@@ -11,7 +11,7 @@ const path = require('path');
 const { WebinarEngine, WEBINAR_STATES, getYuSleepApprovedReference } = require('./webinar-engine');
 
 async function runTests() {
-  console.log('=== Running Hardened WebinarEngine Test Suite (15 Suites) ===\n');
+  console.log('=== Running Hardened WebinarEngine Test Suite (18 Suites) ===\n');
 
   const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'webinar-engine-test-'));
   const ADMIN_TOKEN = 'test-admin-secret-token-999-strong-enough-for-all-checks';
@@ -1051,9 +1051,372 @@ async function runTests() {
     assert.ok(engine.lastStaleLockRecovery, 'Dead PID lock must be reclaimed and recorded');
     assert.strictEqual(engine.lastStaleLockRecovery.stalePid, 99999999);
     assert.strictEqual(engine.getPersistenceModelInfo().supportsHorizontalMultiWriter, false);
-    console.log('   [PASS] Single-writer lock enforcement and dead-PID stale lock recovery verified.\n');
+    assert.strictEqual(engine.getPersistenceModelInfo().supportsSharedVolumeAcrossHosts, false);
+    assert.strictEqual(engine.getPersistenceModelInfo().model, 'SINGLE_HOST_SINGLE_WRITER_JSON_STORE_WITH_JOURNAL');
+    console.log('   [PASS] Single-writer lock enforcement and dead-PID stale lock recovery verified.');
 
-    console.log('=== ALL 15 UNIT & INTEGRATION TEST SUITES PASSED 100% ===');
+    // ---------------------------------------------------------
+    // 16. Safe Failed Transaction Recovery (Rollback Failure, Corrupt Journal, Cleanup Failure, Restart Recovery)
+    // ---------------------------------------------------------
+    console.log('16. Testing Safe Failed Transaction Recovery (Rollback Failure, Corrupt Journal, Cleanup Failure & Restart)...');
+    const txTestDir = fs.mkdtempSync(path.join(os.tmpdir(), 'webinar-tx-safety-'));
+    try {
+      let txEngine = new WebinarEngine({
+        dataDir: txTestDir,
+        adminToken: ADMIN_TOKEN,
+        sessionSecret: SESSION_SECRET
+      });
+
+      const initialDraftRev = txEngine.getWebinarForAdmin('yu-sleep').draft.revision;
+
+      // 16a. Rollback restoration failure:
+      // Simulate failure on the 2nd file write ('webinars') during a multi-file registration AND failure to restore 'registrations' during rollback.
+      await txEngine.transitionWebinarState('yu-sleep', { action: 'APPROVE' }, 'admin:primary');
+      await txEngine.transitionWebinarState('yu-sleep', { action: 'PUBLISH' }, 'admin:primary');
+      const pubAccess = txEngine.resolveViewerPageAccess('yu-sleep', null);
+
+      txEngine.configureWriteFaultInjection({
+        failOnWriteIndex: 1,
+        failOnRollbackRestore: 'registrations'
+      });
+
+      await assert.rejects(
+        async () => {
+          await txEngine.registerLead('yu-sleep', {
+            email: 'rollback_fail@example.com',
+            name: 'Rollback Fail',
+            registrationRequested: true,
+            marketingConsentGiven: false
+          }, { viewerContextToken: pubAccess.viewerContextToken });
+        },
+        (err) => err.code === 'STORE_UNHEALTHY_ROLLBACK_FAILED' && err.statusCode === 503 && err.journalPreserved === true
+      );
+
+      // Recovery journal MUST still exist on disk because rollback restoration failed!
+      const journalPath = path.join(txTestDir, 'webinar-tx-journal.json');
+      assert.strictEqual(fs.existsSync(journalPath), true, 'Recovery journal must never be deleted when rollback restoration fails');
+
+      // Store must be marked unhealthy and reject any subsequent mutations
+      assert.strictEqual(txEngine.getStoreHealthStatus().healthy, false);
+      assert.strictEqual(txEngine.getStoreHealthStatus().errorCode, 'STORE_UNHEALTHY_ROLLBACK_FAILED');
+
+      await assert.rejects(
+        async () => {
+          await txEngine.saveWebinar({ slug: 'yu-sleep', headline: 'Blocked Mutation While Unhealthy' }, 'admin:primary');
+        },
+        (err) => err.code === 'STORE_UNHEALTHY_ROLLBACK_FAILED'
+      );
+
+      txEngine.close();
+
+      // 16b. Recovery after restarting: when a fresh engine starts on txTestDir without fault injection,
+      // it reads the preserved journal, restores all files to beforeData, deletes the journal only after restoration succeeds,
+      // and accepts writes again!
+      let recoveredEngine = new WebinarEngine({
+        dataDir: txTestDir,
+        adminToken: ADMIN_TOKEN,
+        sessionSecret: SESSION_SECRET
+      });
+      assert.strictEqual(recoveredEngine.getStoreHealthStatus().healthy, true);
+      assert.ok(recoveredEngine.lastJournalRecovery, 'Engine must record successful startup journal recovery');
+      assert.strictEqual(fs.existsSync(journalPath), false, 'Journal must be removed after all startup restorations succeed');
+      assert.strictEqual(recoveredEngine.getRegistrationsForWebinar('yu-sleep').length, 0, 'Partial registration must be rolled back on startup recovery');
+
+      // 16c. Journal cleanup failure after target writes:
+      // Must NOT return a false success that would later be undone on restart; must revert, preserve/surface error, and mark store unhealthy.
+      recoveredEngine.configureWriteFaultInjection({
+        failOnJournalCleanup: true
+      });
+
+      await assert.rejects(
+        async () => {
+          await recoveredEngine.saveWebinar({
+            slug: 'yu-sleep',
+            headline: 'Should Not Succeed When Journal Cleanup Fails'
+          }, 'admin:primary');
+        },
+        (err) => err.code === 'JOURNAL_CLEANUP_FAILED' && err.statusCode === 503
+      );
+
+      assert.strictEqual(recoveredEngine.getStoreHealthStatus().healthy, false);
+      assert.strictEqual(recoveredEngine.getStoreHealthStatus().errorCode, 'JOURNAL_CLEANUP_FAILED');
+      assert.strictEqual(fs.existsSync(journalPath), true, 'Journal remains on disk when unlink failed');
+
+      recoveredEngine.close();
+
+      // Restarting after fixing journal cleanup recovers cleanly to the pre-transaction state
+      let postCleanupEngine = new WebinarEngine({
+        dataDir: txTestDir,
+        adminToken: ADMIN_TOKEN,
+        sessionSecret: SESSION_SECRET
+      });
+      assert.strictEqual(postCleanupEngine.getStoreHealthStatus().healthy, true);
+      assert.strictEqual(fs.existsSync(journalPath), false);
+      assert.notStrictEqual(
+        postCleanupEngine.getWebinarForAdmin('yu-sleep').draft.headline,
+        'Should Not Succeed When Journal Cleanup Fails'
+      );
+      postCleanupEngine.close();
+
+      // 16d. Corrupt / unreadable recovery journal on startup:
+      // Must NOT be silently discarded; must preserve the corrupt journal and fail startup recovery with CORRUPT_TRANSACTION_JOURNAL.
+      fs.writeFileSync(journalPath, '{ "txId": "corrupt_json_trunc', 'utf8');
+      assert.throws(
+        () => {
+          new WebinarEngine({
+            dataDir: txTestDir,
+            adminToken: ADMIN_TOKEN,
+            sessionSecret: SESSION_SECRET
+          });
+        },
+        (err) => err.code === 'CORRUPT_TRANSACTION_JOURNAL' && err.statusCode === 503 && err.journalPreserved === true
+      );
+      assert.strictEqual(fs.existsSync(journalPath), true, 'Corrupt journal must be preserved on disk for admin inspection');
+
+      // Malformed journal missing valid files array must also fail with CORRUPT_TRANSACTION_JOURNAL and preserve journal
+      fs.writeFileSync(journalPath, JSON.stringify({ txId: 'bad_schema', files: [] }), 'utf8');
+      assert.throws(
+        () => {
+          new WebinarEngine({
+            dataDir: txTestDir,
+            adminToken: ADMIN_TOKEN,
+            sessionSecret: SESSION_SECRET
+          });
+        },
+        (err) => err.code === 'CORRUPT_TRANSACTION_JOURNAL' && err.statusCode === 503
+      );
+      assert.strictEqual(fs.existsSync(journalPath), true);
+
+      // Startup recovery restoration failure must preserve journal and throw JOURNAL_RECOVERY_FAILED
+      fs.writeFileSync(journalPath, JSON.stringify({
+        txId: 'tx_startup_fail',
+        status: 'COMMITTING',
+        files: [
+          {
+            key: 'registrations',
+            filePath: path.join(txTestDir, 'webinar-registrations.json'),
+            existedBefore: true,
+            beforeData: []
+          }
+        ]
+      }), 'utf8');
+      assert.throws(
+        () => {
+          new WebinarEngine({
+            dataDir: txTestDir,
+            adminToken: ADMIN_TOKEN,
+            sessionSecret: SESSION_SECRET,
+            failOnStartupRecoveryRestore: true
+          });
+        },
+        (err) => err.code === 'JOURNAL_RECOVERY_FAILED' && err.statusCode === 503 && err.journalPreserved === true
+      );
+      assert.strictEqual(fs.existsSync(journalPath), true, 'Journal must be preserved when startup file restoration fails');
+    } finally {
+      fs.rmSync(txTestDir, { recursive: true, force: true });
+    }
+    console.log('   [PASS] Rollback restoration failure, journal cleanup failure, corrupt journal rejection, and restart recovery verified.');
+
+    // ---------------------------------------------------------
+    // 17. Strict Single-Writer Lock Ownership (Foreign-Host & Ambiguous Locks Never Deleted)
+    // ---------------------------------------------------------
+    console.log('17. Testing Strict Single-Writer Lock Ownership (Foreign-Host & Malformed/Ambiguous Locks)...');
+    const lockTestDir = fs.mkdtempSync(path.join(os.tmpdir(), 'webinar-lock-ownership-'));
+    const lockFilePath = path.join(lockTestDir, 'webinar-store.lock');
+    try {
+      // 17a. Foreign-host lock (even if PID does not exist on this host) MUST NOT be reclaimed or deleted!
+      const foreignLockContent = JSON.stringify({
+        instanceId: 'weng_remote_container_1',
+        pid: 99999998,
+        hostname: 'foreign-worker-node-02.internal',
+        dataDir: lockTestDir,
+        acquiredAt: new Date().toISOString()
+      }, null, 2);
+      fs.writeFileSync(lockFilePath, foreignLockContent, 'utf8');
+
+      assert.throws(
+        () => {
+          new WebinarEngine({
+            dataDir: lockTestDir,
+            adminToken: ADMIN_TOKEN,
+            sessionSecret: SESSION_SECRET
+          });
+        },
+        (err) => err.code === 'FOREIGN_HOST_STORE_LOCK' && err.statusCode === 503 && err.lockPreserved === true
+      );
+      assert.strictEqual(fs.existsSync(lockFilePath), true, 'Foreign-host lock file must not be deleted');
+      assert.strictEqual(fs.readFileSync(lockFilePath, 'utf8'), foreignLockContent);
+
+      // 17b. Malformed JSON lock file MUST NOT be reclaimed or deleted!
+      const corruptLockContent = '{ "instanceId": "broken_lock" ';
+      fs.writeFileSync(lockFilePath, corruptLockContent, 'utf8');
+      assert.throws(
+        () => {
+          new WebinarEngine({
+            dataDir: lockTestDir,
+            adminToken: ADMIN_TOKEN,
+            sessionSecret: SESSION_SECRET
+          });
+        },
+        (err) => err.code === 'AMBIGUOUS_OR_CORRUPT_STORE_LOCK' && err.statusCode === 503 && err.lockPreserved === true
+      );
+      assert.strictEqual(fs.existsSync(lockFilePath), true, 'Corrupt lock file must not be deleted');
+      assert.strictEqual(fs.readFileSync(lockFilePath, 'utf8'), corruptLockContent);
+
+      // 17c. Incomplete/ambiguous lock missing hostname or valid PID MUST NOT be reclaimed or deleted!
+      const ambiguousLockContent = JSON.stringify({
+        instanceId: 'weng_missing_host',
+        pid: 99999997
+      });
+      fs.writeFileSync(lockFilePath, ambiguousLockContent, 'utf8');
+      assert.throws(
+        () => {
+          new WebinarEngine({
+            dataDir: lockTestDir,
+            adminToken: ADMIN_TOKEN,
+            sessionSecret: SESSION_SECRET
+          });
+        },
+        (err) => err.code === 'AMBIGUOUS_OR_CORRUPT_STORE_LOCK' && err.statusCode === 503 && err.lockPreserved === true
+      );
+      assert.strictEqual(fs.existsSync(lockFilePath), true, 'Ambiguous lock file missing hostname must not be deleted');
+
+      // 17d. Valid same-host lock with confirmed dead PID IS automatically reclaimed
+      fs.writeFileSync(lockFilePath, JSON.stringify({
+        instanceId: 'weng_same_host_dead',
+        pid: 99999996,
+        hostname: os.hostname(),
+        acquiredAt: new Date(Date.now() - 60000).toISOString()
+      }), 'utf8');
+
+      const reclaimedEngine = new WebinarEngine({
+        dataDir: lockTestDir,
+        adminToken: ADMIN_TOKEN,
+        sessionSecret: SESSION_SECRET
+      });
+      assert.ok(reclaimedEngine.lastStaleLockRecovery);
+      assert.strictEqual(reclaimedEngine.lastStaleLockRecovery.stalePid, 99999996);
+      assert.strictEqual(reclaimedEngine.lastStaleLockRecovery.staleHostname, os.hostname());
+      reclaimedEngine.close();
+      assert.strictEqual(fs.existsSync(lockFilePath), false, 'Clean close removes own lock file');
+    } finally {
+      fs.rmSync(lockTestDir, { recursive: true, force: true });
+    }
+    console.log('   [PASS] Foreign-host and ambiguous locks preserved and rejected; dead same-host lock reclaimed.');
+
+    // ---------------------------------------------------------
+    // 18. Brevo Outbox Operating Modes, Bounded Recurring Runner, Overlap Prevention & Restart Persistence
+    // ---------------------------------------------------------
+    console.log('18. Testing Brevo Outbox Operating Modes (DISABLED / MANUAL / AUTOMATIC), Overlap Guard & Restart Retry State...');
+    const outboxRunnerDir = fs.mkdtempSync(path.join(os.tmpdir(), 'webinar-outbox-runner-'));
+    try {
+      // 18a. Default engine has both live Brevo and auto-runner disabled ('DISABLED' mode)
+      let runnerEngine = new WebinarEngine({
+        dataDir: outboxRunnerDir,
+        adminToken: ADMIN_TOKEN,
+        sessionSecret: SESSION_SECRET
+      });
+      assert.strictEqual(runnerEngine.getBrevoOutboxOperatingMode(), 'DISABLED');
+      assert.strictEqual(runnerEngine.getBrevoOutboxSummary('yu-sleep').processingMode, 'DISABLED');
+      assert.strictEqual(runnerEngine.getBrevoOutboxSummary('yu-sleep').autoRunnerEnabled, false);
+
+      await runnerEngine.transitionWebinarState('yu-sleep', { action: 'APPROVE' }, 'admin:primary');
+      await runnerEngine.transitionWebinarState('yu-sleep', { action: 'PUBLISH' }, 'admin:primary');
+      const vCtx = runnerEngine.resolveViewerPageAccess('yu-sleep', null).viewerContextToken;
+
+      // Enqueue two leads with marketing consent
+      await runnerEngine.registerLead('yu-sleep', {
+        email: 'auto_lead1@example.com',
+        name: 'Auto Lead 1',
+        registrationRequested: true,
+        marketingConsentGiven: true
+      }, { viewerContextToken: vCtx });
+      await runnerEngine.registerLead('yu-sleep', {
+        email: 'auto_lead2@example.com',
+        name: 'Auto Lead 2',
+        registrationRequested: true,
+        marketingConsentGiven: true
+      }, { viewerContextToken: vCtx });
+
+      // 18b. Inject mock transport without starting auto-runner -> mode is 'MANUAL'
+      let mockDispatches = [];
+      runnerEngine.brevoTransport = async (payload, meta) => {
+        mockDispatches.push({ email: payload.email, attempt: meta.attempt });
+        // Simulate transient error on auto_lead1 attempt 1 so we can verify retry state persistence across restart
+        if (payload.email === 'auto_lead1@example.com' && meta.attempt === 1) {
+          return { ok: false, status: 502, body: { message: 'Bad Gateway' } };
+        }
+        return { ok: true, status: 201, body: { id: `mock_${payload.email}` } };
+      };
+      assert.strictEqual(runnerEngine.getBrevoOutboxOperatingMode(), 'MANUAL');
+      assert.strictEqual(runnerEngine.getBrevoOutboxSummary('yu-sleep').processingMode, 'MANUAL');
+
+      // Withdraw consent for auto_lead2 BEFORE runner processes it -> runner must recheck consent and cancel
+      await runnerEngine.updateRegistrationConsent('yu-sleep', {
+        email: 'auto_lead2@example.com',
+        marketingConsentGiven: false
+      }, { viewerContextToken: vCtx });
+
+      // Run one manual pass -> auto_lead1 enters RETRY_SCHEDULED (attempt 1), auto_lead2 stays CONSENT_CANCELLED
+      const manualPass = await runnerEngine.processBrevoOutbox({ workerId: 'manual_admin' });
+      assert.strictEqual(manualPass.processingMode, 'MANUAL');
+      assert.strictEqual(manualPass.processedCount, 1);
+      assert.strictEqual(manualPass.processedJobs[0].email, 'auto_lead1@example.com');
+      assert.strictEqual(manualPass.processedJobs[0].status, 'RETRY_SCHEDULED');
+
+      // 18c. Close and restart engine to verify RETRY_SCHEDULED state & attemptHistory persist across restarts
+      runnerEngine.close();
+
+      let restartedRunnerEngine = new WebinarEngine({
+        dataDir: outboxRunnerDir,
+        adminToken: ADMIN_TOKEN,
+        sessionSecret: SESSION_SECRET,
+        outboxBaseBackoffMs: 10
+      });
+      const persistedSummary = restartedRunnerEngine.getBrevoOutboxSummary('yu-sleep');
+      assert.strictEqual(persistedSummary.counts.retryScheduled, 1);
+      assert.strictEqual(persistedSummary.counts.consentCancelled, 1);
+      const persistedJob = persistedSummary.jobs.find((j) => j.email === 'auto_lead1@example.com');
+      assert.strictEqual(persistedJob.attempts, 1);
+      assert.strictEqual(persistedJob.attemptHistory.length, 1);
+
+      // Make nextAttemptAt eligible immediately and test overlap prevention + automatic recurring runner
+      restartedRunnerEngine.brevoOutbox[0].nextAttemptAt = new Date(Date.now() - 1000).toISOString();
+
+      let slowTransportCompleted = false;
+      restartedRunnerEngine.brevoTransport = async (payload) => {
+        await new Promise((r) => setTimeout(r, 90));
+        slowTransportCompleted = true;
+        return { ok: true, status: 200, body: { id: `synced_${payload.email}` } };
+      };
+
+      // Start automatic recurring runner with 40ms interval while transport takes 90ms -> overlapping ticks must be skipped!
+      restartedRunnerEngine.startBrevoOutboxRunner({ intervalMs: 40 });
+      assert.strictEqual(restartedRunnerEngine.getBrevoOutboxOperatingMode(), 'AUTOMATIC');
+      assert.strictEqual(restartedRunnerEngine.getBrevoOutboxSummary('yu-sleep').processingMode, 'AUTOMATIC');
+      assert.strictEqual(restartedRunnerEngine.getBrevoOutboxSummary('yu-sleep').autoRunnerEnabled, true);
+
+      await new Promise((r) => setTimeout(r, 170));
+      restartedRunnerEngine.stopBrevoOutboxRunner();
+      assert.strictEqual(restartedRunnerEngine.getBrevoOutboxOperatingMode(), 'MANUAL');
+
+      const afterAutoSummary = restartedRunnerEngine.getBrevoOutboxSummary('yu-sleep');
+      assert.strictEqual(slowTransportCompleted, true);
+      assert.strictEqual(afterAutoSummary.counts.synchronized, 1);
+      assert.strictEqual(afterAutoSummary.counts.retryScheduled, 0);
+      assert.ok(
+        afterAutoSummary.runnerStats.skippedOverlappingTicks >= 1,
+        'Recurring runner must prevent overlapping runs while a slow transport call is in flight'
+      );
+      assert.strictEqual(afterAutoSummary.emailDeliveryMode, 'CONTACT_SYNC_ONLY_NO_EMAIL_SENT');
+
+      restartedRunnerEngine.close();
+    } finally {
+      fs.rmSync(outboxRunnerDir, { recursive: true, force: true });
+    }
+    console.log('   [PASS] Brevo outbox operating modes, bounded recurring runner, overlap prevention, and restart retry persistence verified.\n');
+
+    console.log('=== ALL 18 UNIT & INTEGRATION TEST SUITES PASSED 100% ===');
   } finally {
     if (engine) {
       engine.close();
