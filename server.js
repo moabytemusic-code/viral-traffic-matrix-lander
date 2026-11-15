@@ -472,17 +472,48 @@ Promote ${offer.name}: ${offer.headlinePrefix || ''} ${offer.headlineGradient} $
 }
 
 const server = http.createServer(async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') {
-    res.writeHead(204);
-    return res.end();
-  }
-
   const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const pathname = parsedUrl.pathname;
+
+  const isStrictSecurityRoute =
+    pathname.startsWith('/api/webinars') ||
+    pathname.startsWith('/api/public/webinars') ||
+    pathname.startsWith('/api/admin') ||
+    pathname.startsWith('/webinar/') ||
+    pathname.startsWith('/w/') ||
+    pathname === '/launchpad';
+
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+
+  if (isStrictSecurityRoute) {
+    res.setHeader('Referrer-Policy', 'no-referrer');
+    res.setHeader('Vary', 'Origin');
+    const reqOrigin = req.headers.origin;
+    const reqHost = req.headers.host;
+    if (reqOrigin && reqHost) {
+      try {
+        const originUrl = new URL(reqOrigin);
+        if (originUrl.host === reqHost) {
+          res.setHeader('Access-Control-Allow-Origin', reqOrigin);
+          res.setHeader('Access-Control-Allow-Credentials', 'true');
+          res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+          res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-CSRF-Token, X-Viewer-Context');
+        }
+      } catch (_) {}
+    }
+    if (req.method === 'OPTIONS') {
+      res.writeHead(204);
+      return res.end();
+    }
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    if (req.method === 'OPTIONS') {
+      res.writeHead(204);
+      return res.end();
+    }
+  }
 
   // Healthcheck endpoint for Coolify (supports both GET and HEAD for wget/curl spider checks)
   if ((req.method === 'GET' || req.method === 'HEAD') && pathname === '/health') {
@@ -627,12 +658,16 @@ Sitemap: https://${host}/sitemap.xml
     const rawSlug = pathname.replace(/^\/(webinar|w)\//, '').replace(/\/$/, '');
     const previewToken = parsedUrl.searchParams.get('preview') || null;
 
-    const access = webinarEngine.canAccessWebinar(rawSlug, previewToken);
+    const access = webinarEngine.resolveViewerPageAccess(rawSlug, previewToken);
 
-    if (access.allowed && access.webinar) {
+    if (access.allowed && access.snapshot) {
       try {
-        const html = renderWebinarViewer(access.webinar, { isPreview: access.isPreview });
-        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        const html = renderWebinarViewer({ ...access, slug: rawSlug });
+        res.writeHead(200, {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Referrer-Policy': 'no-referrer',
+          'Cache-Control': 'no-store, no-cache, must-revalidate, private'
+        });
         return res.end(html);
       } catch (err) {
         console.error('Error rendering webinar for slug', rawSlug, err);
@@ -641,15 +676,19 @@ Sitemap: https://${host}/sitemap.xml
       }
     }
 
-    if (access.reason === 'UNPUBLISHED_DRAFT') {
-      res.writeHead(403, { 'Content-Type': 'text/html; charset=utf-8' });
+    if (access.reason !== 'NOT_FOUND') {
+      res.writeHead(access.statusCode || 403, {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Referrer-Policy': 'no-referrer',
+        'Cache-Control': 'no-store'
+      });
       return res.end(`
         <body style="background:#020617;color:#f8fafc;font-family:sans-serif;padding:60px 20px;text-align:center">
           <div style="max-width:500px;margin:0 auto;background:#0f172a;padding:40px;border-radius:24px;border:1px solid rgba(255,255,255,0.1)">
             <div style="font-size:32px;margin-bottom:16px">🔒</div>
             <h1 style="font-size:20px;font-weight:bold;margin-bottom:12px">Webinar Currently in Private Review</h1>
-            <p style="color:#94a3b8;font-size:14px;line-height:1.6">This webinar overview is an unpublished draft and is not currently available for public viewing. If you are an authorized reviewer, please use the private preview link provided in the Launchpad admin.</p>
-            <p style="margin-top:24px"><a href="/launchpad" style="color:#6366f1;text-decoration:none;font-size:13px;font-weight:bold">Return to Admin Launchpad →</a></p>
+            <p style="color:#94a3b8;font-size:14px;line-height:1.6">Access blocked (${escapeHtml(access.reason)}). This webinar overview is not publicly available or the preview token is invalid, expired, or revoked.</p>
+            <p style="margin-top:24px"><a href="/launchpad" style="color:#6366f1;text-decoration:none;font-size:13px;font-weight:bold">Return to Admin Launchpad -></a></p>
           </div>
         </body>
       `);
@@ -1115,168 +1154,352 @@ Sitemap: https://${host}/sitemap.xml
   }
 
   // ==========================================
-  // WEBINAR ENGINE API ENDPOINTS
+  // WEBINAR ENGINE & ADMIN AUTHENTICATION API ENDPOINTS
   // ==========================================
 
-  // GET /api/webinars -> List all webinars (Admin Launchpad)
-  if (req.method === 'GET' && pathname === '/api/webinars') {
-    try {
-      const webinars = webinarEngine.getAllWebinars(true);
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify({ ok: true, webinars }));
-    } catch (err) {
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify({ ok: false, error: err.message }));
-    }
-  }
-
-  // GET /api/webinars/:slug -> Get single webinar with full audit trail & analytics
-  if (req.method === 'GET' && pathname.startsWith('/api/webinars/') && !pathname.endsWith('/analytics') && !pathname.endsWith('/videoman-manifest')) {
-    const slug = pathname.replace('/api/webinars/', '').split('/')[0];
-    const webinar = webinarEngine.getWebinar(slug);
-    if (!webinar) {
-      res.writeHead(404, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify({ ok: false, error: 'Webinar not found' }));
-    }
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify({ ok: true, webinar }));
-  }
-
-  // POST /api/webinars -> Create new webinar draft
-  if (req.method === 'POST' && pathname === '/api/webinars') {
+  // POST /api/admin/session -> Create HttpOnly admin/viewer session cookie with CSRF token
+  if (req.method === 'POST' && pathname === '/api/admin/session') {
     try {
       const body = await readJsonBody(req);
-      const webinar = webinarEngine.saveWebinar(body, 'Admin');
-      res.writeHead(201, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify({ ok: true, webinar }));
+      const session = webinarEngine.createAdminSession(body.token);
+      res.writeHead(200, {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store',
+        'Set-Cookie': `webinar_admin_session=${encodeURIComponent(session.sessionId)}; HttpOnly; SameSite=Strict; Path=/; Max-Age=43200`
+      });
+      return res.end(JSON.stringify({
+        ok: true,
+        actorId: session.actorId,
+        role: session.role,
+        permissions: session.permissions,
+        csrfToken: session.csrfToken,
+        expiresAt: session.expiresAt
+      }));
     } catch (err) {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.writeHead(err.statusCode || 400, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
       return res.end(JSON.stringify({ ok: false, error: err.message }));
     }
   }
 
-  // PUT /api/webinars/:slug -> Update webinar draft
-  if (req.method === 'PUT' && pathname.startsWith('/api/webinars/')) {
-    try {
-      const slug = pathname.replace('/api/webinars/', '').split('/')[0];
-      const body = await readJsonBody(req);
-      body.slug = slug;
-      const webinar = webinarEngine.saveWebinar(body, 'Admin');
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify({ ok: true, webinar }));
-    } catch (err) {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify({ ok: false, error: err.message }));
+  // GET /api/admin/session -> Inspect current authenticated admin session
+  if (req.method === 'GET' && pathname === '/api/admin/session') {
+    const auth = webinarEngine.authenticateAdminRequest(req, 'webinar:read');
+    if (!auth.authenticated || !auth.authorized) {
+      res.writeHead(auth.statusCode || 401, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: false, authenticated: false, code: auth.code, error: auth.error }));
     }
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+    return res.end(JSON.stringify({
+      ok: true,
+      authenticated: true,
+      actorId: auth.actorId,
+      role: auth.role,
+      permissions: auth.permissions,
+      csrfToken: auth.csrfToken || null
+    }));
   }
 
-  // POST /api/webinars/:slug/status -> State transition (Save, Approve, Publish, Unpublish, Archive)
-  if (req.method === 'POST' && pathname.match(/^\/api\/webinars\/[^/]+\/status$/)) {
-    try {
-      const slug = pathname.split('/')[3];
-      const body = await readJsonBody(req);
-      const { status, note, actor } = body;
-      const webinar = webinarEngine.updateStatus(slug, status, actor || 'Admin', note);
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify({ ok: true, webinar }));
-    } catch (err) {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify({ ok: false, error: err.message }));
+  // DELETE /api/admin/session -> Revoke admin session cookie
+  if (req.method === 'DELETE' && pathname === '/api/admin/session') {
+    const cookieHeader = req.headers.cookie || '';
+    const m = cookieHeader.match(/(?:^|;\s*)webinar_admin_session=([^;]+)/);
+    if (m && m[1]) {
+      webinarEngine.revokeAdminSession(decodeURIComponent(m[1]));
     }
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store',
+      'Set-Cookie': 'webinar_admin_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0'
+    });
+    return res.end(JSON.stringify({ ok: true }));
   }
 
-  // POST /api/webinars/:slug/videoman-import -> Import MP4 video into webinar
-  if (req.method === 'POST' && pathname.match(/^\/api\/webinars\/[^/]+\/videoman-import$/)) {
-    try {
-      const slug = pathname.split('/')[3];
-      const body = await readJsonBody(req);
-      const webinar = webinarEngine.importVideoManAsset(slug, body);
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify({ ok: true, webinar }));
-    } catch (err) {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify({ ok: false, error: err.message }));
+  // GET /api/public/webinars/:slug -> Public-only metadata for published webinars (no preview tokens, drafts, or audit logs)
+  if (req.method === 'GET' && pathname.startsWith('/api/public/webinars/')) {
+    const slug = pathname.replace('/api/public/webinars/', '').split('/')[0];
+    const w = webinarEngine.getWebinar(slug);
+    const pub = webinarEngine.serializeForPublic(w);
+    if (!pub) {
+      res.writeHead(404, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: false, code: 'NOT_PUBLISHED', error: 'Published webinar not found.' }));
     }
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60' });
+    return res.end(JSON.stringify({ ok: true, webinar: pub }));
   }
 
-  // POST /api/webinars/:slug/videoman-manifest -> Export VideoMan production manifest
-  if (req.method === 'POST' && pathname.match(/^\/api\/webinars\/[^/]+\/videoman-manifest$/)) {
-    try {
-      const slug = pathname.split('/')[3];
-      const manifest = webinarEngine.generateVideoManManifest(slug);
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify({ ok: true, manifest }));
-    } catch (err) {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify({ ok: false, error: err.message }));
-    }
-  }
-
-  // POST /api/webinars/:slug/register -> Viewer Lead Capture with Brevo & Consent
+  // POST /api/webinars/:slug/register -> Viewer Lead Capture with Server-Verified Viewer Context & Consent
   if (req.method === 'POST' && pathname.match(/^\/api\/webinars\/[^/]+\/register$/)) {
     try {
       const slug = pathname.split('/')[3];
       const body = await readJsonBody(req);
+      const viewerContextToken = req.headers['x-viewer-context'] || body.viewerContextToken || '';
       const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
       const userAgent = req.headers['user-agent'] || 'Unknown';
-      const result = await webinarEngine.registerLead(slug, {
-        ...body,
+      const result = await webinarEngine.registerLead(slug, body, {
+        viewerContextToken,
         ip,
         userAgent
       });
-      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
       return res.end(JSON.stringify(result));
     } catch (err) {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify({ ok: false, error: err.message }));
+      const status = err.statusCode || 400;
+      res.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: false, code: err.code || 'REGISTRATION_ERROR', error: err.message }));
     }
   }
 
-  // POST /api/webinars/:slug/qa -> Grounded AI Q&A Engine
+  // POST /api/webinars/:slug/qa -> Reference-Driven Product FAQ Assistant with Server-Verified Viewer Context
   if (req.method === 'POST' && pathname.match(/^\/api\/webinars\/[^/]+\/qa$/)) {
     try {
       const slug = pathname.split('/')[3];
       const body = await readJsonBody(req);
+      const viewerContextToken = req.headers['x-viewer-context'] || body.viewerContextToken || '';
       const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
-      const result = await webinarEngine.answerViewerQuestion(slug, body.question, { ip });
-      res.writeHead(200, { 'Content-Type': 'application/json' });
+      const result = await webinarEngine.answerViewerQuestion(slug, body.question, {
+        viewerContextToken,
+        ip
+      });
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
       return res.end(JSON.stringify(result));
     } catch (err) {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify({ ok: false, error: err.message }));
+      const status = err.statusCode || 400;
+      res.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: false, code: err.code || 'QA_ERROR', error: err.message }));
     }
   }
 
-  // POST /api/webinars/:slug/track -> Viewer Analytics Heartbeat & Milestone Tracking
+  // POST /api/webinars/:slug/track -> Interval-Based Viewer Analytics Tracking with Server-Verified Viewer Context
   if (req.method === 'POST' && pathname.match(/^\/api\/webinars\/[^/]+\/track$/)) {
     try {
       const slug = pathname.split('/')[3];
       const body = await readJsonBody(req);
-      const result = webinarEngine.trackEvent(slug, body);
-      res.writeHead(200, { 'Content-Type': 'application/json' });
+      const viewerContextToken = req.headers['x-viewer-context'] || body.viewerContextToken || '';
+      const userAgent = req.headers['user-agent'] || '';
+      const result = await webinarEngine.trackEvent(slug, body, {
+        viewerContextToken,
+        userAgent
+      });
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
       return res.end(JSON.stringify(result));
     } catch (err) {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
+      const status = err.statusCode || 400;
+      res.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: false, code: err.code || 'TRACK_ERROR', error: err.message }));
+    }
+  }
+
+  // GET /api/webinars -> List all webinars (Admin Launchpad, requires webinar:read)
+  if (req.method === 'GET' && pathname === '/api/webinars') {
+    const auth = webinarEngine.authenticateAdminRequest(req, 'webinar:read');
+    if (!auth.authenticated || !auth.authorized) {
+      res.writeHead(auth.statusCode || 401, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: false, code: auth.code, error: auth.error }));
+    }
+    try {
+      const webinars = webinarEngine.getAllWebinarsForAdmin();
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: true, webinars }));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
       return res.end(JSON.stringify({ ok: false, error: err.message }));
     }
   }
 
-  // GET /api/webinars/:slug/analytics -> Reconciled Metrics & Audit History
+  // POST /api/webinars/:slug/preview-links -> Create scoped expiring preview link (requires webinar:preview)
+  if (req.method === 'POST' && pathname.match(/^\/api\/webinars\/[^/]+\/preview-links$/)) {
+    const auth = webinarEngine.authenticateAdminRequest(req, 'webinar:preview');
+    if (!auth.authenticated || !auth.authorized) {
+      res.writeHead(auth.statusCode || 401, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: false, code: auth.code, error: auth.error }));
+    }
+    try {
+      const slug = pathname.split('/')[3];
+      const body = await readJsonBody(req);
+      const ttlSeconds = body.ttlSeconds || (body.ttlMinutes ? Number(body.ttlMinutes) * 60 : 3600);
+      const preview = await webinarEngine.createPreviewLink(slug, { ttlSeconds, revision: body.revision }, auth.actorId);
+      const webinar = webinarEngine.getWebinarForAdmin(slug);
+      res.writeHead(201, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: true, preview, webinar }));
+    } catch (err) {
+      res.writeHead(err.statusCode || 400, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: false, code: err.code, error: err.message }));
+    }
+  }
+
+  // POST /api/webinars/:slug/preview-links/revoke -> Revoke preview link(s) (requires webinar:preview)
+  if (req.method === 'POST' && pathname.match(/^\/api\/webinars\/[^/]+\/preview-links\/revoke$/)) {
+    const auth = webinarEngine.authenticateAdminRequest(req, 'webinar:preview');
+    if (!auth.authenticated || !auth.authorized) {
+      res.writeHead(auth.statusCode || 401, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: false, code: auth.code, error: auth.error }));
+    }
+    try {
+      const slug = pathname.split('/')[3];
+      const body = await readJsonBody(req);
+      const tokenId = body.revokeAll ? 'ALL' : body.tokenId;
+      const result = await webinarEngine.revokePreviewLink(slug, { tokenId }, auth.actorId);
+      const webinar = webinarEngine.getWebinarForAdmin(slug);
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: true, ...result, webinar }));
+    } catch (err) {
+      res.writeHead(err.statusCode || 400, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: false, code: err.code, error: err.message }));
+    }
+  }
+
+  // POST /api/webinars/:slug/status -> State transition (SUBMIT_FOR_REVIEW, APPROVE, PUBLISH, UNPUBLISH, ARCHIVE)
+  if (req.method === 'POST' && pathname.match(/^\/api\/webinars\/[^/]+\/status$/)) {
+    try {
+      const slug = pathname.split('/')[3];
+      const body = await readJsonBody(req);
+      const rawAction = String(body.action || body.status || '').toUpperCase();
+      const neededPermission =
+        rawAction === 'PUBLISH' || rawAction === 'PUBLISHED' || rawAction === 'UNPUBLISH' || rawAction === 'ARCHIVE' || rawAction === 'ARCHIVED'
+          ? 'webinar:publish'
+          : 'webinar:approve';
+
+      const auth = webinarEngine.authenticateAdminRequest(req, neededPermission);
+      if (!auth.authenticated || !auth.authorized) {
+        res.writeHead(auth.statusCode || 401, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+        return res.end(JSON.stringify({ ok: false, code: auth.code, error: auth.error }));
+      }
+
+      // Actor strictly comes from authenticated server identity (auth.actorId), ignoring any body.actor
+      const webinar = await webinarEngine.transitionWebinarState(
+        slug,
+        { action: rawAction, note: body.note, revision: body.revision },
+        auth.actorId
+      );
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: true, webinar }));
+    } catch (err) {
+      res.writeHead(err.statusCode || 400, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: false, code: err.code, error: err.message }));
+    }
+  }
+
+  // POST /api/webinars/:slug/videoman-import -> Import MP4 video into webinar draft (requires webinar:write)
+  if (req.method === 'POST' && pathname.match(/^\/api\/webinars\/[^/]+\/videoman-import$/)) {
+    const auth = webinarEngine.authenticateAdminRequest(req, 'webinar:write');
+    if (!auth.authenticated || !auth.authorized) {
+      res.writeHead(auth.statusCode || 401, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: false, code: auth.code, error: auth.error }));
+    }
+    try {
+      const slug = pathname.split('/')[3];
+      const body = await readJsonBody(req);
+      const webinar = await webinarEngine.importVideoManAsset(slug, body, auth.actorId);
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: true, webinar }));
+    } catch (err) {
+      res.writeHead(err.statusCode || 400, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: false, code: err.code, error: err.message }));
+    }
+  }
+
+  // POST /api/webinars/:slug/videoman-manifest -> Export VideoMan production manifest (requires webinar:read)
+  if (req.method === 'POST' && pathname.match(/^\/api\/webinars\/[^/]+\/videoman-manifest$/)) {
+    const auth = webinarEngine.authenticateAdminRequest(req, 'webinar:read');
+    if (!auth.authenticated || !auth.authorized) {
+      res.writeHead(auth.statusCode || 401, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: false, code: auth.code, error: auth.error }));
+    }
+    try {
+      const slug = pathname.split('/')[3];
+      const manifest = webinarEngine.generateVideoManManifest(slug, auth.actorId);
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: true, manifest }));
+    } catch (err) {
+      res.writeHead(err.statusCode || 400, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: false, code: err.code, error: err.message }));
+    }
+  }
+
+  // GET /api/webinars/:slug/analytics -> Reconciled Metrics & Audit History (requires webinar:read)
   if (req.method === 'GET' && pathname.match(/^\/api\/webinars\/[^/]+\/analytics$/)) {
+    const auth = webinarEngine.authenticateAdminRequest(req, 'webinar:read');
+    if (!auth.authenticated || !auth.authorized) {
+      res.writeHead(auth.statusCode || 401, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: false, code: auth.code, error: auth.error }));
+    }
     const slug = pathname.split('/')[3];
-    const webinar = webinarEngine.getWebinar(slug);
+    const webinar = webinarEngine.getWebinarForAdmin(slug);
     if (!webinar) {
-      res.writeHead(404, { 'Content-Type': 'application/json' });
+      res.writeHead(404, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
       return res.end(JSON.stringify({ ok: false, error: 'Webinar not found' }));
     }
-    res.writeHead(200, { 'Content-Type': 'application/json' });
+    const registrations = webinarEngine.getRegistrationsForWebinar(slug);
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
     return res.end(JSON.stringify({
       ok: true,
       analytics: webinar.analytics,
       auditLog: webinar.auditLog,
-      video: webinar.video,
-      status: webinar.status
+      versionHistory: webinar.versionHistory,
+      approval: webinar.approval,
+      hasUnpublishedDraftChanges: webinar.hasUnpublishedDraftChanges,
+      status: webinar.status,
+      draftRevision: webinar.draft?.revision || 1,
+      publishedRevision: webinar.publishedSnapshot?.revision || null,
+      registrationsCount: registrations.length,
+      registrations
     }));
+  }
+
+  // GET /api/webinars/:slug -> Get single webinar with full audit trail & analytics (requires webinar:read)
+  if (req.method === 'GET' && pathname.startsWith('/api/webinars/') && pathname.split('/').length === 4) {
+    const auth = webinarEngine.authenticateAdminRequest(req, 'webinar:read');
+    if (!auth.authenticated || !auth.authorized) {
+      res.writeHead(auth.statusCode || 401, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: false, code: auth.code, error: auth.error }));
+    }
+    const slug = pathname.split('/')[3];
+    const webinar = webinarEngine.getWebinarForAdmin(slug);
+    if (!webinar) {
+      res.writeHead(404, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: false, error: 'Webinar not found' }));
+    }
+    const registrations = webinarEngine.getRegistrationsForWebinar(slug);
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+    return res.end(JSON.stringify({ ok: true, webinar, registrations }));
+  }
+
+  // POST /api/webinars -> Create new webinar draft (requires webinar:write)
+  if (req.method === 'POST' && pathname === '/api/webinars') {
+    const auth = webinarEngine.authenticateAdminRequest(req, 'webinar:write');
+    if (!auth.authenticated || !auth.authorized) {
+      res.writeHead(auth.statusCode || 401, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: false, code: auth.code, error: auth.error }));
+    }
+    try {
+      const body = await readJsonBody(req);
+      const webinar = await webinarEngine.saveWebinar(body, auth.actorId);
+      res.writeHead(201, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: true, webinar }));
+    } catch (err) {
+      res.writeHead(err.statusCode || 400, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: false, code: err.code, error: err.message }));
+    }
+  }
+
+  // PUT /api/webinars/:slug -> Update webinar draft (requires webinar:write)
+  if (req.method === 'PUT' && pathname.startsWith('/api/webinars/') && pathname.split('/').length === 4) {
+    const auth = webinarEngine.authenticateAdminRequest(req, 'webinar:write');
+    if (!auth.authenticated || !auth.authorized) {
+      res.writeHead(auth.statusCode || 401, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: false, code: auth.code, error: auth.error }));
+    }
+    try {
+      const slug = pathname.split('/')[3];
+      const body = await readJsonBody(req);
+      body.slug = slug;
+      const webinar = await webinarEngine.saveWebinar(body, auth.actorId);
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: true, webinar }));
+    } catch (err) {
+      res.writeHead(err.statusCode || 400, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ ok: false, code: err.code, error: err.message }));
+    }
   }
 
   // GET /api/vf/job-status?slug=... -> Check live ViralForge render + auto-schedule state

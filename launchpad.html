@@ -226,7 +226,7 @@
       <div id="predictionWebinarsPanel" class="hidden space-y-5">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
           <div>
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
               <h3 class="text-base font-bold text-white flex items-center gap-2">
                 <span>🎬</span> Presenter-Led On-Demand Webinars
               </h3>
@@ -236,9 +236,12 @@
               <span class="px-2 py-0.5 rounded text-[10px] font-mono-code font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                 $0 Budget Ceiling Enforced
               </span>
+              <span id="webinarAuthStatusBadge" class="px-2 py-0.5 rounded text-[10px] font-mono-code font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                🔒 Admin Auth Required
+              </span>
             </div>
             <p class="text-xs text-slate-400 mt-1">
-              Presenter walkthroughs with VideoMan integration, grounded AI Q&A, verifiable Brevo lead consent, and reconciled watch metrics.
+              Presenter walkthroughs with VideoMan integration, reference-driven FAQ assistant, server-verified Brevo lead consent, and interval watch analytics.
             </p>
           </div>
           <button
@@ -250,9 +253,60 @@
           </button>
         </div>
 
+        <!-- Admin Authentication & CSRF Session Bar -->
+        <div id="webinarAdminAuthBar" class="p-4 rounded-2xl bg-slate-900/80 border border-indigo-500/30 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3">
+          <div class="space-y-1">
+            <div class="text-xs font-bold text-white flex items-center gap-2">
+              <span>🛡️</span> Server-Side Administrator Session
+              <span id="webinarActorDisplay" class="text-[11px] font-mono-code text-slate-400">(Not signed in)</span>
+            </div>
+            <p class="text-[11px] text-slate-400">
+              All webinar management routes enforce server-side authentication, role permissions, and CSRF validation. Audit actors derive strictly from your authenticated session.
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+            <input
+              id="webinarAdminTokenInput"
+              type="password"
+              placeholder="Enter WEBINAR_ADMIN_TOKEN..."
+              class="px-3 py-2 rounded-xl bg-black/60 border border-white/15 text-xs text-white font-mono-code focus:outline-none focus:border-indigo-400 flex-1 sm:w-64"
+            />
+            <button
+              type="button"
+              id="webinarAdminLoginBtn"
+              onclick="authenticateWebinarAdmin()"
+              class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold font-mono-code transition cursor-pointer"
+            >
+              Authenticate Session
+            </button>
+            <button
+              type="button"
+              id="webinarAdminLogoutBtn"
+              onclick="logoutWebinarAdmin()"
+              class="hidden px-3 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-xs font-mono-code transition cursor-pointer"
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
+
+        <!-- Generated Scoped Preview Link Banner -->
+        <div id="latestPreviewBanner" class="hidden p-4 rounded-2xl bg-purple-950/40 border border-purple-500/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs font-mono-code">
+          <div class="space-y-1">
+            <span class="text-[10px] uppercase font-bold text-purple-300 block">🔑 Scoped Expiring Private Preview Link Issued (Revocable)</span>
+            <a id="latestPreviewUrlLink" href="#" target="_blank" class="text-white font-bold underline break-all"></a>
+            <span id="latestPreviewMeta" class="text-[11px] text-slate-400 block"></span>
+          </div>
+          <div class="flex items-center gap-2">
+            <a id="latestPreviewOpenBtn" href="#" target="_blank" class="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition whitespace-nowrap">
+              Open Preview ↗
+            </a>
+          </div>
+        </div>
+
         <!-- Webinars List -->
         <div id="webinarsList" class="space-y-4">
-          <div class="text-xs text-slate-400 font-mono-code p-4 rounded-xl bg-white/5">Loading webinar records...</div>
+          <div class="text-xs text-slate-400 font-mono-code p-4 rounded-xl bg-white/5">Authenticate above to load private webinar records...</div>
         </div>
       </div>
     </section>
@@ -2306,7 +2360,7 @@ async function broadcastNewLaunch() {
     }
 
     // ==========================================
-    // WEBINAR ENGINE CLIENT LOGIC
+    // WEBINAR ENGINE CLIENT LOGIC (HARDENED v2)
     // ==========================================
     function escapeHtml(str) {
       if (!str) return '';
@@ -2319,11 +2373,129 @@ async function broadcastNewLaunch() {
     }
 
     let activeWebinars = [];
+    let adminAuthSession = {
+      authenticated: false,
+      actorId: null,
+      role: null,
+      csrfToken: null,
+      bearerToken: ''
+    };
+
+    function getAdminHeaders(extra = {}) {
+      const headers = { ...extra };
+      if (adminAuthSession.csrfToken) {
+        headers['X-CSRF-Token'] = adminAuthSession.csrfToken;
+      }
+      if (adminAuthSession.bearerToken) {
+        headers['Authorization'] = `Bearer ${adminAuthSession.bearerToken}`;
+      }
+      return headers;
+    }
+
+    function updateWebinarAuthUI() {
+      const badge = document.getElementById('webinarAuthStatusBadge');
+      const actorEl = document.getElementById('webinarActorDisplay');
+      const logoutBtn = document.getElementById('webinarAdminLogoutBtn');
+      const inputEl = document.getElementById('webinarAdminTokenInput');
+      if (adminAuthSession.authenticated) {
+        if (badge) {
+          badge.className = 'px-2 py-0.5 rounded text-[10px] font-mono-code font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+          badge.textContent = `🔓 Authenticated (${adminAuthSession.role})`;
+        }
+        if (actorEl) {
+          actorEl.textContent = `Signed in as ${adminAuthSession.actorId} [${adminAuthSession.role}]`;
+          actorEl.className = 'text-[11px] font-mono-code text-emerald-400 font-bold';
+        }
+        if (logoutBtn) logoutBtn.classList.remove('hidden');
+        if (inputEl) inputEl.value = '';
+      } else {
+        if (badge) {
+          badge.className = 'px-2 py-0.5 rounded text-[10px] font-mono-code font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30';
+          badge.textContent = '🔒 Admin Auth Required';
+        }
+        if (actorEl) {
+          actorEl.textContent = '(Not signed in)';
+          actorEl.className = 'text-[11px] font-mono-code text-slate-400';
+        }
+        if (logoutBtn) logoutBtn.classList.add('hidden');
+      }
+    }
+
+    async function authenticateWebinarAdmin() {
+      const tokenInput = document.getElementById('webinarAdminTokenInput');
+      const rawToken = (tokenInput?.value || '').trim();
+      if (!rawToken) {
+        alert('Please enter your WEBINAR_ADMIN_TOKEN or WEBINAR_VIEWER_TOKEN.');
+        return;
+      }
+      try {
+        const res = await fetch('/api/admin/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: rawToken })
+        });
+        const data = await res.json();
+        if (res.ok && data.ok) {
+          adminAuthSession = {
+            authenticated: true,
+            actorId: data.actorId,
+            role: data.role,
+            csrfToken: data.csrfToken,
+            bearerToken: rawToken
+          };
+          updateWebinarAuthUI();
+          await loadWebinars();
+        } else {
+          alert('Authentication failed: ' + (data.error || 'Invalid token'));
+        }
+      } catch (err) {
+        alert('Authentication error: ' + err.message);
+      }
+    }
+
+    async function logoutWebinarAdmin() {
+      try {
+        await fetch('/api/admin/session', { method: 'DELETE', headers: getAdminHeaders() });
+      } catch (_) {}
+      adminAuthSession = { authenticated: false, actorId: null, role: null, csrfToken: null, bearerToken: '' };
+      updateWebinarAuthUI();
+      const container = document.getElementById('webinarsList');
+      if (container) {
+        container.innerHTML = '<div class="text-xs text-slate-400 font-mono-code p-4 rounded-xl bg-white/5">Signed out. Authenticate above to manage webinars.</div>';
+      }
+    }
 
     async function loadWebinars() {
+      const container = document.getElementById('webinarsList');
       try {
-        const res = await fetch('/api/webinars');
+        // Check existing cookie session first if not yet populated
+        if (!adminAuthSession.authenticated) {
+          const sessRes = await fetch('/api/admin/session', { headers: getAdminHeaders() });
+          if (sessRes.ok) {
+            const sessData = await sessRes.json();
+            if (sessData.ok && sessData.authenticated) {
+              adminAuthSession.authenticated = true;
+              adminAuthSession.actorId = sessData.actorId;
+              adminAuthSession.role = sessData.role;
+              adminAuthSession.csrfToken = sessData.csrfToken;
+              updateWebinarAuthUI();
+            }
+          }
+        }
+
+        const res = await fetch('/api/webinars', { headers: getAdminHeaders() });
         const data = await res.json();
+        if (res.status === 401 || res.status === 403) {
+          if (container) {
+            container.innerHTML = `
+              <div class="p-6 rounded-2xl bg-rose-950/20 border border-rose-500/30 text-xs font-mono-code text-rose-200 space-y-2">
+                <div class="font-bold text-sm">🔒 Administrator Authentication Required (${res.status})</div>
+                <p class="text-slate-300">${escapeHtml(data.error || 'Enter your WEBINAR_ADMIN_TOKEN in the bar above to view and manage private webinar drafts.')}</p>
+              </div>
+            `;
+          }
+          return;
+        }
         if (data.ok && Array.isArray(data.webinars)) {
           activeWebinars = data.webinars;
           const badge = document.getElementById('tabWebinarsBadge');
@@ -2351,26 +2523,34 @@ async function broadcastNewLaunch() {
       }
 
       container.innerHTML = webinars.map(w => {
-        const a = w.analytics || {};
-        const v = w.video || {};
-        const p = w.presenter || {};
-        const c = w.cta || {};
+        const d = w.draft || {};
+        const pub = w.publishedSnapshot || null;
+        const prodA = w.analytics?.production || w.analytics || {};
+        const prevA = w.analytics?.preview || {};
+        const v = d.video || w.video || {};
+        const p = d.presenter || w.presenter || {};
+        const c = d.cta || w.cta || {};
+        const draftRev = d.revision || 1;
+        const pubRev = pub ? pub.revision : null;
+        const approvedRev = w.approval?.approvedRevision || null;
+        const isCurrentDraftApproved = approvedRev === draftRev;
+        const activePreviews = (w.previewLinks || []).filter(pl => pl.isActive);
 
         let statusClass = 'bg-amber-500/20 text-amber-300 border-amber-500/40';
         let statusLabel = 'DRAFT : UNPUBLISHED';
         if (w.status === 'READY_FOR_REVIEW') {
           statusClass = 'bg-blue-500/20 text-blue-300 border-blue-500/40';
           statusLabel = 'READY FOR REVIEW';
+        } else if (w.status === 'APPROVED') {
+          statusClass = 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40';
+          statusLabel = `APPROVED (REV #${approvedRev})`;
         } else if (w.status === 'PUBLISHED') {
           statusClass = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
-          statusLabel = 'PUBLISHED : LIVE';
+          statusLabel = `PUBLISHED : LIVE (REV #${pubRev})`;
         } else if (w.status === 'ARCHIVED') {
           statusClass = 'bg-slate-500/20 text-slate-300 border-slate-500/40';
           statusLabel = 'ARCHIVED';
         }
-
-        const previewUrl = `/webinar/${encodeURIComponent(w.slug)}?preview=${encodeURIComponent(w.previewToken || '')}`;
-        const liveUrl = `/webinar/${encodeURIComponent(w.slug)}`;
 
         return `
           <div class="glass-surface p-5 sm:p-6 rounded-2xl border border-white/10 space-y-4 hover:border-purple-500/40 transition">
@@ -2381,37 +2561,45 @@ async function broadcastNewLaunch() {
                     ${statusLabel}
                   </span>
                   <span class="text-xs font-mono-code text-indigo-400">/webinar/${escapeHtml(w.slug)}</span>
-                  <span class="text-slate-500 text-xs font-mono-code">v${w.version || 1}</span>
+                  <span class="text-slate-400 text-xs font-mono-code">Draft Rev #${draftRev}</span>
+                  ${pubRev ? `<span class="text-emerald-400 text-xs font-mono-code">Live Rev #${pubRev}</span>` : '<span class="text-slate-500 text-xs font-mono-code">No Live Snapshot</span>'}
+                  ${w.hasUnpublishedDraftChanges ? '<span class="text-[10px] font-mono-code px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold">Unpublished Draft Edits</span>' : ''}
                   ${v.isPrototype ? '<span class="text-[10px] font-mono-code px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">30s Prototype</span>' : ''}
                 </div>
-                <h4 class="text-base sm:text-lg font-bold text-white">${escapeHtml(w.internalTitle || w.headline)}</h4>
-                <p class="text-xs text-slate-400 line-clamp-1">${escapeHtml(w.subheadline || '')}</p>
+                <h4 class="text-base sm:text-lg font-bold text-white">${escapeHtml(w.internalTitle || d.headline)}</h4>
+                <p class="text-xs text-slate-400 line-clamp-1">Draft Headline: ${escapeHtml(d.headline || '')}</p>
+                ${pub ? `<p class="text-[11px] text-emerald-400 font-mono-code mt-0.5">Live Public Headline (Rev #${pub.revision}): ${escapeHtml(pub.headline)}</p>` : ''}
               </div>
 
               <!-- Action Controls -->
               <div class="flex flex-wrap items-center gap-2 font-mono-code text-xs">
-                <a href="${previewUrl}" target="_blank" class="px-3 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 transition flex items-center gap-1.5 cursor-pointer">
-                  <span>👁️</span> Private Preview
-                </a>
+                <button type="button" onclick="issueScopedPreviewLink('${escapeHtml(w.slug)}')" class="px-3 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 transition flex items-center gap-1.5 cursor-pointer">
+                  <span>🔑</span> Issue Scoped Preview
+                </button>
+                ${activePreviews.length > 0 ? `
+                  <button type="button" onclick="revokeAllPreviewLinks('${escapeHtml(w.slug)}')" class="px-2.5 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/30 transition cursor-pointer" title="Revoke ${activePreviews.length} active preview token(s)">
+                    Revoke Previews (${activePreviews.length})
+                  </button>
+                ` : ''}
                 <button type="button" onclick="openWebinarEditor('${escapeHtml(w.slug)}')" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10 transition cursor-pointer">
                   Configure & Edit
                 </button>
                 <button type="button" onclick="showVideoManManifest('${escapeHtml(w.slug)}')" class="px-2.5 py-1.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 transition cursor-pointer" title="VideoMan Manifest">
                   <span>🎬</span> Manifest
                 </button>
-                ${w.status === 'DRAFT' ? `
-                  <button type="button" onclick="changeWebinarStatus('${escapeHtml(w.slug)}', 'READY_FOR_REVIEW', 'Approved draft for review')" class="px-2.5 py-1.5 rounded-xl bg-blue-600/30 hover:bg-blue-600/50 text-blue-200 border border-blue-500/40 transition cursor-pointer">
-                    Approve for Review
+                ${!isCurrentDraftApproved ? `
+                  <button type="button" onclick="changeWebinarStatus('${escapeHtml(w.slug)}', 'APPROVE', 'Approved Draft Revision #${draftRev}')" class="px-2.5 py-1.5 rounded-xl bg-blue-600/30 hover:bg-blue-600/50 text-blue-200 border border-blue-500/40 transition cursor-pointer font-bold">
+                    ✓ Approve Rev #${draftRev}
                   </button>
                 ` : ''}
-                ${w.status === 'READY_FOR_REVIEW' ? `
-                  <button type="button" onclick="changeWebinarStatus('${escapeHtml(w.slug)}', 'PUBLISHED', 'Explicit admin publication')" class="px-2.5 py-1.5 rounded-xl bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-200 border border-emerald-500/40 transition cursor-pointer font-bold">
-                    🚀 Publish Live
+                ${isCurrentDraftApproved && (w.status !== 'PUBLISHED' || w.hasUnpublishedDraftChanges) ? `
+                  <button type="button" onclick="changeWebinarStatus('${escapeHtml(w.slug)}', 'PUBLISH', 'Published approved Draft Revision #${draftRev}')" class="px-2.5 py-1.5 rounded-xl bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-200 border border-emerald-500/40 transition cursor-pointer font-bold">
+                    🚀 Publish Rev #${draftRev}
                   </button>
                 ` : ''}
                 ${w.status === 'PUBLISHED' ? `
-                  <button type="button" onclick="changeWebinarStatus('${escapeHtml(w.slug)}', 'DRAFT', 'Reverted to draft')" class="px-2.5 py-1.5 rounded-xl bg-amber-600/30 hover:bg-amber-600/50 text-amber-200 border border-amber-500/40 transition cursor-pointer">
-                    Revert to Draft
+                  <button type="button" onclick="changeWebinarStatus('${escapeHtml(w.slug)}', 'UNPUBLISH', 'Unpublished from public access')" class="px-2.5 py-1.5 rounded-xl bg-amber-600/30 hover:bg-amber-600/50 text-amber-200 border border-amber-500/40 transition cursor-pointer">
+                    Unpublish
                   </button>
                 ` : ''}
               </div>
@@ -2433,27 +2621,81 @@ async function broadcastNewLaunch() {
               </div>
               <div class="p-2.5 rounded-xl bg-black/40 border border-white/5">
                 <span class="text-[10px] text-slate-500 block uppercase">Brevo Lead List</span>
-                <span class="font-bold text-emerald-300">List #${w.registration?.brevoListId || 80}</span>
+                <span class="font-bold text-emerald-300">List #${(d.registration || w.registration)?.brevoListId || 80}</span>
               </div>
             </div>
 
-            <!-- Reconciled Metrics Strip -->
+            <!-- Reconciled Metrics Strip (Production vs Preview Separated) -->
             <div class="p-3 rounded-xl bg-gradient-to-r from-purple-950/20 via-black/40 to-indigo-950/20 border border-white/5 flex flex-wrap items-center justify-between gap-4 text-xs font-mono-code">
-              <div class="flex items-center gap-4">
-                <span>Unique Views: <strong class="text-white">${a.viewsUnique || 0}</strong></span>
-                <span>Starts: <strong class="text-purple-300">${a.playbackStarts || 0}</strong></span>
-                <span>Avg Watch: <strong class="text-indigo-300">${a.averageWatchSeconds || 0}s</strong></span>
-                <span>CTA Clicks: <strong class="text-emerald-400">${a.ctaClicks || 0}</strong></span>
-                <span>Leads: <strong class="text-cyan-300">${a.registrations || 0}</strong></span>
-                <span>AI Q&A: <strong class="text-pink-300">${a.qaQuestionsAsked || 0}</strong></span>
+              <div class="flex flex-wrap items-center gap-4">
+                <span class="text-emerald-300 font-bold uppercase text-[10px]">Production:</span>
+                <span>Sessions: <strong class="text-white">${prodA.uniqueSessions || 0}</strong></span>
+                <span>Starts: <strong class="text-purple-300">${prodA.playbackStarts || 0}</strong></span>
+                <span>Avg Watch: <strong class="text-indigo-300">${prodA.averageUniqueWatchSeconds || 0}s</strong></span>
+                <span>CTA Clicks: <strong class="text-emerald-400">${prodA.ctaClicks || 0}</strong></span>
+                <span>Leads: <strong class="text-cyan-300">${prodA.registrations || 0}</strong></span>
+                <span>FAQ Queries: <strong class="text-pink-300">${prodA.faqQuestionsAsked || 0}</strong></span>
               </div>
-              <div class="text-[11px] text-slate-400">
-                Sales Attribution: <span class="text-amber-400 font-bold">${a.salesAttributionStatus || 'NOT_CONNECTED'}</span>
+              <div class="flex items-center gap-3 text-[11px] text-slate-400">
+                <span>Preview Sessions: <strong>${prevA.uniqueSessions || 0}</strong> | Preview Watch: <strong>${prevA.averageUniqueWatchSeconds || 0}s</strong></span>
+                <span>Sales: <strong class="text-amber-400">${w.analytics?.salesAttributionStatus || 'NOT_CONNECTED'}</strong></span>
               </div>
             </div>
           </div>
         `;
       }).join('');
+    }
+
+    async function issueScopedPreviewLink(slug) {
+      try {
+        const res = await fetch(`/api/webinars/${encodeURIComponent(slug)}/preview-links`, {
+          method: 'POST',
+          headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({ ttlMinutes: 60, note: 'Admin Launchpad preview request' })
+        });
+        const data = await res.json();
+        if (res.ok && data.ok && data.preview) {
+          const banner = document.getElementById('latestPreviewBanner');
+          const urlLink = document.getElementById('latestPreviewUrlLink');
+          const metaEl = document.getElementById('latestPreviewMeta');
+          const openBtn = document.getElementById('latestPreviewOpenBtn');
+          if (banner && urlLink && metaEl && openBtn) {
+            banner.classList.remove('hidden');
+            urlLink.href = data.preview.previewUrl;
+            urlLink.textContent = data.preview.previewUrl;
+            openBtn.href = data.preview.previewUrl;
+            metaEl.textContent = `Token ID: ${data.preview.tokenId} | Scoped to: ${data.preview.slug} (Draft Rev #${data.preview.revision}) | Expires: ${new Date(data.preview.expiresAt).toLocaleTimeString()}`;
+          }
+          await loadWebinars();
+          return data.preview;
+        } else {
+          alert('Failed to issue preview link: ' + (data.error || 'Unauthorized'));
+        }
+      } catch (err) {
+        alert('Error issuing preview link: ' + err.message);
+      }
+      return null;
+    }
+
+    async function revokeAllPreviewLinks(slug) {
+      try {
+        const res = await fetch(`/api/webinars/${encodeURIComponent(slug)}/preview-links/revoke`, {
+          method: 'POST',
+          headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({ revokeAll: true })
+        });
+        const data = await res.json();
+        if (res.ok && data.ok) {
+          const banner = document.getElementById('latestPreviewBanner');
+          if (banner) banner.classList.add('hidden');
+          await loadWebinars();
+          alert(`Revoked ${data.revokedCount} active preview link(s) for ${slug}.`);
+        } else {
+          alert('Revoke failed: ' + (data.error || 'Error'));
+        }
+      } catch (err) {
+        alert('Error revoking preview links: ' + err.message);
+      }
     }
 
     // Webinar Editor Modal Handlers
@@ -2465,11 +2707,9 @@ async function broadcastNewLaunch() {
       const form = document.getElementById('webinarEditorForm');
       if (!modal || !form) return;
 
-      modal.classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-
       if (!slug) {
-        // New blank draft
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
         document.getElementById('weModalTitle').textContent = 'Create New Webinar Draft';
         form.reset();
         document.getElementById('weSlug').value = 'new-webinar';
@@ -2479,61 +2719,72 @@ async function broadcastNewLaunch() {
         return;
       }
 
-      document.getElementById('weModalTitle').textContent = `Edit Webinar: ${slug}`;
-      document.getElementById('weSlug').setAttribute('readonly', 'true');
-
       try {
-        const res = await fetch(`/api/webinars/${encodeURIComponent(slug)}`);
+        const res = await fetch(`/api/webinars/${encodeURIComponent(slug)}`, {
+          headers: getAdminHeaders()
+        });
         const data = await res.json();
-        if (data.ok && data.webinar) {
-          const w = data.webinar;
-          document.getElementById('weInternalTitle').value = w.internalTitle || '';
-          document.getElementById('weHeadline').value = w.headline || '';
-          document.getElementById('weSlug').value = w.slug || '';
-          document.getElementById('weSubheadline').value = w.subheadline || '';
-          document.getElementById('wePresenterName').value = w.presenter?.name || 'Sarah';
-          document.getElementById('wePresenterRole').value = w.presenter?.role || 'Affiliate Overview Host';
-          document.getElementById('weIsAiPresenter').checked = !!w.presenter?.isAiGenerated;
-          document.getElementById('wePresenterDisclosure').value = w.presenter?.disclosureText || '';
-          document.getElementById('weVideoUrl').value = w.video?.videoUrl || '';
-          document.getElementById('wePosterUrl').value = w.video?.posterUrl || '';
-          document.getElementById('weDurationSeconds').value = w.video?.durationSeconds || 30;
-          document.getElementById('weIsPrototype').checked = !!w.video?.isPrototype;
-          document.getElementById('wePrototypeNotice').value = w.video?.prototypeNotice || '';
-          document.getElementById('weCtaText').value = w.cta?.buttonText || '';
-          document.getElementById('weCtaSubtext').value = w.cta?.subtext || '';
-          document.getElementById('weCtaUrl').value = w.cta?.destinationUrl || '';
-          document.getElementById('weCtaRevealSeconds').value = w.cta?.revealSeconds || 15;
-          document.getElementById('weCtaDisclosure').value = w.cta?.affiliateDisclosure || '';
-          document.getElementById('weBrevoListId').value = w.registration?.brevoListId || 80;
-          document.getElementById('weConsentText').value = w.registration?.consentCheckboxText || '';
-          document.getElementById('weStatus').textContent = w.status || 'DRAFT';
+        if (!res.ok || !data.ok || !data.webinar) {
+          alert('Cannot open editor: ' + (data.error || 'Please authenticate first.'));
+          return;
+        }
 
-          // Grounded Reference
-          const ref = w.reference || {};
-          document.getElementById('weRefProductName').value = ref.productName || '';
-          document.getElementById('weRefServingSize').value = ref.servingSize || '';
-          document.getElementById('weRefRefundPolicy').value = ref.refundPolicy?.terms || '';
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        document.getElementById('weModalTitle').textContent = `Edit Webinar Draft: ${slug}`;
+        document.getElementById('weSlug').setAttribute('readonly', 'true');
 
-          // Audit Log
-          const auditList = document.getElementById('weAuditList');
-          if (auditList && Array.isArray(w.auditLog)) {
-            auditList.innerHTML = w.auditLog.slice().reverse().map(log => `
-              <li class="py-1 border-b border-white/5 text-[11px] font-mono-code flex justify-between gap-2">
-                <span class="text-purple-300 font-bold">${escapeHtml(log.action)}</span>
-                <span class="text-slate-400">${escapeHtml(log.note || '')} (${escapeHtml(log.actor || 'System')})</span>
-                <span class="text-slate-500">${new Date(log.timestamp).toLocaleTimeString()}</span>
-              </li>
-            `).join('');
-          }
+        const w = data.webinar;
+        const d = w.draft || w;
+        document.getElementById('weInternalTitle').value = w.internalTitle || '';
+        document.getElementById('weHeadline').value = d.headline || '';
+        document.getElementById('weSlug').value = w.slug || '';
+        document.getElementById('weSubheadline').value = d.subheadline || '';
+        document.getElementById('wePresenterName').value = d.presenter?.name || 'Sarah';
+        document.getElementById('wePresenterRole').value = d.presenter?.role || 'Affiliate Overview Host';
+        document.getElementById('weIsAiPresenter').checked = !!d.presenter?.isAiGenerated;
+        document.getElementById('wePresenterDisclosure').value = d.presenter?.disclosureText || '';
+        document.getElementById('weVideoUrl').value = d.video?.videoUrl || '';
+        document.getElementById('wePosterUrl').value = d.video?.posterUrl || '';
+        document.getElementById('weDurationSeconds').value = d.video?.durationSeconds || 30;
+        document.getElementById('weIsPrototype').checked = !!d.video?.isPrototype;
+        document.getElementById('wePrototypeNotice').value = d.video?.prototypeNotice || '';
+        document.getElementById('weCtaText').value = d.cta?.buttonText || '';
+        document.getElementById('weCtaSubtext').value = d.cta?.subtext || '';
+        document.getElementById('weCtaUrl').value = d.cta?.destinationUrl || '';
+        document.getElementById('weCtaRevealSeconds').value = d.cta?.revealSeconds || 15;
+        document.getElementById('weCtaDisclosure').value = d.cta?.affiliateDisclosure || '';
+        document.getElementById('weBrevoListId').value = d.registration?.brevoListId || 80;
+        document.getElementById('weConsentText').value = d.registration?.consentCheckboxText || '';
+        document.getElementById('weStatus').textContent = `${w.status || 'DRAFT'} (Draft Rev #${d.revision || 1})`;
 
-          // Update Preview Link in Modal
-          const previewBtn = document.getElementById('wePreviewBtn');
-          if (previewBtn) {
-            previewBtn.onclick = () => {
-              window.open(`/webinar/${encodeURIComponent(w.slug)}?preview=${encodeURIComponent(w.previewToken || '')}`, '_blank');
-            };
-          }
+        // Grounded Reference
+        const ref = d.reference || {};
+        document.getElementById('weRefProductName').value = ref.productName?.value || ref.productName || '';
+        document.getElementById('weRefServingSize').value = ref.servingDetails?.servingSize || ref.servingSize?.value || ref.servingSize || '';
+        document.getElementById('weRefRefundPolicy').value = ref.refundPolicy?.terms || '';
+
+        // Audit Log
+        const auditList = document.getElementById('weAuditList');
+        if (auditList && Array.isArray(w.auditLog)) {
+          auditList.innerHTML = w.auditLog.slice().reverse().map(log => `
+            <li class="py-1 border-b border-white/5 text-[11px] font-mono-code flex justify-between gap-2">
+              <span class="text-purple-300 font-bold">${escapeHtml(log.action)}</span>
+              <span class="text-slate-400">${escapeHtml(log.note || '')} (Actor: ${escapeHtml(log.actor || 'System')})</span>
+              <span class="text-slate-500">${new Date(log.timestamp).toLocaleTimeString()}</span>
+            </li>
+          `).join('');
+        }
+
+        // Update Preview Button in Modal to issue a fresh scoped preview token
+        const previewBtn = document.getElementById('wePreviewBtn');
+        if (previewBtn) {
+          previewBtn.onclick = async () => {
+            const issued = await issueScopedPreviewLink(w.slug);
+            if (issued && issued.previewUrl) {
+              window.open(issued.previewUrl, '_blank');
+            }
+          };
         }
       } catch (err) {
         alert('Error fetching webinar: ' + err.message);
@@ -2585,7 +2836,9 @@ async function broadcastNewLaunch() {
         },
         reference: {
           productName: document.getElementById('weRefProductName').value.trim(),
-          servingSize: document.getElementById('weRefServingSize').value.trim(),
+          servingDetails: {
+            servingSize: document.getElementById('weRefServingSize').value.trim()
+          },
           refundPolicy: {
             terms: document.getElementById('weRefRefundPolicy').value.trim()
           }
@@ -2599,13 +2852,12 @@ async function broadcastNewLaunch() {
 
         const res = await fetch(url, {
           method,
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify(payload)
         });
         const data = await res.json();
-        if (data.ok) {
+        if (res.ok && data.ok) {
           await loadWebinars();
-          alert('Webinar draft saved successfully!');
           closeWebinarEditor();
         } else {
           alert('Save failed: ' + (data.error || 'Unknown error'));
@@ -2615,24 +2867,21 @@ async function broadcastNewLaunch() {
       }
     }
 
-    async function changeWebinarStatus(slug, nextStatus, note) {
-      if (!confirm(`Are you sure you want to transition "${slug}" to ${nextStatus}?`)) return;
-
+    async function changeWebinarStatus(slug, actionName, note) {
       try {
         const res = await fetch(`/api/webinars/${encodeURIComponent(slug)}/status`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: nextStatus, note: note || '', actor: 'Admin' })
+          headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({ action: actionName, note: note || '' })
         });
         const data = await res.json();
-        if (data.ok) {
+        if (res.ok && data.ok) {
           await loadWebinars();
           if (editingWebinarSlug === slug) {
             openWebinarEditor(slug);
           }
-          alert(`Status updated to ${nextStatus}!`);
         } else {
-          alert('Status transition failed: ' + data.error);
+          alert('Status transition failed: ' + (data.error || 'Unauthorized'));
         }
       } catch (err) {
         alert('Error: ' + err.message);
@@ -2642,14 +2891,17 @@ async function broadcastNewLaunch() {
     async function showVideoManManifest(slug) {
       try {
         const res = await fetch(`/api/webinars/${encodeURIComponent(slug)}/videoman-manifest`, {
-          method: 'POST'
+          method: 'POST',
+          headers: getAdminHeaders()
         });
         const data = await res.json();
-        if (data.ok && data.manifest) {
+        if (res.ok && data.ok && data.manifest) {
           const modal = document.getElementById('webinarManifestModal');
           const pre = document.getElementById('manifestJsonPre');
           pre.textContent = JSON.stringify(data.manifest, null, 2);
           modal.classList.remove('hidden');
+        } else {
+          alert('Failed to generate manifest: ' + (data.error || 'Unauthorized'));
         }
       } catch (err) {
         alert('Failed to generate manifest: ' + err.message);

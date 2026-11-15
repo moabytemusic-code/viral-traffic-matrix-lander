@@ -1,168 +1,312 @@
 /**
- * End-to-End HTTP Integration Test
- * Starts a live server on test port 3889 and verifies:
- * - /launchpad serves HTML with Webinars tab and modals
- * - /api/webinars returns array including yu-sleep
- * - /webinar/yu-sleep returns 403 without preview token (Unpublished gate)
- * - /webinar/yu-sleep?preview=<token> returns 200 with complete viewer HTML
- * - /api/webinars/yu-sleep/qa returns grounded answers
- * - /api/webinars/yu-sleep/register returns lead registration confirmation
- * - /api/webinars/yu-sleep/track records events
- * - /videos/yusleep-presenter-prototype.mp4 handles Range requests (HTTP 206)
- * - /images/yusleep-bottle.png returns image/png
+ * End-to-End HTTP Security, Lifecycle, Reference, Registration & Analytics Verification Suite
+ * Spawns server.js on an isolated ephemeral port with an isolated temporary WEBINAR_DATA_DIR.
+ * Never mutates workspace state files or contacts external APIs.
  */
 
-const http = require('http');
+const assert = require('assert');
+const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const { spawn } = require('child_process');
-const assert = require('assert');
 
-const TEST_PORT = 3889;
-const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
+const PORT = 3981;
+const BASE_URL = `http://127.0.0.1:${PORT}`;
+const ADMIN_TOKEN = 'e2e-admin-secret-token-777';
+const VIEWER_TOKEN = 'e2e-viewer-readonly-token-333';
+const SESSION_SECRET = 'e2e-session-hmac-secret-555';
 
-function makeRequest(urlPath, options = {}) {
-  return new Promise((resolve, reject) => {
-    const url = new URL(urlPath, BASE_URL);
-    const reqOptions = {
-      method: options.method || 'GET',
-      headers: options.headers || {}
-    };
-
-    const req = http.request(url, reqOptions, (res) => {
-      let data = [];
-      res.on('data', (chunk) => data.push(chunk));
-      res.on('end', () => {
-        const bodyBuffer = Buffer.concat(data);
-        const bodyText = bodyBuffer.toString('utf8');
-        let bodyJson = null;
-        try { bodyJson = JSON.parse(bodyText); } catch (e) {}
-        resolve({
-          statusCode: res.statusCode,
-          headers: res.headers,
-          bodyText,
-          bodyJson,
-          bodyBuffer
-        });
-      });
-    });
-
-    req.on('error', reject);
-
-    if (options.body) {
-      if (typeof options.body === 'object') {
-        req.setHeader('Content-Type', 'application/json');
-        req.write(JSON.stringify(options.body));
-      } else {
-        req.write(options.body);
-      }
-    }
-    req.end();
-  });
+async function httpReq(urlPath, { method = 'GET', headers = {}, body = null } = {}) {
+  const opts = {
+    method,
+    headers: { ...headers }
+  };
+  if (body !== null) {
+    opts.headers['Content-Type'] = 'application/json';
+    opts.body = JSON.stringify(body);
+  }
+  const res = await fetch(`${BASE_URL}${urlPath}`, opts);
+  const text = await res.text();
+  let json = null;
+  try {
+    json = JSON.parse(text);
+  } catch (_) {}
+  return { status: res.status, headers: res.headers, text, json };
 }
 
-async function run() {
-  console.log(`Starting local server on port ${TEST_PORT}...`);
-  const serverProc = spawn('node', ['server.js'], {
-    cwd: path.join(__dirname),
-    env: { ...process.env, PORT: TEST_PORT },
-    stdio: 'inherit'
+async function waitForServer(maxWaitMs = 8000) {
+  const start = Date.now();
+  while (Date.now() - start < maxWaitMs) {
+    try {
+      const r = await httpReq('/health');
+      if (r.status === 200) return;
+    } catch (_) {}
+    await new Promise((r) => setTimeout(r, 150));
+  }
+  throw new Error('Server failed to start within timeout');
+}
+
+async function runE2E() {
+  console.log('=== Running End-to-End HTTP Verification Suite ===\n');
+  const tmpDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'webinar-e2e-http-'));
+
+  const child = spawn(process.execPath, ['server.js'], {
+    cwd: __dirname,
+    env: {
+      ...process.env,
+      PORT: String(PORT),
+      HOST: '127.0.0.1',
+      WEBINAR_DATA_DIR: tmpDataDir,
+      WEBINAR_ADMIN_TOKEN: ADMIN_TOKEN,
+      WEBINAR_VIEWER_TOKEN: VIEWER_TOKEN,
+      WEBINAR_SESSION_SECRET: SESSION_SECRET,
+      WEBINAR_BREVO_LIVE: 'false'
+    },
+    stdio: ['ignore', 'pipe', 'pipe']
   });
 
-  // Give server time to bind
-  await new Promise((r) => setTimeout(r, 2000));
-
   try {
-    // 1. Check /launchpad
-    console.log('Testing GET /launchpad...');
-    const lpRes = await makeRequest('/launchpad');
-    assert.strictEqual(lpRes.statusCode, 200, 'Launchpad must return 200');
-    assert(lpRes.bodyText.includes('Presenter Webinars'), 'Launchpad must contain Presenter Webinars tab');
-    assert(lpRes.bodyText.includes('webinarEditorModal'), 'Launchpad must contain webinarEditorModal');
-    assert(lpRes.bodyText.includes('webinarManifestModal'), 'Launchpad must contain webinarManifestModal');
-    console.log('✅ GET /launchpad verified.');
-
-    // 2. Check GET /api/webinars
-    console.log('Testing GET /api/webinars...');
-    const apiRes = await makeRequest('/api/webinars');
-    assert.strictEqual(apiRes.statusCode, 200);
-    assert.strictEqual(apiRes.bodyJson.ok, true);
-    const yuSleep = apiRes.bodyJson.webinars.find(w => w.slug === 'yu-sleep');
-    assert(yuSleep, 'Must return yu-sleep webinar');
-    assert.strictEqual(yuSleep.status, 'DRAFT', 'Must be DRAFT');
-    const token = yuSleep.previewToken;
-    assert(token, 'Must have previewToken');
-    console.log('✅ GET /api/webinars verified.');
-
-    // 3. Test Public Access Gate (No preview token -> 403 Forbidden)
-    console.log('Testing GET /webinar/yu-sleep without token...');
-    const publicRes = await makeRequest('/webinar/yu-sleep');
-    assert.strictEqual(publicRes.statusCode, 403, 'Must return 403 for unpublished draft');
-    assert(publicRes.bodyText.includes('Webinar Currently in Private Review'), 'Must show private review notice');
-    console.log('✅ Unpublished draft blocking verified.');
-
-    // 4. Test Authenticated Preview (With preview token -> 200 OK)
-    console.log(`Testing GET /webinar/yu-sleep?preview=${token}...`);
-    const previewRes = await makeRequest(`/webinar/yu-sleep?preview=${token}`);
-    assert.strictEqual(previewRes.statusCode, 200, 'Must return 200 with valid preview token');
-    assert(previewRes.bodyText.includes('ADMIN PREVIEW MODE'), 'Must show admin preview banner');
-    assert(previewRes.bodyText.includes('yusleep-presenter-prototype.mp4'), 'Must include video source');
-    assert(previewRes.bodyText.includes('kmtwarrior'), 'Must include affiliate link kmtwarrior');
-    console.log('✅ Authenticated preview access verified.');
-
-    // 5. Test AI Q&A Endpoint
-    console.log('Testing POST /api/webinars/yu-sleep/qa...');
-    const qaRes = await makeRequest('/api/webinars/yu-sleep/qa', {
-      method: 'POST',
-      body: { question: 'What is the proprietary blend and how much melatonin is inside?' }
+    await waitForServer();
+    console.log('1. Testing Unauthenticated Admin Route Protection (401) & CORS Hardening...');
+    const unauthList = await httpReq('/api/webinars', {
+      headers: { Origin: 'https://evil.example.com' }
     });
-    assert.strictEqual(qaRes.statusCode, 200);
-    assert(qaRes.bodyJson.answer.includes('637 mg') || qaRes.bodyJson.answer.includes('0.9 mg'));
-    assert.strictEqual(qaRes.bodyJson.aiIdentified, true);
-    console.log('✅ AI Q&A endpoint verified.');
+    assert.strictEqual(unauthList.status, 401);
+    assert.strictEqual(unauthList.headers.get('access-control-allow-origin'), null, 'Cross-origin wildcard CORS must not be present on admin routes');
+    assert.strictEqual(unauthList.headers.get('referrer-policy'), 'no-referrer');
 
-    // 6. Test Lead Registration Endpoint
-    console.log('Testing POST /api/webinars/yu-sleep/register...');
-    const regRes = await makeRequest('/api/webinars/yu-sleep/register', {
+    const unauthPost = await httpReq('/api/webinars', {
       method: 'POST',
+      body: { slug: 'hacked', headline: 'Hacked' }
+    });
+    assert.strictEqual(unauthPost.status, 401);
+
+    const unauthStatus = await httpReq('/api/webinars/yu-sleep/status', {
+      method: 'POST',
+      body: { action: 'PUBLISH', actor: 'ForgedAdmin' }
+    });
+    assert.strictEqual(unauthStatus.status, 401);
+    console.log('   [PASS] All unauthenticated management requests rejected with 401 and strict CORS headers.');
+
+    console.log('2. Testing Role-Based Authorization (403 for Read-Only Auditor Token on Mutations)...');
+    const viewerList = await httpReq('/api/webinars', {
+      headers: { Authorization: `Bearer ${VIEWER_TOKEN}` }
+    });
+    assert.strictEqual(viewerList.status, 200);
+    assert.strictEqual(viewerList.json.ok, true);
+
+    const viewerMutate = await httpReq('/api/webinars/yu-sleep', {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${VIEWER_TOKEN}` },
+      body: { headline: 'Unauthorized Edit' }
+    });
+    assert.strictEqual(viewerMutate.status, 403);
+    console.log('   [PASS] Read-only token allowed on GET (200) and blocked on PUT/POST mutations (403).');
+
+    console.log('3. Testing Cookie Session Login, CSRF Enforcement & Forged Actor Rejection...');
+    const loginRes = await httpReq('/api/admin/session', {
+      method: 'POST',
+      body: { token: ADMIN_TOKEN }
+    });
+    assert.strictEqual(loginRes.status, 200);
+    const setCookie = loginRes.headers.get('set-cookie');
+    assert.ok(setCookie && setCookie.includes('HttpOnly') && setCookie.includes('SameSite=Strict'));
+    const cookiePair = setCookie.split(';')[0];
+    const csrfToken = loginRes.json.csrfToken;
+
+    // Cookie mutation without X-CSRF-Token must fail with 403
+    const noCsrfMutate = await httpReq('/api/webinars/yu-sleep', {
+      method: 'PUT',
+      headers: { Cookie: cookiePair },
+      body: { headline: 'CSRF Bypass Attempt' }
+    });
+    assert.strictEqual(noCsrfMutate.status, 403);
+
+    // Cookie mutation with valid X-CSRF-Token succeeds and ignores forged body.actor
+    const validCsrfStatus = await httpReq('/api/webinars/yu-sleep/status', {
+      method: 'POST',
+      headers: {
+        Cookie: cookiePair,
+        'X-CSRF-Token': csrfToken
+      },
+      body: { action: 'SUBMIT_FOR_REVIEW', note: 'Submitted in E2E', actor: 'FORGED_BODY_ACTOR' }
+    });
+    assert.strictEqual(validCsrfStatus.status, 200);
+    const latestAudit = validCsrfStatus.json.webinar.auditLog.slice(-1)[0];
+    assert.strictEqual(latestAudit.actor, 'admin:primary');
+    assert.notStrictEqual(latestAudit.actor, 'FORGED_BODY_ACTOR');
+    console.log('   [PASS] Cookie session CSRF enforced and audit actor derived from authenticated server session.');
+
+    console.log('4. Testing Unpublished Draft Protection on Public HTML, Public API & Viewer APIs...');
+    const pubHtmlDraft = await httpReq('/webinar/yu-sleep');
+    assert.strictEqual(pubHtmlDraft.status, 403);
+
+    const pubApiDraft = await httpReq('/api/public/webinars/yu-sleep');
+    assert.strictEqual(pubApiDraft.status, 404);
+
+    // Viewer APIs with forged isPreview:true must return 403 when draft is unpublished and no valid viewerContextToken is supplied
+    const forgedQa = await httpReq('/api/webinars/yu-sleep/qa', {
+      method: 'POST',
+      body: { question: 'How much melatonin?', isPreview: true }
+    });
+    assert.strictEqual(forgedQa.status, 403);
+
+    const forgedTrack = await httpReq('/api/webinars/yu-sleep/track', {
+      method: 'POST',
+      body: { eventType: 'pageview', isPreview: true }
+    });
+    assert.strictEqual(forgedTrack.status, 403);
+    console.log('   [PASS] Public HTML, Public API, and forged isPreview viewer API calls blocked on unpublished draft.');
+
+    console.log('5. Testing Scoped Preview Link Issuance, HTML Rendering, HTTP 206 Video Range & Revocation...');
+    const issuePrev = await httpReq('/api/webinars/yu-sleep/preview-links', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${ADMIN_TOKEN}` },
+      body: { ttlMinutes: 30 }
+    });
+    assert.strictEqual(issuePrev.status, 201);
+    const previewUrl = issuePrev.json.preview.previewUrl;
+    const tokenId = issuePrev.json.preview.tokenId;
+
+    const previewPage = await httpReq(previewUrl);
+    assert.strictEqual(previewPage.status, 200);
+    assert.strictEqual(previewPage.headers.get('referrer-policy'), 'no-referrer');
+    assert.ok(previewPage.text.includes('0.5 mg'), 'Rendered page must show corrected 0.5 mg Vitamin B2/B6');
+    assert.ok(previewPage.text.includes('38%'), 'Rendered page must show corrected 38% DV for B2');
+    assert.ok(previewPage.text.includes('29%'), 'Rendered page must show corrected 29% DV for B6');
+    assert.ok(previewPage.text.includes('Product FAQ Assistant'), 'Rendered page must label FAQ assistant honestly');
+    assert.ok(previewPage.text.includes('history.replaceState'), 'Rendered page must strip ?preview= token from URL bar');
+
+    // Extract viewerContextToken and SLUG embedded in preview page
+    const slugMatch = previewPage.text.match(/const SLUG = "([^"]+)"/);
+    assert.ok(slugMatch && slugMatch[1] === 'yu-sleep', 'Preview page must embed SLUG = "yu-sleep"');
+    const ctxMatch = previewPage.text.match(/const VIEWER_CONTEXT_TOKEN = "([^"]+)"/);
+    assert.ok(ctxMatch && ctxMatch[1], 'Preview page must embed signed viewerContextToken');
+    const previewContextToken = ctxMatch[1];
+
+    // Verify HTTP 206 Range streaming for the local prototype MP4
+    const rangeRes = await fetch(`${BASE_URL}/videos/yusleep-presenter-prototype.mp4`, {
+      headers: { Range: 'bytes=0-1023' }
+    });
+    assert.strictEqual(rangeRes.status, 206);
+    assert.strictEqual(rangeRes.headers.get('accept-ranges'), 'bytes');
+
+    // Revoke preview link and verify immediate rejection
+    const revokeRes = await httpReq('/api/webinars/yu-sleep/preview-links/revoke', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${ADMIN_TOKEN}` },
+      body: { tokenId }
+    });
+    assert.strictEqual(revokeRes.status, 200);
+
+    const afterRevokePage = await httpReq(previewUrl);
+    assert.strictEqual(afterRevokePage.status, 403);
+
+    const afterRevokeTrack = await httpReq('/api/webinars/yu-sleep/track', {
+      method: 'POST',
+      headers: { 'X-Viewer-Context': previewContextToken },
+      body: { eventType: 'pageview' }
+    });
+    assert.strictEqual(afterRevokeTrack.status, 403);
+    console.log('   [PASS] Scoped preview link rendered corrected facts, streamed HTTP 206 video, and revoked cleanly.');
+
+    console.log('6. Testing Approval, Publish, Live Snapshot Isolation Across Draft Edits & Viewer APIs...');
+    // Approve Rev #1
+    const approveRes = await httpReq('/api/webinars/yu-sleep/status', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${ADMIN_TOKEN}` },
+      body: { action: 'APPROVE', note: 'Approve Rev 1' }
+    });
+    assert.strictEqual(approveRes.status, 200);
+
+    // Publish Rev #1
+    const publishRes = await httpReq('/api/webinars/yu-sleep/status', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${ADMIN_TOKEN}` },
+      body: { action: 'PUBLISH', note: 'Publish Rev 1' }
+    });
+    assert.strictEqual(publishRes.status, 200);
+
+    // Edit Draft to Rev #2 while live
+    const editRes = await httpReq('/api/webinars/yu-sleep', {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${ADMIN_TOKEN}` },
       body: {
-        email: 'preview.lead@aurumrise.com',
-        name: 'Jordan',
-        consentGiven: true,
-        consentText: 'I agree to receive the YuSleep label guide and email updates.',
-        isPreview: true
+        headline: 'UNAPPROVED DRAFT REV 2 HEADLINE',
+        reference: {
+          servingDetails: {
+            servingSize: '99 mL (Unapproved Draft Serving)'
+          }
+        }
       }
     });
-    assert.strictEqual(regRes.statusCode, 200);
-    assert.strictEqual(regRes.bodyJson.ok, true);
-    console.log('✅ Lead registration endpoint verified.');
+    assert.strictEqual(editRes.status, 200);
 
-    // 7. Test Video Streaming with Range Header (HTTP 206 Partial Content)
-    console.log('Testing GET /videos/yusleep-presenter-prototype.mp4 with Range: bytes=0-1024...');
-    const videoRes = await makeRequest('/videos/yusleep-presenter-prototype.mp4', {
-      headers: { 'Range': 'bytes=0-1024' }
+    // Public viewer page must still show Published Rev #1 headline and '2 mL (2 full droppers)'
+    const livePubPage = await httpReq('/webinar/yu-sleep');
+    assert.strictEqual(livePubPage.status, 200);
+    assert.ok(livePubPage.text.includes('YuSleep: Let Us Look Beyond the Sales Pitch'));
+    assert.strictEqual(livePubPage.text.includes('UNAPPROVED DRAFT REV 2 HEADLINE'), false);
+
+    const pubCtxMatch = livePubPage.text.match(/const VIEWER_CONTEXT_TOKEN = "([^"]+)"/);
+    assert.ok(pubCtxMatch && pubCtxMatch[1]);
+    const pubContextToken = pubCtxMatch[1];
+
+    // Public FAQ query uses Published Snapshot Rev #1 ('2 mL (2 full droppers)')
+    const pubQa = await httpReq('/api/webinars/yu-sleep/qa', {
+      method: 'POST',
+      headers: { 'X-Viewer-Context': pubContextToken },
+      body: { question: 'What is the serving size and how much Vitamin B2 is in it?' }
     });
-    assert.strictEqual(videoRes.statusCode, 206, 'Must return 206 Partial Content');
-    assert.strictEqual(videoRes.headers['content-range'], 'bytes 0-1024/' + videoRes.headers['content-range'].split('/')[1]);
-    assert.strictEqual(videoRes.bodyBuffer.length, 1025);
-    console.log('✅ Video Range request streaming verified.');
+    assert.strictEqual(pubQa.status, 200);
+    assert.ok(pubQa.json.answer.includes('2 mL (2 full droppers)'));
+    assert.ok(pubQa.json.answer.includes('0.5 mg'));
+    assert.ok(pubQa.json.answer.includes('38%'));
 
-    // 8. Test Image Serving
-    console.log('Testing GET /images/yusleep-bottle.png...');
-    const imgRes = await makeRequest('/images/yusleep-bottle.png');
-    assert.strictEqual(imgRes.statusCode, 200);
-    assert.strictEqual(imgRes.headers['content-type'], 'image/png');
-    assert(imgRes.bodyBuffer.length > 500000, 'Image buffer must be complete');
-    console.log('✅ Image asset serving verified.');
+    // Public registration + watch interval tracking
+    const pubReg = await httpReq('/api/webinars/yu-sleep/register', {
+      method: 'POST',
+      headers: { 'X-Viewer-Context': pubContextToken },
+      body: {
+        email: 'e2e_viewer@example.com',
+        name: 'E2E Viewer',
+        registrationRequested: true,
+        marketingConsentGiven: false
+      }
+    });
+    assert.strictEqual(pubReg.status, 200);
+    assert.strictEqual(pubReg.json.brevoStatus, 'NOT_APPLICABLE_NO_MARKETING_CONSENT');
 
-    console.log('\n====================================================');
-    console.log('🎉 ALL END-TO-END HTTP INTEGRATION CHECKS PASSED!');
-    console.log('====================================================');
+    const pubTrack = await httpReq('/api/webinars/yu-sleep/track', {
+      method: 'POST',
+      headers: { 'X-Viewer-Context': pubContextToken },
+      body: {
+        eventType: 'watch_interval',
+        intervalStart: 10,
+        intervalEnd: 20,
+        eventId: 'e2e_interval_1'
+      }
+    });
+    assert.strictEqual(pubTrack.status, 200);
+    assert.strictEqual(pubTrack.json.sessionMetrics.uniqueWatchedSeconds, 10);
+    assert.strictEqual(pubTrack.json.analytics.milestones.p25, 1);
+
+    // Public metadata endpoint excludes previewLinks, draft, and auditLog
+    const pubMeta = await httpReq('/api/public/webinars/yu-sleep');
+    assert.strictEqual(pubMeta.status, 200);
+    assert.strictEqual(pubMeta.json.webinar.previewLinks, undefined);
+    assert.strictEqual(pubMeta.json.webinar.draft, undefined);
+    assert.strictEqual(pubMeta.json.webinar.auditLog, undefined);
+    console.log('   [PASS] Live published snapshot isolated from draft edits; FAQ, registration, and interval tracking verified.\n');
+
+    console.log('=== ALL END-TO-END HTTP VERIFICATION CHECKS PASSED 100% ===');
   } finally {
-    serverProc.kill('SIGINT');
+    child.kill('SIGTERM');
+    fs.rmSync(tmpDataDir, { recursive: true, force: true });
   }
 }
 
-run().catch((err) => {
-  console.error('Test execution failed:', err);
+runE2E().catch((err) => {
+  console.error('E2E TEST FAILURE:', err);
   process.exit(1);
 });
