@@ -143,6 +143,9 @@
         <button id="tabCampaignsBtn" type="button" onclick="switchPredictionTab('campaigns')" class="px-3.5 py-1.5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10 transition whitespace-nowrap">
           Campaign Drafts Queue (<span id="tabDraftsBadge">0</span>)
         </button>
+        <button id="tabWebinarsBtn" type="button" onclick="switchPredictionTab('webinars')" class="px-3.5 py-1.5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10 transition whitespace-nowrap flex items-center gap-1.5">
+          <span>🎬</span> Presenter Webinars (<span id="tabWebinarsBadge">1</span>)
+        </button>
         <button id="tabAttributionBtn" type="button" onclick="switchPredictionTab('attribution')" class="px-3.5 py-1.5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10 transition whitespace-nowrap">
           Revenue Attribution 📊
         </button>
@@ -216,6 +219,40 @@
           <div class="p-3 rounded-xl bg-white/5 border border-white/10">Affiliate Offer Relevance: <strong>20%</strong></div>
           <div class="p-3 rounded-xl bg-white/5 border border-white/10">Commission Economics: <strong>10%</strong></div>
           <div class="p-3 rounded-xl bg-white/5 border border-white/10">Evidence Confidence: <strong>5%</strong></div>
+        </div>
+      </div>
+
+      <!-- Panel 5: Presenter-Led On-Demand Webinars -->
+      <div id="predictionWebinarsPanel" class="hidden space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-base font-bold text-white flex items-center gap-2">
+                <span>🎬</span> Presenter-Led On-Demand Webinars
+              </h3>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono-code font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                Unpublished by Default
+              </span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono-code font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                $0 Budget Ceiling Enforced
+              </span>
+            </div>
+            <p class="text-xs text-slate-400 mt-1">
+              Presenter walkthroughs with VideoMan integration, grounded AI Q&A, verifiable Brevo lead consent, and reconciled watch metrics.
+            </p>
+          </div>
+          <button
+            type="button"
+            onclick="openWebinarEditor(null)"
+            class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:brightness-110 text-white text-xs font-bold transition shadow-lg shadow-indigo-500/20 whitespace-nowrap cursor-pointer flex items-center gap-1.5"
+          >
+            <span>+</span> New Webinar Draft
+          </button>
+        </div>
+
+        <!-- Webinars List -->
+        <div id="webinarsList" class="space-y-4">
+          <div class="text-xs text-slate-400 font-mono-code p-4 rounded-xl bg-white/5">Loading webinar records...</div>
         </div>
       </div>
     </section>
@@ -1798,6 +1835,7 @@ async function broadcastNewLaunch() {
     searchOutliers();
     syncChannels();
     loadPredictionState();
+    loadWebinars();
 
     // ==========================================
     // PREDICTION-TO-PROFIT CLIENT LOGIC
@@ -1874,6 +1912,8 @@ async function broadcastNewLaunch() {
       document.getElementById('predictionCampaignsPanel').classList.toggle('hidden', tab !== 'campaigns');
       document.getElementById('predictionAttributionPanel').classList.toggle('hidden', tab !== 'attribution');
       document.getElementById('predictionConfigPanel').classList.toggle('hidden', tab !== 'settings');
+      const webPanel = document.getElementById('predictionWebinarsPanel');
+      if (webPanel) webPanel.classList.toggle('hidden', tab !== 'webinars');
 
       document.getElementById('tabOppsBtn').className = tab === 'opps'
         ? 'px-3.5 py-1.5 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold transition whitespace-nowrap'
@@ -1882,6 +1922,13 @@ async function broadcastNewLaunch() {
       document.getElementById('tabCampaignsBtn').className = tab === 'campaigns'
         ? 'px-3.5 py-1.5 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold transition whitespace-nowrap'
         : 'px-3.5 py-1.5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10 transition whitespace-nowrap';
+
+      const tabWebBtn = document.getElementById('tabWebinarsBtn');
+      if (tabWebBtn) {
+        tabWebBtn.className = tab === 'webinars'
+          ? 'px-3.5 py-1.5 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold transition whitespace-nowrap flex items-center gap-1.5'
+          : 'px-3.5 py-1.5 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10 transition whitespace-nowrap flex items-center gap-1.5';
+      }
 
       document.getElementById('tabAttributionBtn').className = tab === 'attribution'
         ? 'px-3.5 py-1.5 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold transition whitespace-nowrap'
@@ -1893,6 +1940,9 @@ async function broadcastNewLaunch() {
 
       if (tab === 'attribution') {
         loadAttributionMetrics();
+      }
+      if (tab === 'webinars') {
+        loadWebinars();
       }
     }
 
@@ -2255,6 +2305,362 @@ async function broadcastNewLaunch() {
       }
     }
 
+    // ==========================================
+    // WEBINAR ENGINE CLIENT LOGIC
+    // ==========================================
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    let activeWebinars = [];
+
+    async function loadWebinars() {
+      try {
+        const res = await fetch('/api/webinars');
+        const data = await res.json();
+        if (data.ok && Array.isArray(data.webinars)) {
+          activeWebinars = data.webinars;
+          const badge = document.getElementById('tabWebinarsBadge');
+          if (badge) badge.textContent = activeWebinars.length;
+          renderWebinarsList(activeWebinars);
+        }
+      } catch (err) {
+        console.error('Failed to load webinars:', err);
+      }
+    }
+
+    function renderWebinarsList(webinars) {
+      const container = document.getElementById('webinarsList');
+      if (!container) return;
+
+      if (!webinars || webinars.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 rounded-2xl bg-white/5 border border-white/10 text-center space-y-3 font-mono-code">
+            <span class="text-3xl block">🎬</span>
+            <p class="text-slate-300 text-sm">No webinar funnels configured yet.</p>
+            <p class="text-slate-500 text-xs">Click "+ New Webinar Draft" above to create an on-demand presentation from an approved offer.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = webinars.map(w => {
+        const a = w.analytics || {};
+        const v = w.video || {};
+        const p = w.presenter || {};
+        const c = w.cta || {};
+
+        let statusClass = 'bg-amber-500/20 text-amber-300 border-amber-500/40';
+        let statusLabel = 'DRAFT : UNPUBLISHED';
+        if (w.status === 'READY_FOR_REVIEW') {
+          statusClass = 'bg-blue-500/20 text-blue-300 border-blue-500/40';
+          statusLabel = 'READY FOR REVIEW';
+        } else if (w.status === 'PUBLISHED') {
+          statusClass = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
+          statusLabel = 'PUBLISHED : LIVE';
+        } else if (w.status === 'ARCHIVED') {
+          statusClass = 'bg-slate-500/20 text-slate-300 border-slate-500/40';
+          statusLabel = 'ARCHIVED';
+        }
+
+        const previewUrl = `/webinar/${encodeURIComponent(w.slug)}?preview=${encodeURIComponent(w.previewToken || '')}`;
+        const liveUrl = `/webinar/${encodeURIComponent(w.slug)}`;
+
+        return `
+          <div class="glass-surface p-5 sm:p-6 rounded-2xl border border-white/10 space-y-4 hover:border-purple-500/40 transition">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-white/5 pb-4">
+              <div>
+                <div class="flex flex-wrap items-center gap-2 mb-1">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-mono-code font-bold border ${statusClass}">
+                    ${statusLabel}
+                  </span>
+                  <span class="text-xs font-mono-code text-indigo-400">/webinar/${escapeHtml(w.slug)}</span>
+                  <span class="text-slate-500 text-xs font-mono-code">v${w.version || 1}</span>
+                  ${v.isPrototype ? '<span class="text-[10px] font-mono-code px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">30s Prototype</span>' : ''}
+                </div>
+                <h4 class="text-base sm:text-lg font-bold text-white">${escapeHtml(w.internalTitle || w.headline)}</h4>
+                <p class="text-xs text-slate-400 line-clamp-1">${escapeHtml(w.subheadline || '')}</p>
+              </div>
+
+              <!-- Action Controls -->
+              <div class="flex flex-wrap items-center gap-2 font-mono-code text-xs">
+                <a href="${previewUrl}" target="_blank" class="px-3 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 transition flex items-center gap-1.5 cursor-pointer">
+                  <span>👁️</span> Private Preview
+                </a>
+                <button type="button" onclick="openWebinarEditor('${escapeHtml(w.slug)}')" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10 transition cursor-pointer">
+                  Configure & Edit
+                </button>
+                <button type="button" onclick="showVideoManManifest('${escapeHtml(w.slug)}')" class="px-2.5 py-1.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 transition cursor-pointer" title="VideoMan Manifest">
+                  <span>🎬</span> Manifest
+                </button>
+                ${w.status === 'DRAFT' ? `
+                  <button type="button" onclick="changeWebinarStatus('${escapeHtml(w.slug)}', 'READY_FOR_REVIEW', 'Approved draft for review')" class="px-2.5 py-1.5 rounded-xl bg-blue-600/30 hover:bg-blue-600/50 text-blue-200 border border-blue-500/40 transition cursor-pointer">
+                    Approve for Review
+                  </button>
+                ` : ''}
+                ${w.status === 'READY_FOR_REVIEW' ? `
+                  <button type="button" onclick="changeWebinarStatus('${escapeHtml(w.slug)}', 'PUBLISHED', 'Explicit admin publication')" class="px-2.5 py-1.5 rounded-xl bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-200 border border-emerald-500/40 transition cursor-pointer font-bold">
+                    🚀 Publish Live
+                  </button>
+                ` : ''}
+                ${w.status === 'PUBLISHED' ? `
+                  <button type="button" onclick="changeWebinarStatus('${escapeHtml(w.slug)}', 'DRAFT', 'Reverted to draft')" class="px-2.5 py-1.5 rounded-xl bg-amber-600/30 hover:bg-amber-600/50 text-amber-200 border border-amber-500/40 transition cursor-pointer">
+                    Revert to Draft
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+
+            <!-- Key Details & Production Status Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono-code">
+              <div class="p-2.5 rounded-xl bg-black/40 border border-white/5">
+                <span class="text-[10px] text-slate-500 block uppercase">Presenter</span>
+                <span class="font-bold text-slate-200">${escapeHtml(p.name || 'Sarah')} ${p.isAiGenerated ? '(AI Character)' : ''}</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-black/40 border border-white/5">
+                <span class="text-[10px] text-slate-500 block uppercase">Video Delivery</span>
+                <span class="font-bold text-slate-200">${v.durationSeconds || 30}s · MP4 Range</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-black/40 border border-white/5">
+                <span class="text-[10px] text-slate-500 block uppercase">CTA Reveal</span>
+                <span class="font-bold text-indigo-300">At ${c.revealSeconds || 15}s Playback</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-black/40 border border-white/5">
+                <span class="text-[10px] text-slate-500 block uppercase">Brevo Lead List</span>
+                <span class="font-bold text-emerald-300">List #${w.registration?.brevoListId || 80}</span>
+              </div>
+            </div>
+
+            <!-- Reconciled Metrics Strip -->
+            <div class="p-3 rounded-xl bg-gradient-to-r from-purple-950/20 via-black/40 to-indigo-950/20 border border-white/5 flex flex-wrap items-center justify-between gap-4 text-xs font-mono-code">
+              <div class="flex items-center gap-4">
+                <span>Unique Views: <strong class="text-white">${a.viewsUnique || 0}</strong></span>
+                <span>Starts: <strong class="text-purple-300">${a.playbackStarts || 0}</strong></span>
+                <span>Avg Watch: <strong class="text-indigo-300">${a.averageWatchSeconds || 0}s</strong></span>
+                <span>CTA Clicks: <strong class="text-emerald-400">${a.ctaClicks || 0}</strong></span>
+                <span>Leads: <strong class="text-cyan-300">${a.registrations || 0}</strong></span>
+                <span>AI Q&A: <strong class="text-pink-300">${a.qaQuestionsAsked || 0}</strong></span>
+              </div>
+              <div class="text-[11px] text-slate-400">
+                Sales Attribution: <span class="text-amber-400 font-bold">${a.salesAttributionStatus || 'NOT_CONNECTED'}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Webinar Editor Modal Handlers
+    let editingWebinarSlug = null;
+
+    async function openWebinarEditor(slug) {
+      editingWebinarSlug = slug;
+      const modal = document.getElementById('webinarEditorModal');
+      const form = document.getElementById('webinarEditorForm');
+      if (!modal || !form) return;
+
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+
+      if (!slug) {
+        // New blank draft
+        document.getElementById('weModalTitle').textContent = 'Create New Webinar Draft';
+        form.reset();
+        document.getElementById('weSlug').value = 'new-webinar';
+        document.getElementById('weSlug').removeAttribute('readonly');
+        document.getElementById('weStatus').textContent = 'DRAFT';
+        document.getElementById('weAuditList').innerHTML = '<li class="text-slate-500">New draft not yet saved.</li>';
+        return;
+      }
+
+      document.getElementById('weModalTitle').textContent = `Edit Webinar: ${slug}`;
+      document.getElementById('weSlug').setAttribute('readonly', 'true');
+
+      try {
+        const res = await fetch(`/api/webinars/${encodeURIComponent(slug)}`);
+        const data = await res.json();
+        if (data.ok && data.webinar) {
+          const w = data.webinar;
+          document.getElementById('weInternalTitle').value = w.internalTitle || '';
+          document.getElementById('weHeadline').value = w.headline || '';
+          document.getElementById('weSlug').value = w.slug || '';
+          document.getElementById('weSubheadline').value = w.subheadline || '';
+          document.getElementById('wePresenterName').value = w.presenter?.name || 'Sarah';
+          document.getElementById('wePresenterRole').value = w.presenter?.role || 'Affiliate Overview Host';
+          document.getElementById('weIsAiPresenter').checked = !!w.presenter?.isAiGenerated;
+          document.getElementById('wePresenterDisclosure').value = w.presenter?.disclosureText || '';
+          document.getElementById('weVideoUrl').value = w.video?.videoUrl || '';
+          document.getElementById('wePosterUrl').value = w.video?.posterUrl || '';
+          document.getElementById('weDurationSeconds').value = w.video?.durationSeconds || 30;
+          document.getElementById('weIsPrototype').checked = !!w.video?.isPrototype;
+          document.getElementById('wePrototypeNotice').value = w.video?.prototypeNotice || '';
+          document.getElementById('weCtaText').value = w.cta?.buttonText || '';
+          document.getElementById('weCtaSubtext').value = w.cta?.subtext || '';
+          document.getElementById('weCtaUrl').value = w.cta?.destinationUrl || '';
+          document.getElementById('weCtaRevealSeconds').value = w.cta?.revealSeconds || 15;
+          document.getElementById('weCtaDisclosure').value = w.cta?.affiliateDisclosure || '';
+          document.getElementById('weBrevoListId').value = w.registration?.brevoListId || 80;
+          document.getElementById('weConsentText').value = w.registration?.consentCheckboxText || '';
+          document.getElementById('weStatus').textContent = w.status || 'DRAFT';
+
+          // Grounded Reference
+          const ref = w.reference || {};
+          document.getElementById('weRefProductName').value = ref.productName || '';
+          document.getElementById('weRefServingSize').value = ref.servingSize || '';
+          document.getElementById('weRefRefundPolicy').value = ref.refundPolicy?.terms || '';
+
+          // Audit Log
+          const auditList = document.getElementById('weAuditList');
+          if (auditList && Array.isArray(w.auditLog)) {
+            auditList.innerHTML = w.auditLog.slice().reverse().map(log => `
+              <li class="py-1 border-b border-white/5 text-[11px] font-mono-code flex justify-between gap-2">
+                <span class="text-purple-300 font-bold">${escapeHtml(log.action)}</span>
+                <span class="text-slate-400">${escapeHtml(log.note || '')} (${escapeHtml(log.actor || 'System')})</span>
+                <span class="text-slate-500">${new Date(log.timestamp).toLocaleTimeString()}</span>
+              </li>
+            `).join('');
+          }
+
+          // Update Preview Link in Modal
+          const previewBtn = document.getElementById('wePreviewBtn');
+          if (previewBtn) {
+            previewBtn.onclick = () => {
+              window.open(`/webinar/${encodeURIComponent(w.slug)}?preview=${encodeURIComponent(w.previewToken || '')}`, '_blank');
+            };
+          }
+        }
+      } catch (err) {
+        alert('Error fetching webinar: ' + err.message);
+      }
+    }
+
+    function closeWebinarEditor() {
+      const modal = document.getElementById('webinarEditorModal');
+      if (modal) modal.classList.add('hidden');
+      document.body.style.overflow = 'auto';
+    }
+
+    async function saveWebinarForm(e) {
+      if (e) e.preventDefault();
+      const slug = document.getElementById('weSlug').value.trim();
+      if (!slug) {
+        alert('Slug is required');
+        return;
+      }
+
+      const payload = {
+        slug,
+        internalTitle: document.getElementById('weInternalTitle').value.trim(),
+        headline: document.getElementById('weHeadline').value.trim(),
+        subheadline: document.getElementById('weSubheadline').value.trim(),
+        presenter: {
+          name: document.getElementById('wePresenterName').value.trim(),
+          role: document.getElementById('wePresenterRole').value.trim(),
+          isAiGenerated: document.getElementById('weIsAiPresenter').checked,
+          disclosureText: document.getElementById('wePresenterDisclosure').value.trim()
+        },
+        video: {
+          videoUrl: document.getElementById('weVideoUrl').value.trim(),
+          posterUrl: document.getElementById('wePosterUrl').value.trim(),
+          durationSeconds: Number(document.getElementById('weDurationSeconds').value) || 30,
+          isPrototype: document.getElementById('weIsPrototype').checked,
+          prototypeNotice: document.getElementById('wePrototypeNotice').value.trim()
+        },
+        cta: {
+          buttonText: document.getElementById('weCtaText').value.trim(),
+          subtext: document.getElementById('weCtaSubtext').value.trim(),
+          destinationUrl: document.getElementById('weCtaUrl').value.trim(),
+          revealSeconds: Number(document.getElementById('weCtaRevealSeconds').value) || 15,
+          affiliateDisclosure: document.getElementById('weCtaDisclosure').value.trim()
+        },
+        registration: {
+          brevoListId: Number(document.getElementById('weBrevoListId').value) || 80,
+          consentCheckboxText: document.getElementById('weConsentText').value.trim()
+        },
+        reference: {
+          productName: document.getElementById('weRefProductName').value.trim(),
+          servingSize: document.getElementById('weRefServingSize').value.trim(),
+          refundPolicy: {
+            terms: document.getElementById('weRefRefundPolicy').value.trim()
+          }
+        }
+      };
+
+      try {
+        const isUpdate = !!editingWebinarSlug;
+        const url = isUpdate ? `/api/webinars/${encodeURIComponent(slug)}` : '/api/webinars';
+        const method = isUpdate ? 'PUT' : 'POST';
+
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.ok) {
+          await loadWebinars();
+          alert('Webinar draft saved successfully!');
+          closeWebinarEditor();
+        } else {
+          alert('Save failed: ' + (data.error || 'Unknown error'));
+        }
+      } catch (err) {
+        alert('Network error while saving: ' + err.message);
+      }
+    }
+
+    async function changeWebinarStatus(slug, nextStatus, note) {
+      if (!confirm(`Are you sure you want to transition "${slug}" to ${nextStatus}?`)) return;
+
+      try {
+        const res = await fetch(`/api/webinars/${encodeURIComponent(slug)}/status`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: nextStatus, note: note || '', actor: 'Admin' })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          await loadWebinars();
+          if (editingWebinarSlug === slug) {
+            openWebinarEditor(slug);
+          }
+          alert(`Status updated to ${nextStatus}!`);
+        } else {
+          alert('Status transition failed: ' + data.error);
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+
+    async function showVideoManManifest(slug) {
+      try {
+        const res = await fetch(`/api/webinars/${encodeURIComponent(slug)}/videoman-manifest`, {
+          method: 'POST'
+        });
+        const data = await res.json();
+        if (data.ok && data.manifest) {
+          const modal = document.getElementById('webinarManifestModal');
+          const pre = document.getElementById('manifestJsonPre');
+          pre.textContent = JSON.stringify(data.manifest, null, 2);
+          modal.classList.remove('hidden');
+        }
+      } catch (err) {
+        alert('Failed to generate manifest: ' + err.message);
+      }
+    }
+
+    function closeManifestModal() {
+      const modal = document.getElementById('webinarManifestModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
     async function scanPredictionMarketsNow() {
       const btn = document.getElementById('scanPredictionMarketsBtn');
       const originalText = btn.innerHTML;
@@ -2281,7 +2687,8 @@ async function broadcastNewLaunch() {
         btn.disabled = false;
       }
     }
-  </script>
+
+      </script>
 
   <!-- Central Postiz Hub & Multi-Project Modal -->
   <div id="postizHubModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden">
@@ -2378,6 +2785,223 @@ await postiz.schedulePost({
       <div class="text-[11px] font-mono-code text-slate-400 bg-slate-900/60 p-3 rounded-xl border border-white/5 flex items-center justify-between">
         <span>📦 Coolify Stack Ready: <code class="text-indigo-300">docker-compose.postiz.yml</code> (Root directory)</span>
         <span class="text-slate-400">PostgreSQL 16 + Redis 7 + Postiz App</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Webinar Editor Modal -->
+  <div id="webinarEditorModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md hidden">
+    <div class="relative w-full max-w-4xl max-h-[92vh] overflow-y-auto rounded-3xl bg-slate-950 border border-indigo-500/30 p-6 sm:p-8 space-y-6 shadow-2xl">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-white/10 pb-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono-code font-bold uppercase px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+              Webinar Studio Editor
+            </span>
+            <span id="weStatus" class="text-xs font-mono-code font-bold uppercase px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              DRAFT
+            </span>
+          </div>
+          <h3 id="weModalTitle" class="text-xl sm:text-2xl font-black text-white mt-1">Configure Webinar Funnel</h3>
+        </div>
+        <button type="button" onclick="closeWebinarEditor()" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-white/10 transition text-lg cursor-pointer">
+          ✕
+        </button>
+      </div>
+
+      <!-- Form -->
+      <form id="webinarEditorForm" onsubmit="saveWebinarForm(event)" class="space-y-6">
+
+        <!-- 1. General & SEO -->
+        <div class="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4">
+          <h4 class="text-xs font-mono-code font-bold uppercase text-indigo-300">1. Overview &amp; Routing</h4>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weInternalTitle">Internal Title</label>
+              <input id="weInternalTitle" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" required>
+            </div>
+            <div>
+              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weSlug">URL Slug (e.g. /webinar/yu-sleep)</label>
+              <input id="weSlug" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" required>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weHeadline">Public Headline</label>
+            <input id="weHeadline" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" required>
+          </div>
+          <div>
+            <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weSubheadline">Subheadline / Narrative Angle</label>
+            <textarea id="weSubheadline" rows="2" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500"></textarea>
+          </div>
+        </div>
+
+        <!-- 2. Presenter & Transparency -->
+        <div class="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4">
+          <h4 class="text-xs font-mono-code font-bold uppercase text-purple-300">2. Presenter &amp; AI Disclosures</h4>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="wePresenterName">Presenter Name</label>
+              <input id="wePresenterName" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="e.g. Sarah">
+            </div>
+            <div>
+              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="wePresenterRole">Presenter Role / Designation</label>
+              <input id="wePresenterRole" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="e.g. Affiliate Overview Host">
+            </div>
+          </div>
+          <div class="flex items-center gap-2 pt-1">
+            <input type="checkbox" id="weIsAiPresenter" class="rounded border-slate-700 text-indigo-600 focus:ring-indigo-500">
+            <label for="weIsAiPresenter" class="text-xs text-slate-300 cursor-pointer">
+              Presenter is AI Generated (Enforces explicit on-screen disclosure and persistent badge)
+            </label>
+          </div>
+          <div>
+            <label class="block text-xs font-mono-code text-slate-300 mb-1" for="wePresenterDisclosure">AI Presenter Disclosure Copy</label>
+            <textarea id="wePresenterDisclosure" rows="2" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500"></textarea>
+          </div>
+        </div>
+
+        <!-- 3. Video Asset Delivery & VideoMan -->
+        <div class="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-mono-code font-bold uppercase text-emerald-300">3. Video Asset &amp; VideoMan Engine</h4>
+            <span class="text-[10px] font-mono-code text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+              $0 Spending Limit Enforced
+            </span>
+          </div>
+          <div class="grid sm:grid-cols-3 gap-4">
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weVideoUrl">Hosted MP4 Path</label>
+              <input id="weVideoUrl" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="/videos/yusleep-presenter-prototype.mp4" required>
+            </div>
+            <div>
+              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weDurationSeconds">Duration (Seconds)</label>
+              <input id="weDurationSeconds" type="number" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="30" required>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-mono-code text-slate-300 mb-1" for="wePosterUrl">Poster Image URL</label>
+            <input id="wePosterUrl" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="/images/yusleep-presenter.jpg">
+          </div>
+          <div class="flex items-center gap-2 pt-1">
+            <input type="checkbox" id="weIsPrototype" class="rounded border-slate-700 text-indigo-600 focus:ring-indigo-500">
+            <label for="weIsPrototype" class="text-xs text-amber-300 cursor-pointer">
+              Mark as Demonstration Prototype (Displays transparent prototype banner to viewer)
+            </label>
+          </div>
+          <div>
+            <label class="block text-xs font-mono-code text-slate-300 mb-1" for="wePrototypeNotice">Prototype Notice Text</label>
+            <textarea id="wePrototypeNotice" rows="2" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500"></textarea>
+          </div>
+        </div>
+
+        <!-- 4. Call-to-Action & Timing -->
+        <div class="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4">
+          <h4 class="text-xs font-mono-code font-bold uppercase text-indigo-300">4. Timed Call-to-Action (CTA)</h4>
+          <div class="grid sm:grid-cols-3 gap-4">
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weCtaText">CTA Button Text</label>
+              <input id="weCtaText" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" required>
+            </div>
+            <div>
+              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weCtaRevealSeconds">Reveal At (Seconds)</label>
+              <input id="weCtaRevealSeconds" type="number" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" required>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weCtaUrl">Approved Destination URL (with tracking)</label>
+            <input id="weCtaUrl" type="url" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" required>
+          </div>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weCtaSubtext">CTA Subtext</label>
+              <input id="weCtaSubtext" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500">
+            </div>
+            <div>
+              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weCtaDisclosure">Affiliate Disclosure Statement</label>
+              <input id="weCtaDisclosure" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500">
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Lead Generation & Brevo -->
+        <div class="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4">
+          <h4 class="text-xs font-mono-code font-bold uppercase text-cyan-300">5. Brevo Lead Capture &amp; Consent</h4>
+          <div class="grid sm:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weBrevoListId">Brevo List ID</label>
+              <input id="weBrevoListId" type="number" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500" value="80">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weConsentText">Marketing Consent Checkbox Text</label>
+              <input id="weConsentText" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500">
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. Grounded Reference for AI Q&A -->
+        <div class="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4">
+          <h4 class="text-xs font-mono-code font-bold uppercase text-pink-300">6. Grounded Reference Data (AI Q&amp;A Sources)</h4>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weRefProductName">Verified Product Name</label>
+              <input id="weRefProductName" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500">
+            </div>
+            <div>
+              <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weRefServingSize">Serving Size</label>
+              <input id="weRefServingSize" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-mono-code text-slate-300 mb-1" for="weRefRefundPolicy">Verified Guarantee / Refund Terms</label>
+            <textarea id="weRefRefundPolicy" rows="2" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500"></textarea>
+          </div>
+        </div>
+
+        <!-- 7. Audit Log -->
+        <div class="p-4 sm:p-5 rounded-2xl bg-black/40 border border-white/5 space-y-2">
+          <h4 class="text-xs font-mono-code font-bold uppercase text-slate-400">Version History &amp; Audit Trail</h4>
+          <ul id="weAuditList" class="space-y-1 max-h-32 overflow-y-auto"></ul>
+        </div>
+
+        <!-- Action Footer -->
+        <div class="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4">
+          <div class="flex items-center gap-2">
+            <button type="submit" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:brightness-110 text-white font-bold text-xs shadow-lg shadow-indigo-500/20 transition cursor-pointer">
+              💾 Save Draft
+            </button>
+            <button type="button" id="wePreviewBtn" class="px-4 py-2.5 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 text-xs font-mono-code transition cursor-pointer">
+              👁️ Private Preview
+            </button>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="closeWebinarEditor()" class="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-mono-code border border-white/10 transition cursor-pointer">
+              Close
+            </button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- VideoMan Production Manifest Modal -->
+  <div id="webinarManifestModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md hidden">
+    <div class="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-3xl bg-slate-950 border border-indigo-500/30 p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <h4 class="font-bold text-white text-sm flex items-center gap-2">
+          <span>🎬</span> VideoMan Production Manifest (JSON)
+        </h4>
+        <button type="button" onclick="closeManifestModal()" class="text-slate-400 hover:text-white cursor-pointer">✕</button>
+      </div>
+      <p class="text-xs text-slate-400 font-mono-code">
+        Hardware-accelerated Remotion render configuration. Enforces $0 external avatar budget ceiling.
+      </p>
+      <pre id="manifestJsonPre" class="p-4 rounded-xl bg-black/80 border border-white/10 text-xs font-mono-code text-indigo-300 overflow-x-auto max-h-96"></pre>
+      <div class="flex justify-end">
+        <button type="button" onclick="closeManifestModal()" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-mono-code">
+          Close
+        </button>
       </div>
     </div>
   </div>

@@ -26,6 +26,8 @@ const catalystEngine = require('./catalyst-engine');
 const autonomousCatalyst = require('./autonomous-catalyst');
 const continuousDaemon = require('./continuous-daemon');
 const predictionPipeline = require('./prediction-pipeline');
+const { webinarEngine, WEBINAR_STATES } = require('./webinar-engine');
+const { renderWebinarViewer } = require('./render-webinar');
 const ARTICLES_PATH = path.join(__dirname, 'articles.json');
 const BIOS_PATH = path.join(__dirname, 'bios.json');
 const PREDICTION_STATE_PATH = path.join(__dirname, 'prediction-state.json');
@@ -370,7 +372,7 @@ async function provisionBrevoListAndTemplates(offer) {
       name: `${offer.name} - Day 1 Quick Check-In`,
       subject: `Did you activate your ${offer.name} access yet?`,
       heading: `Quick 4-Minute Check-In`,
-      bodyHtml: `<p>Just checking in after you unlocked <strong>${offer.name}</strong> yesterday.</p><p>Don't let this sit in your bookmarks—it takes just a few minutes to activate and put to work:</p>`,
+      bodyHtml: `<p>Just checking in after you unlocked <strong>${offer.name}</strong> yesterday.</p><p>Don't let this sit in your bookmarks: it takes just a few minutes to activate and put to work:</p>`,
       cta: `Complete Your ${offer.name} Setup →`
     },
     {
@@ -444,7 +446,7 @@ function buildViralForgeSwapPrompt(offer, outlierBreakdown) {
   const rawBreakdown = outlierBreakdown?.rawText || JSON.stringify(outlierBreakdown || {}, null, 2);
   const outlierExcerpt = rawBreakdown.slice(0, 1200);
 
-  return `# ${offer.name} — SwapEngine Prompt
+  return `# ${offer.name} : SwapEngine Prompt
 
 Create this in the same format, pacing, and style as the reference video. Keep the reference’s structure and beat pattern, but change the content so it promotes ${offer.name}.
 
@@ -620,21 +622,114 @@ Sitemap: https://${host}/sitemap.xml
     return;
   }
 
-  // GET /videos/:file -> Stream high-production Remotion commercial MP4s directly
+  // GET /webinar/:slug or GET /w/:slug -> Presenter-Led On-Demand Webinar Viewer
+  if ((req.method === 'GET' || req.method === 'HEAD') && (pathname.startsWith('/webinar/') || pathname.startsWith('/w/'))) {
+    const rawSlug = pathname.replace(/^\/(webinar|w)\//, '').replace(/\/$/, '');
+    const previewToken = parsedUrl.searchParams.get('preview') || null;
+
+    const access = webinarEngine.canAccessWebinar(rawSlug, previewToken);
+
+    if (access.allowed && access.webinar) {
+      try {
+        const html = renderWebinarViewer(access.webinar, { isPreview: access.isPreview });
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        return res.end(html);
+      } catch (err) {
+        console.error('Error rendering webinar for slug', rawSlug, err);
+        res.writeHead(500, { 'Content-Type': 'text/html; charset=utf-8' });
+        return res.end(`<h1>Error rendering webinar</h1><p>${escapeHtml(err.message)}</p>`);
+      }
+    }
+
+    if (access.reason === 'UNPUBLISHED_DRAFT') {
+      res.writeHead(403, { 'Content-Type': 'text/html; charset=utf-8' });
+      return res.end(`
+        <body style="background:#020617;color:#f8fafc;font-family:sans-serif;padding:60px 20px;text-align:center">
+          <div style="max-width:500px;margin:0 auto;background:#0f172a;padding:40px;border-radius:24px;border:1px solid rgba(255,255,255,0.1)">
+            <div style="font-size:32px;margin-bottom:16px">🔒</div>
+            <h1 style="font-size:20px;font-weight:bold;margin-bottom:12px">Webinar Currently in Private Review</h1>
+            <p style="color:#94a3b8;font-size:14px;line-height:1.6">This webinar overview is an unpublished draft and is not currently available for public viewing. If you are an authorized reviewer, please use the private preview link provided in the Launchpad admin.</p>
+            <p style="margin-top:24px"><a href="/launchpad" style="color:#6366f1;text-decoration:none;font-size:13px;font-weight:bold">Return to Admin Launchpad →</a></p>
+          </div>
+        </body>
+      `);
+    }
+
+    res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
+    return res.end(`<h1>Webinar "${escapeHtml(rawSlug)}" not found</h1><p><a href="/launchpad">Open Launchpad</a></p>`);
+  }
+
+  // GET /videos/:file -> Stream high-production Remotion & Webinar MP4s with Range Support (HTTP 206)
   if ((req.method === 'GET' || req.method === 'HEAD') && pathname.startsWith('/videos/')) {
     const videoName = path.basename(pathname);
     const videoFile = path.join(__dirname, 'public', 'videos', videoName);
     if (fs.existsSync(videoFile)) {
       const stat = fs.statSync(videoFile);
-      res.writeHead(200, {
-        'Content-Type': 'video/mp4',
-        'Content-Length': stat.size,
-        'Accept-Ranges': 'bytes'
-      });
-      return fs.createReadStream(videoFile).pipe(res);
+      const fileSize = stat.size;
+      const range = req.headers.range;
+
+      if (range) {
+        const parts = range.replace(/bytes=/, '').split('-');
+        const start = parseInt(parts[0], 10);
+        const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+        const chunksize = (end - start) + 1;
+        const file = fs.createReadStream(videoFile, { start, end });
+        res.writeHead(206, {
+          'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+          'Accept-Ranges': 'bytes',
+          'Content-Length': chunksize,
+          'Content-Type': 'video/mp4'
+        });
+        return file.pipe(res);
+      } else {
+        res.writeHead(200, {
+          'Content-Length': fileSize,
+          'Accept-Ranges': 'bytes',
+          'Content-Type': 'video/mp4'
+        });
+        return fs.createReadStream(videoFile).pipe(res);
+      }
     }
     res.writeHead(404, { 'Content-Type': 'text/plain' });
     return res.end('Video not found');
+  }
+
+  // GET /images/:file -> Serve public images (posters, bottles, supplement facts, avatars)
+  if ((req.method === 'GET' || req.method === 'HEAD') && pathname.startsWith('/images/')) {
+    const fileName = path.basename(pathname);
+    const imgFile = path.join(__dirname, 'public', 'images', fileName);
+    if (fs.existsSync(imgFile)) {
+      const stat = fs.statSync(imgFile);
+      const ext = path.extname(imgFile).toLowerCase();
+      const mime = ext === '.png' ? 'image/png' : ext === '.webp' ? 'image/webp' : 'image/jpeg';
+      res.writeHead(200, {
+        'Content-Type': mime,
+        'Content-Length': stat.size,
+        'Cache-Control': 'public, max-age=86400'
+      });
+      return fs.createReadStream(imgFile).pipe(res);
+    }
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    return res.end('Image not found');
+  }
+
+  // GET /thumbnails/:file -> Serve public thumbnails
+  if ((req.method === 'GET' || req.method === 'HEAD') && pathname.startsWith('/thumbnails/')) {
+    const fileName = path.basename(pathname);
+    const thumbFile = path.join(__dirname, 'public', 'thumbnails', fileName);
+    if (fs.existsSync(thumbFile)) {
+      const stat = fs.statSync(thumbFile);
+      const ext = path.extname(thumbFile).toLowerCase();
+      const mime = ext === '.png' ? 'image/png' : ext === '.webp' ? 'image/webp' : 'image/jpeg';
+      res.writeHead(200, {
+        'Content-Type': mime,
+        'Content-Length': stat.size,
+        'Cache-Control': 'public, max-age=86400'
+      });
+      return fs.createReadStream(thumbFile).pipe(res);
+    }
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    return res.end('Thumbnail not found');
   }
 
   // GET /downloads/:file -> Stream downloadable cheat sheets, PDFs, and guides
@@ -715,7 +810,7 @@ Sitemap: https://${host}/sitemap.xml
     }
     res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
     const available = Object.keys(biosList)
-      .map((k) => `<li><a href="/bio/${k}" style="color:#06b6d4">/bio/${k}</a> — ${biosList[k].channelName}</li>`)
+      .map((k) => `<li><a href="/bio/${k}" style="color:#06b6d4">/bio/${k}</a>: ${biosList[k].channelName}</li>`)
       .join('');
     return res.end(`
       <body style="background:#020617;color:#f8fafc;font-family:sans-serif;padding:40px;text-align:center">
@@ -1017,6 +1112,171 @@ Sitemap: https://${host}/sitemap.xml
       res.writeHead(500, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify({ ok: false, error: err.message }));
     }
+  }
+
+  // ==========================================
+  // WEBINAR ENGINE API ENDPOINTS
+  // ==========================================
+
+  // GET /api/webinars -> List all webinars (Admin Launchpad)
+  if (req.method === 'GET' && pathname === '/api/webinars') {
+    try {
+      const webinars = webinarEngine.getAllWebinars(true);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: true, webinars }));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+  }
+
+  // GET /api/webinars/:slug -> Get single webinar with full audit trail & analytics
+  if (req.method === 'GET' && pathname.startsWith('/api/webinars/') && !pathname.endsWith('/analytics') && !pathname.endsWith('/videoman-manifest')) {
+    const slug = pathname.replace('/api/webinars/', '').split('/')[0];
+    const webinar = webinarEngine.getWebinar(slug);
+    if (!webinar) {
+      res.writeHead(404, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: 'Webinar not found' }));
+    }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ ok: true, webinar }));
+  }
+
+  // POST /api/webinars -> Create new webinar draft
+  if (req.method === 'POST' && pathname === '/api/webinars') {
+    try {
+      const body = await readJsonBody(req);
+      const webinar = webinarEngine.saveWebinar(body, 'Admin');
+      res.writeHead(201, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: true, webinar }));
+    } catch (err) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+  }
+
+  // PUT /api/webinars/:slug -> Update webinar draft
+  if (req.method === 'PUT' && pathname.startsWith('/api/webinars/')) {
+    try {
+      const slug = pathname.replace('/api/webinars/', '').split('/')[0];
+      const body = await readJsonBody(req);
+      body.slug = slug;
+      const webinar = webinarEngine.saveWebinar(body, 'Admin');
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: true, webinar }));
+    } catch (err) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+  }
+
+  // POST /api/webinars/:slug/status -> State transition (Save, Approve, Publish, Unpublish, Archive)
+  if (req.method === 'POST' && pathname.match(/^\/api\/webinars\/[^/]+\/status$/)) {
+    try {
+      const slug = pathname.split('/')[3];
+      const body = await readJsonBody(req);
+      const { status, note, actor } = body;
+      const webinar = webinarEngine.updateStatus(slug, status, actor || 'Admin', note);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: true, webinar }));
+    } catch (err) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+  }
+
+  // POST /api/webinars/:slug/videoman-import -> Import MP4 video into webinar
+  if (req.method === 'POST' && pathname.match(/^\/api\/webinars\/[^/]+\/videoman-import$/)) {
+    try {
+      const slug = pathname.split('/')[3];
+      const body = await readJsonBody(req);
+      const webinar = webinarEngine.importVideoManAsset(slug, body);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: true, webinar }));
+    } catch (err) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+  }
+
+  // POST /api/webinars/:slug/videoman-manifest -> Export VideoMan production manifest
+  if (req.method === 'POST' && pathname.match(/^\/api\/webinars\/[^/]+\/videoman-manifest$/)) {
+    try {
+      const slug = pathname.split('/')[3];
+      const manifest = webinarEngine.generateVideoManManifest(slug);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: true, manifest }));
+    } catch (err) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+  }
+
+  // POST /api/webinars/:slug/register -> Viewer Lead Capture with Brevo & Consent
+  if (req.method === 'POST' && pathname.match(/^\/api\/webinars\/[^/]+\/register$/)) {
+    try {
+      const slug = pathname.split('/')[3];
+      const body = await readJsonBody(req);
+      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+      const userAgent = req.headers['user-agent'] || 'Unknown';
+      const result = await webinarEngine.registerLead(slug, {
+        ...body,
+        ip,
+        userAgent
+      });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify(result));
+    } catch (err) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+  }
+
+  // POST /api/webinars/:slug/qa -> Grounded AI Q&A Engine
+  if (req.method === 'POST' && pathname.match(/^\/api\/webinars\/[^/]+\/qa$/)) {
+    try {
+      const slug = pathname.split('/')[3];
+      const body = await readJsonBody(req);
+      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+      const result = await webinarEngine.answerViewerQuestion(slug, body.question, { ip });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify(result));
+    } catch (err) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+  }
+
+  // POST /api/webinars/:slug/track -> Viewer Analytics Heartbeat & Milestone Tracking
+  if (req.method === 'POST' && pathname.match(/^\/api\/webinars\/[^/]+\/track$/)) {
+    try {
+      const slug = pathname.split('/')[3];
+      const body = await readJsonBody(req);
+      const result = webinarEngine.trackEvent(slug, body);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify(result));
+    } catch (err) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+  }
+
+  // GET /api/webinars/:slug/analytics -> Reconciled Metrics & Audit History
+  if (req.method === 'GET' && pathname.match(/^\/api\/webinars\/[^/]+\/analytics$/)) {
+    const slug = pathname.split('/')[3];
+    const webinar = webinarEngine.getWebinar(slug);
+    if (!webinar) {
+      res.writeHead(404, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: 'Webinar not found' }));
+    }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({
+      ok: true,
+      analytics: webinar.analytics,
+      auditLog: webinar.auditLog,
+      video: webinar.video,
+      status: webinar.status
+    }));
   }
 
   // GET /api/vf/job-status?slug=... -> Check live ViralForge render + auto-schedule state
@@ -1476,7 +1736,7 @@ Sitemap: https://${host}/sitemap.xml
         );
       }
 
-      let title = (fullTitle.split(/\s+[–—|]\s+|\s+-\s+/)[0] || fullTitle).trim();
+      let title = (fullTitle.split(/\s+[\u2013\u2014|]\s+|\s+-\s+/)[0] || fullTitle).trim();
 
       // Better headline selection (combines stacked subheadings if present)
       let headline = '';

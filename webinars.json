@@ -1,0 +1,205 @@
+{
+  "yu-sleep": {
+    "slug": "yu-sleep",
+    "internalTitle": "YuSleep Tart Cherry Label Walkthrough and Buying Guide",
+    "headline": "YuSleep: Looking Beyond the Sleep Supplement Sales Pitch",
+    "subheadline": "An independent, factual label breakdown, ingredient review, and pricing inspection before you decide.",
+    "presenter": {
+      "name": "Sarah",
+      "role": "Affiliate Overview Host",
+      "isAiGenerated": true,
+      "disclosureText": "AI Presenter: Original fictional avatar and synthesized narration. This is an independent affiliate overview, not a customer testimonial or medical diagnosis."
+    },
+    "status": "DRAFT",
+    "version": 1,
+    "previewToken": "prev_yusleep_ddd2b3427a28128761ccc087",
+    "createdAt": "2026-11-14T23:00:00.000Z",
+    "updatedAt": "2026-11-15T04:24:47.809Z",
+    "publishedAt": null,
+    "video": {
+      "sourceType": "LOCAL_MP4",
+      "videoUrl": "/videos/yusleep-presenter-prototype.mp4",
+      "posterUrl": "/images/yusleep-presenter.jpg",
+      "durationSeconds": 30,
+      "isPrototype": true,
+      "width": 1280,
+      "height": 720,
+      "codec": "H.264 / AAC",
+      "importedAt": "2026-11-15T04:24:47.809Z"
+    },
+    "videoMan": {
+      "manifestId": "vm_manifest_yusleep_01",
+      "status": "PROTOTYPE_VERIFIED",
+      "allocatedBudget": 0,
+      "currency": "USD",
+      "prototypeJobCost": 0.751,
+      "fullVideoEstimatedCost": 54,
+      "spendingLimitApproved": false,
+      "scriptVersion": "full-production-script.v1",
+      "disclosuresEnforced": true
+    },
+    "registration": {
+      "required": false,
+      "gateTimeSeconds": 0,
+      "leadMagnetTitle": "YuSleep Supplement Facts Breakdown & Label Comparison Guide (PDF)",
+      "brevoListId": 80,
+      "brevoWelcomeTemplateId": 886,
+      "consentCheckboxText": "I agree to receive the YuSleep label guide and email updates. I can unsubscribe at any time.",
+      "consentPolicyUrl": "/privacy"
+    },
+    "cta": {
+      "buttonText": "View YuSleep Official Presentation & Current Pricing",
+      "subtext": "Opens the official vendor presentation. Backed by 60-day money-back guarantee.",
+      "destinationUrl": "https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=yusleep&op=glp&tid=webinar_yusleep",
+      "revealSeconds": 15,
+      "hideUntilRevealed": true,
+      "affiliateDisclosure": "Affiliate Disclosure: If you purchase YuSleep through our link, we may receive a commission at no additional cost to you."
+    },
+    "reference": {
+      "productName": "Yu Sleep Liquid Dietary Supplement",
+      "merchant": "Yu Sleep Laboratories",
+      "affiliateNetwork": "ClickBank (Vendor: yusleep, Affiliate: kmtwarrior)",
+      "vendorResourceUrl": "https://getyusleep.com/aff-th/",
+      "presentationUrl": "https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=yusleep&op=glp&tid=webinar_yusleep",
+      "productForm": "Liquid dietary supplement in 2 fl oz (60ml) glass dropper bottle",
+      "servingSize": "2 ml daily, taken 30 minutes before sleep",
+      "labelDisclosedIngredients": [
+        {
+          "name": "Vitamin B2 (Riboflavin)",
+          "amount": "1.7 mg",
+          "dailyValue": "131%"
+        },
+        {
+          "name": "Vitamin B6 (Pyridoxine HCl)",
+          "amount": "2.0 mg",
+          "dailyValue": "118%"
+        },
+        {
+          "name": "Melatonin",
+          "amount": "0.9 mg",
+          "dailyValue": "Not Established"
+        },
+        {
+          "name": "Proprietary Herbal & Amino Blend",
+          "totalAmount": "637 mg",
+          "ingredients": [
+            "Red Tart Cherry Juice Concentrate (Prunus cerasus)",
+            "Magnesium Glycinate",
+            "Apigenin (from Chamomile extract)",
+            "Lemon Balm Leaf Extract (Melissa officinalis)",
+            "5-Hydroxytryptophan (5-HTP from Griffonia simplicifolia)",
+            "L-Theanine",
+            "Gamma-Aminobutyric Acid (GABA)"
+          ],
+          "disclosureNote": "The label gives one combined 637 mg total for the blend. Individual milligram amounts for each herb/amino inside this blend are proprietary and not disclosed on the supplement facts panel."
+        }
+      ],
+      "pricingAndPackages": {
+        "singleBottle": "$69 per bottle (plus shipping)",
+        "threeBottles": "$177 total ($59 per bottle) with free US shipping",
+        "sixBottles": "$294 total ($49 per bottle) with free US shipping",
+        "note": "Prices reflect merchant presentation at observation time. Viewers must confirm current prices, sales tax, and shipping on the official merchant checkout."
+      },
+      "refundPolicy": {
+        "durationDays": 60,
+        "terms": "60-day money-back guarantee from merchant. Customers must follow merchant return instructions to obtain RMA and return bottles.",
+        "source": "Merchant official terms on getyusleep.com"
+      },
+      "verifiedFacts": [
+        "YuSleep is a liquid dietary supplement, not a prescription medication or FDA-approved treatment for clinical insomnia.",
+        "Melatonin dosage is 0.9 mg per serving, which is lower than many 5mg or 10mg over-the-counter sleep aids.",
+        "Tart cherry naturally contains trace phytochemicals and anthocyanins.",
+        "The product contains no artificial dyes or synthetic sedatives."
+      ],
+      "knownLimitationsAndUnknowns": [
+        "No independent peer-reviewed clinical trials have been conducted on the finished YuSleep combined formula.",
+        "Individual doses inside the 637 mg proprietary blend are undisclosed on the label.",
+        "This overview is not medical advice and cannot assess individual drug interactions or personal health conditions.",
+        "Customer testimonials from vendor marketing cannot be verified without independent written consent and are excluded from this overview."
+      ],
+      "disallowedClaims": [
+        "Do not claim YuSleep cures, treats, or prevents insomnia, apnea, or sleep disorders.",
+        "Do not guarantee that a viewer will fall asleep in 30 seconds or sleep 8 hours uninterrupted.",
+        "Do not claim personal product use or fabricate clinical trials.",
+        "Do not provide individualized medical advice; refer viewers to their healthcare professional."
+      ]
+    },
+    "auditLog": [
+      {
+        "timestamp": "2026-11-14T23:00:00.000Z",
+        "action": "CREATED_DRAFT",
+        "actor": "System / VideoMan Importer",
+        "note": "Imported 30-second presenter prototype and reference documents. Initial status set to DRAFT (Unpublished)."
+      },
+      {
+        "timestamp": "2026-11-15T04:24:32.140Z",
+        "action": "STATUS_CHANGE: DRAFT -> READY_FOR_REVIEW",
+        "actor": "Lead Reviewer",
+        "note": "Asset review completed"
+      },
+      {
+        "timestamp": "2026-11-15T04:24:32.141Z",
+        "action": "STATUS_CHANGE: READY_FOR_REVIEW -> PUBLISHED",
+        "actor": "Admin Officer",
+        "note": "Compliance verification approved"
+      },
+      {
+        "timestamp": "2026-11-15T04:24:32.141Z",
+        "action": "STATUS_CHANGE: PUBLISHED -> DRAFT",
+        "actor": "Admin Officer",
+        "note": "Reverting to draft for update"
+      },
+      {
+        "timestamp": "2026-11-15T04:24:32.142Z",
+        "action": "VIDEOMAN_IMPORT",
+        "actor": "VideoMan Engine",
+        "note": "Local import verified"
+      },
+      {
+        "timestamp": "2026-11-15T04:24:47.808Z",
+        "action": "STATUS_CHANGE: DRAFT -> READY_FOR_REVIEW",
+        "actor": "Lead Reviewer",
+        "note": "Asset review completed"
+      },
+      {
+        "timestamp": "2026-11-15T04:24:47.808Z",
+        "action": "STATUS_CHANGE: READY_FOR_REVIEW -> PUBLISHED",
+        "actor": "Admin Officer",
+        "note": "Compliance verification approved"
+      },
+      {
+        "timestamp": "2026-11-15T04:24:47.809Z",
+        "action": "STATUS_CHANGE: PUBLISHED -> DRAFT",
+        "actor": "Admin Officer",
+        "note": "Reverting to draft for update"
+      },
+      {
+        "timestamp": "2026-11-15T04:24:47.809Z",
+        "action": "VIDEOMAN_IMPORT",
+        "actor": "VideoMan Engine",
+        "note": "Local import verified"
+      }
+    ],
+    "analytics": {
+      "viewsTotal": 2,
+      "viewsUnique": 2,
+      "previewViews": 0,
+      "playbackStarts": 2,
+      "milestones": {
+        "p25": 0,
+        "p50": 0,
+        "p75": 0,
+        "p100": 0
+      },
+      "totalWatchSeconds": 20,
+      "averageWatchSeconds": 10,
+      "ctaImpressions": 0,
+      "ctaClicks": 2,
+      "registrations": 0,
+      "qaQuestionsAsked": 0,
+      "salesAttributionStatus": "NOT_CONNECTED",
+      "confirmedSales": 0,
+      "confirmedRevenue": 0
+    }
+  }
+}
