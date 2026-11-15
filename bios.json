@@ -1,0 +1,428 @@
+{
+  "dog": {
+    "slug": "dog",
+    "aliases": [
+      "practical-dog-enrichment",
+      "dog-enrichment",
+      "dogenrichment"
+    ],
+    "channelName": "Practical Dog Enrichment",
+    "handle": "@practicaldogenrichment",
+    "verified": true,
+    "avatarEmoji": "\ud83d\udc15",
+    "avatarGradient": "from-amber-400 to-emerald-500",
+    "bio": "\ud83d\udc3e Stop boredom, barking & anxiety fast\n\ud83e\udde0 15-minute brain games for calmer dogs",
+    "theme": "emerald",
+    "leadMagnet": {
+      "badge": "\ud83e\udde0 FREE CANINE GUIDE",
+      "title": "15-Minute Dog Brain Games Protocol",
+      "subtitle": "The gentle mental stimulation routine that calms doorbell barking, separation anxiety & hyperactive pacing naturally.",
+      "buttonText": "Download Free Brain Guide \u2794",
+      "targetUrl": "https://traffic.aisimplesystem.com/brain-training-dogs?src=bio_dog_lead",
+      "offerSlug": "brain-training-dogs"
+    },
+    "links": [
+      {
+        "title": "Brain Training For Dogs (Complete Program)",
+        "subtitle": "Develop your dog's hidden intelligence & eliminate behavioral problems permanently",
+        "url": "https://traffic.aisimplesystem.com/brain-training-dogs?src=bio_dog",
+        "badge": "\ud83d\udc3e #1 RATED",
+        "icon": "\ud83d\udc15",
+        "isPrimary": true
+      },
+      {
+        "title": "Puppy Evening Anxiety & Crate Protocol",
+        "subtitle": "The soothing bedtime routine for uninterrupted 8-hour sleep",
+        "url": "https://traffic.aisimplesystem.com/brain-training-dogs?src=bio_dog_puppy",
+        "badge": "\ud83d\udc36 ESSENTIAL",
+        "icon": "\ud83e\uddb4",
+        "isPrimary": false
+      }
+    ]
+  },
+  "resilience": {
+    "slug": "resilience",
+    "aliases": [
+      "smarthomeresilience",
+      "power",
+      "water",
+      "offgrid",
+      "home-power"
+    ],
+    "channelName": "Smart Home Resilience \u26a1\ud83d\udca7",
+    "handle": "@smarthomeresilience",
+    "verified": true,
+    "avatarEmoji": "\u26a1",
+    "avatarGradient": "from-amber-500 to-cyan-500",
+    "bio": "\ud83d\udee1\ufe0f Off-grid resilience, backup power & clean water protocols\n\ud83d\udd0b Keep your family safe through any blackout",
+    "theme": "gold",
+    "leadMagnet": {
+      "badge": "\u26a1 FREE EMERGENCY CHECKLIST",
+      "title": "Emergency Blackout & Water Independence Checklist",
+      "subtitle": "The 48-hour survival protocol: silent power storage, gravity filtration & food protection.",
+      "buttonText": "Download Free Checklist \u2794",
+      "targetUrl": "https://traffic.aisimplesystem.com/home-power?src=bio_resilience_lead",
+      "offerSlug": "home-power"
+    },
+    "links": [
+      {
+        "title": "DIY 120V Home Power Blueprint (zsh Electric)",
+        "subtitle": "Build a silent residential battery bank for under  in spare parts",
+        "url": "https://traffic.aisimplesystem.com/home-power?src=bio_resilience",
+        "badge": "\u26a1 BESTSELLER",
+        "icon": "\ud83d\udd0b",
+        "isPrimary": true
+      },
+      {
+        "title": "Emergency Gravity Water Filter Guide",
+        "subtitle": "Purify safe drinking water for pennies when tap pressure dies",
+        "url": "https://traffic.aisimplesystem.com/offgrid-water?src=bio_resilience",
+        "badge": "\ud83d\udca7 ESSENTIAL",
+        "icon": "\ud83d\udca7",
+        "isPrimary": false
+      }
+    ]
+  },
+  "freebies": {
+    "slug": "freebies",
+    "aliases": [
+      "thefreebiechannel",
+      "freebie",
+      "deals",
+      "giveaways"
+    ],
+    "channelName": "The Freebie Channel \ud83c\udf81",
+    "handle": "@thefreebiechannel",
+    "verified": true,
+    "avatarEmoji": "\ud83c\udf81",
+    "avatarGradient": "from-rose-500 to-amber-500",
+    "bio": "\u26a1 100% Legit Freebies, Cash Drops & Verified Glitches\n\ud83d\udcb8 Zero-dollar product drops tested daily",
+    "theme": "rose",
+    "leadMagnet": {
+      "badge": "\ud83c\udf81 FREE DAILY ACCESS",
+      "title": "Today's Verified zsh Product & Cash Drops",
+      "subtitle": "Instant alerts on manufacturer price glitches, zero-dollar samples & high-limit perks.",
+      "buttonText": "Unlock Free Drops \u2794",
+      "targetUrl": "https://traffic.aisimplesystem.com/bellver-card?src=bio_freebies_lead",
+      "offerSlug": "bellver-card"
+    },
+    "links": [
+      {
+        "title": "Claim k High-Limit Global Visa Card",
+        "subtitle": "Zero credit check \u2022 Instant virtual card \u2022 Worldwide spend & cash back",
+        "url": "https://traffic.aisimplesystem.com/bellver-card?src=bio_freebies",
+        "badge": "\ud83d\udcb3 HIGH LIMIT",
+        "icon": "\ud83d\udcb3",
+        "isPrimary": true
+      },
+      {
+        "title": "Activate Free Viral Traffic Matrix (8-Tier)",
+        "subtitle": "Plug any business link into a referral-powered network for automated views",
+        "url": "https://traffic.aisimplesystem.com/viral-traffic-matrix?src=bio_freebies",
+        "badge": "\ud83d\ude80 100% FREE",
+        "icon": "\u26a1",
+        "isPrimary": false
+      }
+    ]
+  },
+  "mserica": {
+    "slug": "mserica",
+    "aliases": [
+      "storytime",
+      "storytimewithmserica",
+      "erica",
+      "bedtime",
+      "santacircle"
+    ],
+    "channelName": "Storytime with Ms. Erica \ud83d\udcda\u2728",
+    "handle": "@storytimewithmserica",
+    "verified": true,
+    "avatarEmoji": "\ud83d\udc28",
+    "avatarGradient": "from-pink-400 to-amber-400",
+    "bio": "\ud83d\udc28 Soothing Pixar-3D bedtime stories & mindfulness for kids\n\ud83c\udf19 Gentle routines for peaceful, happy sleep",
+    "theme": "rose",
+    "leadMagnet": {
+      "badge": "\ud83c\udf85 100% FREE ORGANIZER",
+      "title": "The Santa Circle - Ad-Free Gift Exchange",
+      "subtitle": "Automatic name pairing, secret wishlists & zero spreadsheet drama for families & classrooms.",
+      "buttonText": "Start Free Circle \u2794",
+      "targetUrl": "https://traffic.aisimplesystem.com/the-santa-circle?src=bio_mserica_lead",
+      "offerSlug": "the-santa-circle"
+    },
+    "links": [
+      {
+        "title": "Start Your Family Secret Santa Circle",
+        "subtitle": "Set up your group in 60 seconds \u2022 100% ad-free & private",
+        "url": "https://traffic.aisimplesystem.com/the-santa-circle?src=bio_mserica",
+        "badge": "\ud83c\udf84 HOLIDAY",
+        "icon": "\ud83c\udf85",
+        "isPrimary": true
+      },
+      {
+        "title": "Curated 2026 Holiday Gift Guides",
+        "subtitle": "Handpicked, verified gift ideas for kids, toddlers & parents",
+        "url": "https://traffic.aisimplesystem.com/the-santa-circle?src=bio_mserica_gifts",
+        "badge": "\ud83c\udf81 GUIDES",
+        "icon": "\u2b50",
+        "isPrimary": false
+      }
+    ],
+    "postHoliday": {
+      "effectiveDate": "2026-12-26T00:00:00Z",
+      "leadMagnet": {
+        "badge": "\u2b50 FREE PARENT TOOLKIT",
+        "title": "7-Day Gentle Bedtime Routine & Printable Star Chart",
+        "subtitle": "Calm toddler bedtime battles, tantrums & night-waking with 3 soothing mindfulness breath routines and printable visual schedule.",
+        "buttonText": "Download Free Bedtime Toolkit \u2794",
+        "targetUrl": "https://traffic.aisimplesystem.com/bedtime-kit?src=bio_mserica_lead",
+        "offerSlug": "bedtime-kit"
+      },
+      "links": [
+        {
+          "title": "Reading Head Start & Early Literacy Academy",
+          "subtitle": "The award-winning 15-minute daily bedtime reading system for toddlers & preschoolers",
+          "url": "https://traffic.aisimplesystem.com/reading-head-start?src=bio_mserica",
+          "badge": "\u2b50 #1 PARENTING",
+          "icon": "\ud83d\udcda",
+          "isPrimary": true
+        },
+        {
+          "title": "3 Slow Acorn Breaths & Calming Audio Library",
+          "subtitle": "10-minute soothing wind-down audio tracks to play at bedtime for anxiety-free sleep",
+          "url": "https://traffic.aisimplesystem.com/bedtime-kit?src=bio_mserica_audio",
+          "badge": "\ud83c\udf19 AUDIO",
+          "icon": "\ud83c\udfa7",
+          "isPrimary": false
+        }
+      ]
+    }
+  },
+  "crypto": {
+    "slug": "crypto",
+    "aliases": [
+      "walletwise",
+      "walletwisecrypto",
+      "fintech",
+      "bellver",
+      "cards"
+    ],
+    "channelName": "WalletWise Finance & Crypto \ud83d\udcb3",
+    "handle": "@walletwisefinance",
+    "verified": true,
+    "avatarEmoji": "\ud83d\udcb3",
+    "avatarGradient": "from-cyan-400 to-blue-600",
+    "bio": "\ud83d\udcb3 High-limit crypto cards, fee-free banking & passive yield\n\u26a1 Turn everyday spending into high-tier rewards",
+    "theme": "cyan",
+    "leadMagnet": {
+      "badge": "\ud83d\udcb3 FREE WEALTH BLUEPRINT",
+      "title": "Everyday Crypto Bill-Pay Cheat Sheet",
+      "subtitle": "How to pay rent, groceries & bills with zero transaction fees and up to 3% instant cashback.",
+      "buttonText": "Claim Free Cheat Sheet \u2794",
+      "targetUrl": "https://traffic.aisimplesystem.com/bellver-card?src=bio_crypto_lead",
+      "offerSlug": "bellver-card"
+    },
+    "links": [
+      {
+        "title": "Claim k High-Limit Global Visa Card",
+        "subtitle": "Zero credit check \u2022 Instant virtual card \u2022 Worldwide spend (Bellver)",
+        "url": "https://traffic.aisimplesystem.com/bellver-card?src=bio_crypto",
+        "badge": "\ud83d\udcb3 HIGH LIMIT",
+        "icon": "\ud83d\udcb3",
+        "isPrimary": true
+      },
+      {
+        "title": "k Funded Trader Evaluation Pass (80% Off)",
+        "subtitle": "Trade futures with institutional capital \u2022 Keep up to 90% payouts",
+        "url": "https://traffic.aisimplesystem.com/prop-trading?src=bio_crypto",
+        "badge": "\ud83d\udcc8 80% OFF",
+        "icon": "\ud83d\udcca",
+        "isPrimary": false
+      }
+    ]
+  },
+  "mind": {
+    "slug": "mind",
+    "aliases": [
+      "everydaymindexplained",
+      "sleep",
+      "yusleep",
+      "psychology"
+    ],
+    "channelName": "Everyday Mind & Sleep Science \ud83e\udde0",
+    "handle": "@everydaymindexplained",
+    "verified": true,
+    "avatarEmoji": "\ud83c\udf19",
+    "avatarGradient": "from-indigo-500 to-purple-600",
+    "bio": "\ud83e\udde0 Neuroscience, cognitive psychology & sleep biology\n\ud83c\udf19 Why you wake up at 3 AM and how to fix it tonight",
+    "theme": "purple",
+    "leadMagnet": {
+      "badge": "\ud83c\udf19 FREE NEUROSCIENCE GUIDE",
+      "title": "The 3 AM Wakeup Reset Protocol",
+      "subtitle": "Turn off intrusive nocturnal racing thoughts and restore uninterrupted deep delta sleep.",
+      "buttonText": "Get Free Sleep Protocol \u2794",
+      "targetUrl": "https://traffic.aisimplesystem.com/yusleep?src=bio_mind_lead",
+      "offerSlug": "yusleep"
+    },
+    "links": [
+      {
+        "title": "The 3 AM Wakeup Fix (Deep Sleep Protocol)",
+        "subtitle": "Clinical micronutrient science to sleep through the night (Yu Sleep)",
+        "url": "https://traffic.aisimplesystem.com/yusleep?src=bio_mind",
+        "badge": "\ud83c\udf19 CLINICAL",
+        "icon": "\ud83d\udca4",
+        "isPrimary": true
+      },
+      {
+        "title": "Everyday Cognitive & Subconscious Hacks",
+        "subtitle": "Practical mental reframing exercises for high-stress daily life",
+        "url": "https://traffic.aisimplesystem.com/yusleep?src=bio_mind_hacks",
+        "badge": "\ud83e\udde0 GUIDE",
+        "icon": "\ud83d\udca1",
+        "isPrimary": false
+      }
+    ]
+  },
+  "aiprofit": {
+    "slug": "aiprofit",
+    "aliases": [
+      "aiprofitlab1313",
+      "aiprofitlab",
+      "matrix",
+      "traffic",
+      "viral-traffic"
+    ],
+    "channelName": "AI Profit Lab | Traffic & Tools \ud83e\udd16",
+    "handle": "@aiprofitlab1313",
+    "verified": true,
+    "avatarEmoji": "\ud83e\udd16",
+    "avatarGradient": "from-cyan-400 to-indigo-600",
+    "bio": "\ud83d\ude80 1 click into 8+ viral traffic streams automatically\n\ud83e\udd16 Stop cold DMs & dead solo ads forever",
+    "theme": "cyan",
+    "leadMagnet": {
+      "badge": "\ud83d\ude80 FREE TRAFFIC ACCESS",
+      "title": "Activate 8-Tier Viral Traffic Matrix",
+      "subtitle": "Plug any business link into a referral-powered ad network for automated views.",
+      "buttonText": "Get Free Traffic \u2794",
+      "targetUrl": "https://traffic.aisimplesystem.com/viral-traffic-matrix?src=bio_aiprofit_lead",
+      "offerSlug": "viral-traffic-matrix"
+    },
+    "links": [
+      {
+        "title": "Activate Free Viral Traffic Matrix (8-Tier)",
+        "subtitle": "Plug any affiliate or business link into a referral-powered ad network",
+        "url": "https://traffic.aisimplesystem.com/viral-traffic-matrix?src=bio_aiprofit",
+        "badge": "\ud83d\ude80 100% FREE",
+        "icon": "\u26a1",
+        "isPrimary": true
+      },
+      {
+        "title": "Done-For-You Lead Capture Pages",
+        "subtitle": "Pre-built high-converting funnels that build your list in 4 minutes",
+        "url": "https://traffic.aisimplesystem.com/viral-traffic-matrix?src=bio_aiprofit_funnels",
+        "badge": "\ud83d\udd25 4-MIN SETUP",
+        "icon": "\ud83d\udcd1",
+        "isPrimary": false
+      }
+    ]
+  },
+  "nightdocs": {
+    "slug": "nightdocs",
+    "aliases": [
+      "docs",
+      "darkbiology",
+      "longevity",
+      "night-docs",
+      "biohack"
+    ],
+    "channelName": "NightDocs | Dark Biology & Longevity \ud83e\uddec\ud83c\udf19",
+    "handle": "@NightDocs",
+    "verified": true,
+    "avatarEmoji": "\ud83e\uddec",
+    "avatarGradient": "from-cyan-500 to-indigo-900",
+    "bio": "\ud83e\uddec What medicine ignores until it's too late\n\ud83d\udd2c Visceral fat, autophagy resets & cellular longevity",
+    "theme": "cyan",
+    "leadMagnet": {
+      "badge": "\ud83e\uddec FREE INSTANT PROTOCOL",
+      "title": "3-Step Liver Autophagy Blueprint",
+      "subtitle": "The nocturnal protocol to flush trapped hepatic lipids and trigger mitophagy while you sleep.",
+      "buttonText": "Download Free Blueprint \u2794",
+      "targetUrl": "https://traffic.aisimplesystem.com/liver-reset?src=bio_nightdocs_lead",
+      "offerSlug": "liver-reset"
+    },
+    "links": [
+      {
+        "title": "The 3-Step Liver Autophagy Flush",
+        "subtitle": "How to dissolve visceral belly fat & reset your metabolic furnace (LivPure)",
+        "url": "https://traffic.aisimplesystem.com/liver-reset?src=bio_nightdocs",
+        "badge": "\ud83e\uddec BESTSELLER",
+        "icon": "\ud83d\udd2c",
+        "isPrimary": true
+      },
+      {
+        "title": "The 30-Second Bedtime Somatic Reset",
+        "subtitle": "Clinical micronutrient protocol to sleep deep without 3 AM wakeups (Yu Sleep)",
+        "url": "https://traffic.aisimplesystem.com/yusleep?src=bio_nightdocs",
+        "badge": "\ud83c\udf19 SLEEP",
+        "icon": "\ud83d\udca4",
+        "isPrimary": false
+      }
+    ]
+  },
+  "raybo": {
+    "slug": "raybo",
+    "aliases": [
+      "raybowilliams",
+      "blues",
+      "whiskey"
+    ],
+    "channelName": "Raybo Williams",
+    "handle": "@raybowilliams",
+    "verified": true,
+    "avatarEmoji": "\ud83c\udfb8",
+    "avatarGradient": "from-amber-600 to-stone-950",
+    "bio": "Dark Southern Blues, Mississippi Hill-Country Stomps & Louisiana Swamp Grooves.\nPull up a chair on the front porch.",
+    "theme": "gold",
+    "leadMagnet": {
+      "badge": "\ud83c\udfb8 FREE BLUES STREAM",
+      "title": "Stream \"Whiskey Knows My Name\" (Full 43-Min Album)",
+      "subtitle": "Raw unpolished slide guitar, tube-amp grit and dark Mississippi front-porch blues.",
+      "buttonText": "Listen Now On YouTube \u2794",
+      "targetUrl": "https://www.youtube.com/watch?v=06UzOgnAr80",
+      "offerSlug": "raybo-whiskey"
+    },
+    "links": [
+      {
+        "title": "Whiskey Knows My Name (Official Full Collection)",
+        "subtitle": "Raw acoustic slide, resonator guitars & dark southern stomp blues",
+        "url": "https://www.youtube.com/watch?v=06UzOgnAr80",
+        "badge": "\ud83d\udd25 #1 ALBUM",
+        "icon": "\ud83c\udfb8",
+        "isPrimary": true
+      },
+      {
+        "title": "Free 12-Bar Delta Blues & Fretboard Cheat Sheet (PDF)",
+        "subtitle": "Essential blues scale boxes, Open D/G slide tuning & porch turnarounds",
+        "url": "/downloads/The_12_Bar_Delta_Blues_Scale_Fretboard_Cheat_Sheet.pdf",
+        "badge": "\u26a1 FREE PDF",
+        "icon": "\ud83c\udfb8",
+        "isPrimary": false
+      },
+      {
+        "title": "Subscribe to Raybo on YouTube",
+        "subtitle": "New chapters & blues stories every single week",
+        "url": "https://www.youtube.com/@raybowilliams?sub_confirmation=1",
+        "badge": "\ud83d\udd34 YOUTUBE",
+        "icon": "\ud83d\udcfa",
+        "isPrimary": false
+      },
+      {
+        "title": "Search Raybo Williams on Spotify",
+        "subtitle": "Add to your Dark Blues, Late Night & Rainy Day playlists",
+        "url": "https://open.spotify.com/search/Raybo%20Williams",
+        "badge": "\ud83c\udfa7 SPOTIFY",
+        "icon": "\ud83c\udfb5",
+        "isPrimary": false
+      }
+    ]
+  }
+}
