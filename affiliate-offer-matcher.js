@@ -158,8 +158,14 @@ const MERCHANT_SPECIFIC_TERMS = {
 };
 
 function matchAffiliateOffer(predictionEvent, buyerHypothesis, options = {}) {
-  // 1. Non-Commercial or Unviable Early Exit
-  if (!buyerHypothesis || buyerHypothesis.commercialViable === false || buyerHypothesis.outcome === 'NO_COMMERCIAL_OPPORTUNITY') {
+  // 1. Non-Commercial, Purely Informational, or Unviable Early Exit
+  if (
+    !buyerHypothesis ||
+    buyerHypothesis.commercialViable === false ||
+    buyerHypothesis.outcome === 'NO_COMMERCIAL_OPPORTUNITY' ||
+    buyerHypothesis.intentType === 'NON_COMMERCIAL' ||
+    buyerHypothesis.intentType === 'INFORMATIONAL'
+  ) {
     return {
       matchId: null,
       offerSlug: null,
@@ -176,8 +182,8 @@ function matchAffiliateOffer(predictionEvent, buyerHypothesis, options = {}) {
       relevanceScore: 0,
       approvalStatus: 'unmatched',
       sourceInventory: 'NONE',
-      outcome: 'NO_COMMERCIAL_OPPORTUNITY',
-      outcomeReason: buyerHypothesis.outcomeReason || 'Event has no commercial consumer purchasing demand.',
+      outcome: buyerHypothesis?.intentType === 'INFORMATIONAL' ? 'NO_SUITABLE_AFFILIATE_OFFER' : 'NO_COMMERCIAL_OPPORTUNITY',
+      outcomeReason: buyerHypothesis?.outcomeReason || 'Event lacks transactional or commercial-investigation buyer intent.',
       createdAt: new Date().toISOString()
     };
   }
@@ -223,6 +229,8 @@ function matchAffiliateOffer(predictionEvent, buyerHypothesis, options = {}) {
   let formMismatchReason = null;
 
   for (const slug of candidateKeys) {
+    const isAmazonBridge = slug === 'amazon-power-station';
+    if (!isAmazonBridge && !existingOffers[slug]) continue;
     const offer = existingOffers[slug] || MERCHANT_SPECIFIC_TERMS[slug];
     if (!offer) continue;
 
@@ -237,13 +245,15 @@ function matchAffiliateOffer(predictionEvent, buyerHypothesis, options = {}) {
       score += 25;
     }
 
-    // Check problem triggers
+    // Check problem triggers (hard gate: zero trigger overlap cannot pass 60-point threshold)
     const triggers = OFFER_PROBLEM_TRIGGERS[slug] || [];
     const matchedTriggers = triggers.filter(t => combinedContext.includes(t));
     if (matchedTriggers.length >= 2) {
       score += 50;
     } else if (matchedTriggers.length === 1) {
       score += 30;
+    } else {
+      score = Math.min(40, score);
     }
 
     // Check offer headline / purpose words

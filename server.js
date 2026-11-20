@@ -964,10 +964,53 @@ Sitemap: https://${host}/sitemap.xml
     }
   }
 
-  // GET /api/offers -> List all active offers
+  // GET /api/offers -> List all active offers with verified asset status, prompts, and next actions
   if (req.method === 'GET' && pathname === '/api/offers') {
+    const rawOffers = loadOffers();
+    const allArticles = Object.values(loadArticles());
+    const enrichedOffers = {};
+
+    for (const [slug, offer] of Object.entries(rawOffers)) {
+      const videoUrl = offer.videoUrl || null;
+      const videoExists = Boolean(
+        videoUrl && fs.existsSync(path.join(__dirname, 'public', String(videoUrl).replace(/^\/+/, '')))
+      );
+      const guideSlugs = allArticles
+        .filter((a) => a && a.offerSlug === slug && a.slug)
+        .map((a) => a.slug);
+      const brevoListId = offer.brevo?.listId || null;
+
+      let nextAction = 'Schedule existing explainer video & monitor opt-in/click CTR';
+      if (!videoExists) {
+        nextAction = 'Produce explainer Short & attach video asset to funnel';
+      } else if (guideSlugs.length === 0) {
+        nextAction = 'Brief & publish a supporting SEO guide, then route Short traffic';
+      } else if (!brevoListId) {
+        nextAction = 'Connect Brevo list for opt-in capture & follow-up sequence';
+      }
+
+      const stepOne = offer.steps?.[0]?.title ? ` (${offer.steps[0].title})` : '';
+      const contentPrompts = [
+        `Problem-to-Solution Short for ${offer.name}: Open on the exact frustration described in "${offer.subheadline || offer.name}", walk through Step 1${stepOne}, and direct viewers to /o/${slug}.`,
+        `Comparison / Myth-Buster Short for ${offer.name}: Contrast common guesswork against this structured approach, keeping all claims strictly within verified offer terms, and CTA to /o/${slug}.`
+      ];
+
+      enrichedOffers[slug] = {
+        ...offer,
+        assetStatus: {
+          videoUrl,
+          videoExists,
+          guideSlugs,
+          brevoListId,
+          hasAffiliateUrl: Boolean(offer.affiliateUrl)
+        },
+        contentPrompts,
+        nextAction
+      };
+    }
+
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify({ ok: true, offers: loadOffers() }));
+    return res.end(JSON.stringify({ ok: true, offers: enrichedOffers }));
   }
 
   // GET /api/catalyst/niches -> Retrieve all pre-engineered Problem Catalysts
@@ -1090,13 +1133,20 @@ Sitemap: https://${host}/sitemap.xml
       // Never synthesize or invent transaction records.
       const campaigns = (state.campaignDrafts || []).map((draft) => {
         const isPublished = draft.status === 'PUBLISHED';
-        const visits = isPublished ? (draft.actualVisits || 0) : 0;
-        const leads = isPublished ? (draft.actualLeads || 0) : 0;
-        const clicks = isPublished ? (draft.actualClicks || 0) : 0;
-        const confirmedSales = isPublished ? (draft.actualSales || 0) : 0;
-        const confirmedCommissionsUsd = isPublished ? (draft.actualCommissionsUsd || 0.0) : 0.0;
-        const netRevenueUsd = isPublished ? (draft.actualNetRevenueUsd || 0.0) : 0.0;
+        const visits = isPublished ? (Number(draft.actualVisits) || 0) : 0;
+        const leads = isPublished ? (Number(draft.actualLeads) || 0) : 0;
+        const clicks = isPublished ? (Number(draft.actualClicks) || 0) : 0;
+        const confirmedSales = isPublished ? (Number(draft.actualSales) || 0) : 0;
+        const confirmedCommissionsUsd = isPublished ? (Number(draft.actualCommissionsUsd) || 0.0) : 0.0;
+        const refundsCount = isPublished ? (Number(draft.actualRefundsCount) || 0) : 0;
+        const refundsUsd = isPublished ? (Number(draft.actualRefundsUsd) || 0.0) : 0.0;
+        const netRevenueUsd = isPublished
+          ? (draft.actualNetRevenueUsd !== undefined ? Number(draft.actualNetRevenueUsd) || 0.0 : Math.max(0, confirmedCommissionsUsd - refundsUsd))
+          : 0.0;
+        const ctrDisplay = visits > 0 ? `${((clicks / visits) * 100).toFixed(1)}%` : 'No data';
+        const optInRateDisplay = visits > 0 ? `${((leads / visits) * 100).toFixed(1)}%` : 'No data';
         const epc = clicks > 0 ? Number((netRevenueUsd / clicks).toFixed(2)) : 0.0;
+        const epcDisplay = clicks > 0 ? `$${epc.toFixed(2)}` : 'No data';
 
         return {
           campaignId: draft.campaignId,
@@ -1107,10 +1157,15 @@ Sitemap: https://${host}/sitemap.xml
           visits,
           leads,
           clicks,
+          ctrDisplay,
+          optInRateDisplay,
           confirmedSales,
           confirmedCommissionsUsd,
+          refundsCount,
+          refundsUsd,
           netRevenueUsd,
-          epc
+          epc,
+          epcDisplay
         };
       });
 
@@ -1119,11 +1174,13 @@ Sitemap: https://${host}/sitemap.xml
       const totalAffiliateClicks = campaigns.reduce((sum, c) => sum + c.clicks, 0);
       const confirmedSalesCount = campaigns.reduce((sum, c) => sum + c.confirmedSales, 0);
       const confirmedCommissionsUsd = campaigns.reduce((sum, c) => sum + c.confirmedCommissionsUsd, 0.0);
-      const refundLossUsd = 0.0;
+      const totalRefundsCount = campaigns.reduce((sum, c) => sum + c.refundsCount, 0);
+      const refundLossUsd = campaigns.reduce((sum, c) => sum + c.refundsUsd, 0.0);
       const netRevenueUsd = campaigns.reduce((sum, c) => sum + c.netRevenueUsd, 0.0);
-      const leadConversionRate = totalVisits > 0 ? `${((totalLeads / totalVisits) * 100).toFixed(1)}%` : '0.0%';
-      const clickThroughRate = totalVisits > 0 ? `${((totalAffiliateClicks / totalVisits) * 100).toFixed(1)}%` : '0.0%';
+      const leadConversionRate = totalVisits > 0 ? `${((totalLeads / totalVisits) * 100).toFixed(1)}%` : 'No data';
+      const clickThroughRate = totalVisits > 0 ? `${((totalAffiliateClicks / totalVisits) * 100).toFixed(1)}%` : 'No data';
       const averageEpc = totalAffiliateClicks > 0 ? Number((netRevenueUsd / totalAffiliateClicks).toFixed(2)) : 0.0;
+      const averageEpcDisplay = totalAffiliateClicks > 0 ? `$${averageEpc.toFixed(2)}` : 'No data';
 
       const attribution = {
         totalVisits,
@@ -1133,9 +1190,11 @@ Sitemap: https://${host}/sitemap.xml
         clickThroughRate,
         confirmedSalesCount,
         confirmedCommissionsUsd,
+        totalRefundsCount,
         refundLossUsd,
         netRevenueUsd,
         averageEpc,
+        averageEpcDisplay,
         campaigns
       };
 

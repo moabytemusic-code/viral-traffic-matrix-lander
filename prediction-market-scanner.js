@@ -150,9 +150,26 @@ function categorizeEvent(title, description, tags = []) {
 
 function normalizePredictionEvents(events = []) {
   const normalized = [];
+  const seenIds = new Set();
+  const seenTitles = new Set();
+  const nowMs = Date.now();
 
   for (const e of events) {
     if (!e || !e.id || !e.title) continue;
+
+    // Prevent closed, expired, or duplicate events from entering opportunity evaluation
+    if (e.closed === true || e.active === false) continue;
+    const rawResDate = e.endDate || e.resolutionDate || null;
+    if (rawResDate) {
+      const resMs = Date.parse(rawResDate);
+      if (Number.isFinite(resMs) && resMs < nowMs) continue;
+    }
+
+    const extId = String(e.id);
+    const normTitle = e.title.trim().toLowerCase().replace(/\s+/g, ' ');
+    if (seenIds.has(extId) || seenTitles.has(normTitle)) continue;
+    seenIds.add(extId);
+    seenTitles.add(normTitle);
 
     // Extract tags
     const tags = Array.isArray(e.tags) 

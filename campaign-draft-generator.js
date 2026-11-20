@@ -14,52 +14,62 @@ function generateCampaignDraft(opportunity, options = {}) {
   }
 
   const nicheName = offerMatch.productName || 'Verified Solution';
+  const productPurpose = offerMatch.productPurpose || hypothesis.coreProblem || 'Targeted solution';
+  const productForm = offerMatch.productForm || 'DIGITAL_COURSE';
   const targetAudience = hypothesis.affectedConsumerGroup || 'Consumers';
-  const primaryProblem = hypothesis.coreProblem || 'Economic and environmental uncertainty';
+  const primaryProblem = hypothesis.coreProblem || 'Practical consumer need';
   const primarySearchPhrase = hypothesis.searchPhrases?.[0] || 'essential preparation guide';
   const destinationUrl = offerMatch.destinationUrl || `https://traffic.aisimplesystem.com/o/${offerMatch.offerSlug}`;
   const trackingUrl = offerMatch.affiliateUrl || destinationUrl;
   const category = event.category || 'General';
 
-  // 2. Build Category-Specific Frameworks
+  // 2. Build Offer-Specific Frameworks (No generic pricing or unverified guarantees)
   let frameworkName = '8-Pillar Glassmorphic Trust System';
-  let headline = `Practical Action Protocol for ${event.title}`;
-  let subheadline = `A field-tested implementation guide for ${targetAudience.toLowerCase()} addressing ${primaryProblem.toLowerCase()}.`;
+  let headline = `${nicheName}: Practical Action Plan for ${event.title.replace(/[\?\.!]/g, '')}`;
+  let subheadline = `${productPurpose} Built for ${targetAudience.toLowerCase()}.`;
   let protocolSteps = [];
 
   if (category === 'Energy, Blackouts & Emergency Prep') {
-    headline = `The 3-Step Power & Grid Defense Protocol for ${event.title.replace(/[\?\.!]/g, '')}`;
-    subheadline = `A verified field manual for ${targetAudience.toLowerCase()} facing grid instability and extreme weather emergencies.`;
+    headline = `${nicheName}: Practical Prep for ${event.title.replace(/[\?\.!]/g, '')}`;
+    subheadline = `${productPurpose} Designed for ${targetAudience.toLowerCase()} preparing for grid or weather disruptions.`;
     protocolSteps = [
-      { step: 1, title: 'Thermal & Critical Load Reset', desc: 'Secure essential refrigeration, heating, and emergency communications without reliance on municipal power.' },
-      { step: 2, title: 'Storage & Generation Avoidance', desc: 'Avoid dangerous indoor fuel generators and unverified battery banks prone to thermal failure.' },
-      { step: 3, title: 'Autonomous Power Redundancy', desc: 'Deploy residential solar charging and dedicated backup battery storage.' }
+      { step: 1, title: 'Baseline Load & Storage Audit', desc: `Identify critical household loads and review how ${nicheName} addresses ${primaryProblem.toLowerCase()}.` },
+      { step: 2, title: 'Safety & Form Verification', desc: 'Confirm indoor-safe operation, capacity specs, and verified merchant documentation before purchase.' },
+      { step: 3, title: 'Step-by-Step Deployment', desc: `Follow the verified ${nicheName} checklist and connect backup readiness cleanly.` }
     ];
   } else if (category === 'Finance, Capital & Wealth') {
-    headline = `Capital Preservation & Funding Protocol in Response to ${event.title.replace(/[\?\.!]/g, '')}`;
-    subheadline = `A tactical capital protection blueprint for ${targetAudience.toLowerCase()} navigating interest rate volatility.`;
+    headline = `${nicheName}: Capital Protection & Evaluation Guide`;
+    subheadline = `${productPurpose} Tailored for ${targetAudience.toLowerCase()} navigating ${event.title.replace(/[\?\.!]/g, '')}.`;
     protocolSteps = [
-      { step: 1, title: 'Cash Drawdown Insulation', desc: 'Reallocate liquid reserves to insulate portfolio capital from interest rate and inflation erosion.' },
-      { step: 2, title: 'High-Fee Alternative Elimination', desc: 'Eliminate high-fee retail brokerage exposures and unhedged speculative positions.' },
-      { step: 3, title: 'Proprietary Capital Qualification', desc: 'Leverage structured evaluation rules to secure funded trading capital without risking personal savings.' }
+      { step: 1, title: 'Personal Capital Risk Check', desc: 'Separate personal household savings from evaluation or trading risk.' },
+      { step: 2, title: 'Rule & Fee Comparison', desc: `Review exact ${nicheName} program rules, payout terms, and restrictions before enrolling.` },
+      { step: 3, title: 'Structured Execution', desc: `Apply ${nicheName} guidelines with strict drawdown discipline.` }
     ];
   } else if (category === 'Health, Sleep & Wellness') {
-    headline = `The Evening Reset & Cortisol Stabilization Protocol`;
-    subheadline = `A targeted physical protocol for ${targetAudience.toLowerCase()} dealing with nocturnal wakefulness and chronic fatigue.`;
+    headline = `${nicheName}: Evening Routine & Support Guide`;
+    subheadline = `${productPurpose} Informational overview for ${targetAudience.toLowerCase()} (not medical advice).`;
     protocolSteps = [
-      { step: 1, title: 'Circadian Light Phase Neutralization', desc: 'Eliminate artificial blue light stimulus 90 minutes before scheduled sleep.' },
-      { step: 2, title: 'Cortisol Spike Dampening', desc: 'Prevent 3 AM histamine and cortisol rushes with targeted evening nutrient synergy.' },
-      { step: 3, title: 'Physical Sleep Architecture Recovery', desc: 'Support natural delta-wave sleep cycles with clinical-grade tart cherry nano-botanicals.' }
+      { step: 1, title: 'Evening Light & Routine Hygiene', desc: 'Reduce blue light exposure and stabilize pre-sleep habits before adding any supplement.' },
+      { step: 2, title: 'Label & Ingredient Review', desc: `Review the verified ${nicheName} label, serving amounts, and consult a clinician if taking medications.` },
+      { step: 3, title: 'Consistent 14-Day Tracking', desc: 'Track sleep timing and morning alertness rather than expecting overnight results.' }
     ];
   } else {
-    headline = `The Automated Workflow & Traffic Engine`;
-    subheadline = `A step-by-step digital implementation guide for ${targetAudience.toLowerCase()} seeking automated buyer lead capture.`;
+    headline = `${nicheName}: Workflow & Implementation Guide`;
+    subheadline = `${productPurpose} Built for ${targetAudience.toLowerCase()}.`;
     protocolSteps = [
-      { step: 1, title: 'Friction Point Audit', desc: 'Identify critical workflow bottlenecks and manual traffic leakages.' },
-      { step: 2, title: 'Automated Hook Routing', desc: 'Deploy psychological capture mechanisms and automated email handoffs.' },
-      { step: 3, title: 'Perpetual Buyer Syndication', desc: 'Connect verified affiliate pathways into a 24-hour conversion loop.' }
+      { step: 1, title: 'Workflow Bottleneck Audit', desc: 'Pinpoint manual steps that can be standardized cleanly.' },
+      { step: 2, title: 'Offer & Funnel Alignment', desc: `Connect ${nicheName} directly to an opt-in capture and verified affiliate destination.` },
+      { step: 3, title: 'Human-Approved Rollout', desc: 'Review all copy, links, and disclosures before publishing.' }
     ];
   }
+
+  const formBadge = productForm === 'PHYSICAL_HARDWARE'
+    ? 'Verified Hardware Specs'
+    : productForm === 'PHYSICAL_SUPPLEMENT'
+      ? 'Label-Verified Formula'
+      : productForm === 'SERVICE_EVALUATION'
+        ? 'Verified Program Terms'
+        : 'Verified Digital Resource';
 
   return {
     campaignId: `cmp_${Date.now()}`,
@@ -75,18 +85,17 @@ function generateCampaignDraft(opportunity, options = {}) {
       framework: frameworkName,
       headline,
       subheadline,
-      heroTrustBadges: ['Field-Tested Strategy', '100% Practical Protocol', 'Instant Digital Delivery'],
+      heroTrustBadges: [formBadge, `Merchant: ${offerMatch.merchant || 'Verified Partner'}`, 'Human Review Required'],
       protocolSteps,
-      productBundleTiering: {
-        starter: { price: 9.95, name: 'Quick-Start Field Guide (PDF + Checklist)' },
-        complete: { price: 27.00, name: 'Complete Video Masterclass & System Suite' },
-        vip: { price: 67.00, name: 'Lifetime Implementation Vault & Direct Q&A' }
-      },
-      hardwareGearChecklist: [
-        { tier: 'Low', name: 'Tactical Baseline Tool', estPrice: '$15 - $25', vendor: 'Amazon Prime' },
-        { tier: 'Medium', name: 'Dedicated Support Unit', estPrice: '$35 - $60', vendor: 'Walmart Curbside' },
-        { tier: 'Premium', name: 'Commercial Backup / System Unit', estPrice: '$120 - $250', vendor: 'Amazon Prime' }
-      ]
+      verifiedOfferTerms: {
+        productName: nicheName,
+        productForm,
+        merchant: offerMatch.merchant || 'Verified Partner',
+        network: offerMatch.network || 'Direct Network',
+        commissionStructure: offerMatch.commissionStructure || 'Unverified',
+        cookieDuration: offerMatch.cookieDuration || 'Unverified',
+        pricingNote: 'Verify current merchant checkout pricing and refund policy before publishing.'
+      }
     },
 
     // B. SEO Article & Keyword Strategy
@@ -161,8 +170,8 @@ function generateCampaignDraft(opportunity, options = {}) {
     // G. Product Comparison Content
     productComparison: {
       recommendedProduct: nicheName,
-      alternativeComparison: 'Generic Mass-Market Alternatives',
-      keyAdvantage: `Verified merchant reputation, 60-day money-back guarantee, and dedicated customer support.`
+      alternativeComparison: 'Generic Alternatives',
+      keyAdvantage: `${productPurpose} (Verify exact merchant checkout terms and refund policy before publishing.)`
     },
 
     // H. Conversion Calls to Action

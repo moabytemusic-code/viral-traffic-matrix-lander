@@ -56,10 +56,34 @@ async function runPredictionPipeline(options = {}) {
 
   const opportunities = [];
   const campaignDrafts = [];
+  const processedTitles = new Set();
+  const processedIds = new Set();
+  const nowMs = Date.now();
 
   // 2. Process each event through the strict evidence chain
   const processLimit = options.processLimit || 10;
-  for (const event of rawEvents.slice(0, processLimit)) {
+  for (const event of rawEvents) {
+    if (opportunities.length >= processLimit) break;
+
+    const normTitle = String(event.title || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    const extId = String(event.externalId || event.eventId || '');
+    if (processedIds.has(extId) || (normTitle && processedTitles.has(normTitle))) {
+      log(`Skipped duplicate event: "${event.title}"`);
+      continue;
+    }
+    if (event.marketStatus === 'closed') {
+      log(`Skipped closed event: "${event.title}"`);
+      continue;
+    }
+    if (event.resolutionDate) {
+      const resMs = Date.parse(event.resolutionDate);
+      if (Number.isFinite(resMs) && resMs < nowMs) {
+        log(`Skipped expired event (ended ${event.resolutionDate}): "${event.title}"`);
+        continue;
+      }
+    }
+    processedIds.add(extId);
+    if (normTitle) processedTitles.add(normTitle);
     log(`\nEvaluating: "${event.title}"`);
     log(` -> Category: ${event.category} | 24h Vol: $${event.volume24h.toLocaleString()} | Top Outcome: ${event.topOutcome?.label} (${event.topOutcome?.probability}%)`);
 

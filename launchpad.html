@@ -108,26 +108,29 @@
   <!-- Secondary Navigation & View Controls Toolbar -->
   <nav class="sticky top-[61px] z-30 bg-slate-950/90 backdrop-blur-md border-b border-white/10 py-2.5 px-4 sm:px-6 shadow-lg">
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
-      <!-- Quick Section Anchor Pills -->
+      <!-- Revenue Loop Navigation Pills -->
       <div class="flex items-center gap-1.5 overflow-x-auto py-0.5 scrollbar-none font-mono-code">
-        <span class="text-slate-500 uppercase text-[10px] pr-1 hidden sm:inline">Jump:</span>
-        <button type="button" onclick="jumpToSection('activeOffersSection')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-300 text-slate-300 border border-white/10 transition flex items-center gap-1 whitespace-nowrap cursor-pointer">
-          <span>⚡</span> Offers (<span id="jumpOffersCount">4</span>)
+        <span class="text-slate-500 uppercase text-[10px] pr-1 hidden sm:inline">Loop:</span>
+        <button type="button" onclick="jumpToSection('activeOffersSection')" class="px-2.5 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 transition flex items-center gap-1 whitespace-nowrap cursor-pointer">
+          <span>1.</span> Active Offers (<span id="jumpOffersCount">4</span>)
+        </button>
+        <button type="button" onclick="jumpToSection('mainWorkspaceSection')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-blue-500/20 hover:text-blue-300 text-slate-300 border border-white/10 transition flex items-center gap-1 whitespace-nowrap cursor-pointer">
+          <span>2.</span> Research (9FB/vidIQ)
         </button>
         <button type="button" onclick="jumpToSection('predictionEngineSection')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-purple-500/20 hover:text-purple-300 text-slate-300 border border-white/10 transition flex items-center gap-1 whitespace-nowrap cursor-pointer">
-          <span>🔮</span> Prediction Radar
+          <span>3.</span> Offer-Fit &amp; Signals
+        </button>
+        <button type="button" onclick="jumpToSection('nicheCatalystSection')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-amber-500/20 hover:text-amber-300 text-slate-300 border border-white/10 transition flex items-center gap-1 whitespace-nowrap cursor-pointer">
+          <span>4.</span> Drafts &amp; Approval
+        </button>
+        <button type="button" onclick="jumpToSection('videoCadenceSection')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-purple-500/20 hover:text-purple-300 text-slate-300 border border-white/10 transition flex items-center gap-1 whitespace-nowrap cursor-pointer">
+          <span>5.</span> Distribution
+        </button>
+        <button type="button" onclick="jumpToSection('predictionEngineSection', 'attribution')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-cyan-500/20 hover:text-cyan-300 text-slate-300 border border-white/10 transition flex items-center gap-1 whitespace-nowrap cursor-pointer">
+          <span>6.</span> Results
         </button>
         <button type="button" onclick="jumpToSection('predictionEngineSection', 'webinars')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-indigo-500/20 hover:text-indigo-300 text-slate-300 border border-white/10 transition flex items-center gap-1 whitespace-nowrap cursor-pointer">
           <span>🎬</span> Webinars (<span id="jumpWebinarsCount">1</span>)
-        </button>
-        <button type="button" onclick="jumpToSection('nicheCatalystSection')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-amber-500/20 hover:text-amber-300 text-slate-300 border border-white/10 transition flex items-center gap-1 whitespace-nowrap cursor-pointer">
-          <span>💡</span> Niche Catalyst
-        </button>
-        <button type="button" onclick="jumpToSection('videoCadenceSection')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-purple-500/20 hover:text-purple-300 text-slate-300 border border-white/10 transition flex items-center gap-1 whitespace-nowrap cursor-pointer">
-          <span>📹</span> Video Cadence
-        </button>
-        <button type="button" onclick="jumpToSection('mainWorkspaceSection')" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-blue-500/20 hover:text-blue-300 text-slate-300 border border-white/10 transition flex items-center gap-1 whitespace-nowrap cursor-pointer">
-          <span>🧬</span> Outlier Brain &amp; Form
         </button>
       </div>
 
@@ -176,7 +179,13 @@
       </div>
 
       <!-- Section Body -->
-      <div class="section-body">
+      <div class="section-body space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-mono-code">
+          <span id="offersFocusStatus" class="text-slate-400">Showing focused top funnels with clear next actions</span>
+          <button type="button" id="toggleAllOffersBtn" onclick="toggleShowAllOffers()" class="px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-emerald-300 border border-emerald-500/30 transition cursor-pointer">
+            Show All Funnels
+          </button>
+        </div>
         <div id="activeOffersGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
       </div>
     </section>
@@ -192,13 +201,13 @@
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-500/40 text-purple-300 text-xs font-mono-code font-bold uppercase mb-2">
-            <span>🔮</span> PREDICTION-TO-PROFIT INTELLIGENCE
+            <span>🔮</span> OPTIONAL SIGNAL SOURCE • OFFER-FIT REVIEW &amp; RESULTS
           </div>
           <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            Prediction Market Opportunity Engine
+            Offer-Fit Review, Drafts &amp; Attribution Hub
           </h2>
           <p class="text-xs sm:text-sm text-slate-300 max-w-2xl mt-1 leading-relaxed">
-            Monitors real-time Polymarket trading momentum, validates empirical buyer intent, matches verified affiliate offers, and queues unpublished multi-channel campaigns.
+            Optional Polymarket signal scanner paired with hard offer-to-problem relevance gates, unpublished campaign drafts, and live attribution results (visits, opt-ins, affiliate clicks, commissions, refunds).
           </p>
           <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] font-mono-code text-slate-400 pt-2">
             <span>📡 Provider: <strong class="text-emerald-300">Polymarket Gamma API</strong> (Read-Only)</span>
@@ -234,8 +243,8 @@
       <!-- Collapsed Preview Bar -->
       <div class="section-collapsed-summary p-4 rounded-2xl bg-black/50 border border-purple-500/30 items-center justify-between gap-3 text-xs font-mono-code">
         <div class="flex items-center gap-2.5 text-slate-300 truncate">
-          <span class="text-purple-300 font-bold">🔮 Prediction Market Engine:</span>
-          <span id="collapsedPredictionSummary" class="text-slate-400 truncate">5 Ranked Opportunities • 1 Presenter Webinar (/webinar/yu-sleep) • Gamma API Stream Active</span>
+          <span class="text-purple-300 font-bold">🔮 Optional Signals &amp; Attribution:</span>
+          <span id="collapsedPredictionSummary" class="text-slate-400 truncate">Loading signal &amp; attribution summary...</span>
         </div>
         <button type="button" onclick="toggleSectionCollapse('predictionEngineSection')" class="text-purple-300 hover:text-purple-200 font-bold px-3 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 shrink-0 cursor-pointer">
           Expand Prediction Radar ▾
@@ -309,22 +318,30 @@
 
       <!-- Panel 3: Revenue Attribution -->
       <div id="predictionAttributionPanel" class="hidden space-y-4 text-xs font-mono-code">
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10">
-            <span class="text-[10px] text-slate-400 block uppercase">Campaign Visits</span>
-            <span id="attrVisits" class="text-xl font-black text-white">14,280</span>
+            <span class="text-[10px] text-slate-400 block uppercase">Visits</span>
+            <span id="attrVisits" class="text-xl font-black text-white">0</span>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10">
+            <span class="text-[10px] text-slate-400 block uppercase">Opt-Ins (Leads)</span>
+            <span id="attrOptIns" class="text-xl font-black text-blue-300">0 (No data)</span>
           </div>
           <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10">
             <span class="text-[10px] text-slate-400 block uppercase">Affiliate Clicks</span>
-            <span id="attrClicks" class="text-xl font-black text-purple-300">2,845 (19.9% CTR)</span>
+            <span id="attrClicks" class="text-xl font-black text-purple-300">0 (No data)</span>
           </div>
           <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10">
             <span class="text-[10px] text-slate-400 block uppercase">Confirmed Comm.</span>
-            <span id="attrCommissions" class="text-xl font-black text-emerald-400">$5,420.00</span>
+            <span id="attrCommissions" class="text-xl font-black text-emerald-400">$0.00</span>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10">
+            <span class="text-[10px] text-slate-400 block uppercase">Refunds</span>
+            <span id="attrRefunds" class="text-xl font-black text-rose-300">0 ($0.00)</span>
           </div>
           <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10">
             <span class="text-[10px] text-slate-400 block uppercase">Average EPC</span>
-            <span id="attrEpc" class="text-xl font-black text-cyan-300">$1.83</span>
+            <span id="attrEpc" class="text-xl font-black text-cyan-300">No data</span>
           </div>
         </div>
 
@@ -450,10 +467,10 @@
             <span>⚡</span> NICHE CATALYST ARCHITECTURE
           </div>
           <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            Problem-First Niche Catalyst Engine
+            Problem-First Niche Catalyst (Research &amp; Drafting)
           </h2>
           <p class="text-xs sm:text-sm text-slate-300 max-w-2xl mt-1 leading-relaxed">
-            Never pick products at random. Start with a desperate human pain point to auto-deploy the entire ecosystem: Amazon hardware kits, ClickBank masterclasses, SEO cluster guides, and email sequences.
+            Start with a verified consumer pain point to draft supporting guides, email sequences, and product angles. All drafts stay unpublished until human review and approval.
           </p>
         </div>
         <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
@@ -474,9 +491,9 @@
             type="button"
             id="runAutoPilotBtn"
             class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-400 hover:brightness-110 text-slate-950 text-xs font-black transition shadow-lg shadow-emerald-500/25 whitespace-nowrap cursor-pointer flex items-center gap-1.5"
-            title="Automatically scan vidIQ & 9 Figure Buddy, pick the highest scoring human problem, and deploy the entire funnel (article, products, lander)"
+            title="Scan vidIQ & 9 Figure Buddy and generate unpublished research drafts for human approval"
           >
-            <span>🤖</span> Auto-Pilot Deploy
+            <span>🤖</span> Research &amp; Draft (Needs Approval)
           </button>
           <button
             type="button"
@@ -493,8 +510,8 @@
       <!-- Collapsed Preview Bar -->
       <div class="section-collapsed-summary p-4 rounded-2xl bg-black/50 border border-amber-500/30 items-center justify-between gap-3 text-xs font-mono-code">
         <div class="flex items-center gap-2.5 text-slate-300 truncate">
-          <span class="text-amber-400 font-bold">⚡ Niche Catalyst Engine:</span>
-          <span class="text-slate-400 truncate">Continuous Daemon ACTIVE (1 deploy / 24h) • 5 Resilience Pillars • Amazon Hardware + ClickBank Solutions</span>
+          <span class="text-amber-400 font-bold">⚡ Niche Catalyst (Drafting):</span>
+          <span class="text-slate-400 truncate">Research &amp; Drafting Mode • Mandatory Human Approval Before Deployment</span>
         </div>
         <button type="button" onclick="toggleSectionCollapse('nicheCatalystSection')" class="text-amber-400 hover:text-amber-300 font-bold px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 shrink-0 cursor-pointer">
           Expand Catalyst Engine ▾
@@ -1146,10 +1163,125 @@
     }
 
     // 1. Load Active Offers
+    let showAllOffers = false;
+    let cachedOffersList = [];
+    const PRIORITY_OFFER_SLUGS = ['yu-sleep', 'santa-circle', 'bellver-card', 'viral-traffic-matrix', 'home-power', 'dog-enrichment'];
+
+    function toggleShowAllOffers() {
+      showAllOffers = !showAllOffers;
+      renderOffersGrid();
+    }
+
+    function researchOfferInBuilder(slug, offerName) {
+      const input = document.getElementById('nfbQuery');
+      if (input) {
+        input.value = offerName || slug;
+      }
+      jumpToSection('mainWorkspaceSection');
+      if (typeof searchOutliers === 'function') {
+        searchOutliers();
+      }
+    }
+
+    function copyOfferPrompt(slug, idx) {
+      const offer = cachedOffersList.find(o => o.slug === slug);
+      const text = offer?.contentPrompts?.[idx];
+      if (!text) return;
+      navigator.clipboard?.writeText(text).then(() => {
+        alert('Original content prompt copied to clipboard.');
+      }).catch(() => {
+        prompt('Copy original content prompt:', text);
+      });
+    }
+
+    function renderOffersGrid() {
+      const offers = cachedOffersList;
+      const focused = showAllOffers
+        ? offers
+        : offers.filter(o => PRIORITY_OFFER_SLUGS.includes(o.slug)).concat(
+            offers.filter(o => !PRIORITY_OFFER_SLUGS.includes(o.slug))
+          ).slice(0, 6);
+
+      const statusEl = document.getElementById('offersFocusStatus');
+      const toggleBtn = document.getElementById('toggleAllOffersBtn');
+      if (statusEl) {
+        statusEl.textContent = showAllOffers
+          ? `Showing all ${offers.length} offer funnels`
+          : `Focused on ${focused.length} priority funnels (of ${offers.length} total)`;
+      }
+      if (toggleBtn) {
+        toggleBtn.textContent = showAllOffers ? 'Focus Top 6 Funnels' : `Show All (${offers.length})`;
+      }
+
+      const grid = document.getElementById('activeOffersGrid');
+      grid.innerHTML = focused.map(o => {
+        const canonicalUrl = `/o/${o.slug}`;
+        const shortAlias = (o.slug === 'santa-circle' ? '/santa' : o.slug === 'bellver-card' ? '/card' : o.slug === 'yu-sleep' ? '/sleep' : o.slug === 'viral-traffic-matrix' ? '/matrix' : canonicalUrl);
+        const assets = o.assetStatus || {};
+        const videoExists = Boolean(assets.videoExists);
+        const guides = Array.isArray(assets.guideSlugs) ? assets.guideSlugs : [];
+        const nextAction = o.nextAction || (videoExists ? 'Schedule existing video & check opt-in CTR' : 'Create explainer video for funnel');
+        const primaryPrompt = o.contentPrompts?.[0] || '';
+
+        return `
+          <div class="glass-surface rounded-2xl p-4 flex flex-col justify-between gap-3 border border-white/10 hover:border-emerald-500/30 transition">
+            <div class="space-y-2">
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-display font-bold text-sm text-white">${o.name}</span>
+                <span class="text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300">Brevo #${o.brevo?.listId || 80}</span>
+              </div>
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span class="text-[9px] font-mono-code uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">Lander Live</span>
+                <span class="text-[9px] font-mono-code uppercase px-1.5 py-0.5 rounded ${videoExists ? 'bg-cyan-500/20 text-cyan-300' : 'bg-amber-500/20 text-amber-300'}">${videoExists ? 'Explainer Video Ready' : 'Video Needed'}</span>
+                <span class="text-[9px] font-mono-code uppercase px-1.5 py-0.5 rounded ${guides.length > 0 ? 'bg-indigo-500/20 text-indigo-300' : 'bg-white/10 text-slate-400'}">${guides.length > 0 ? `${guides.length} SEO Guide(s)` : 'No SEO Guide'}</span>
+              </div>
+              <div class="text-[10px] font-mono-code text-amber-300">Next: ${nextAction}</div>
+              ${primaryPrompt ? `
+                <div class="p-2 rounded-xl bg-black/40 border border-white/5 text-[10px] text-slate-300 leading-relaxed">
+                  <div class="flex items-center justify-between gap-2 mb-1">
+                    <span class="font-mono-code uppercase text-[9px] text-purple-300 font-bold">Original Content Prompt</span>
+                    <button type="button" onclick="copyOfferPrompt('${o.slug}', 0)" class="text-[9px] font-mono-code text-emerald-300 hover:underline cursor-pointer">Copy</button>
+                  </div>
+                  <div class="line-clamp-2">${primaryPrompt}</div>
+                </div>
+              ` : ''}
+              <div class="text-[10px] font-mono-code text-slate-400 truncate">${canonicalUrl} -> ${o.affiliateUrl}</div>
+            </div>
+            <div class="flex flex-col gap-2 pt-2 border-t border-white/10 text-xs">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <a href="${shortAlias}" target="_blank" class="text-emerald-400 hover:underline font-bold">Open Lander (${shortAlias}) ↗</a>
+                <div class="flex items-center gap-2 text-[10px] font-mono-code">
+                  ${videoExists ? `<a href="${assets.videoUrl}" target="_blank" class="text-cyan-300 hover:underline">▶ Video</a>` : ''}
+                  ${guides.length > 0 ? `<a href="/guides/${guides[0]}" target="_blank" class="text-indigo-300 hover:underline">📄 Guide</a>` : ''}
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-1.5">
+                <button
+                  type="button"
+                  onclick="researchOfferInBuilder('${o.slug}', '${String(o.name).replace(/'/g, "\\'")}')"
+                  class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-[10px] font-bold text-slate-200 flex items-center justify-center gap-1 cursor-pointer transition"
+                >
+                  <span>🔍 Research</span>
+                </button>
+                <button
+                  type="button"
+                  onclick="scheduleCommercial('${o.slug}')"
+                  class="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 hover:from-emerald-500/30 hover:to-teal-500/30 border border-emerald-400/40 text-[10px] font-bold text-emerald-200 flex items-center justify-center gap-1 cursor-pointer transition"
+                >
+                  <span>🎬 ${videoExists ? 'Schedule Video' : 'Draft Video'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
     async function loadOffers() {
       const res = await fetch('/api/offers');
       const data = await res.json();
       const offers = Object.values(data.offers || {});
+      cachedOffersList = offers;
       document.getElementById('offerCountBadge').textContent = `${offers.length} Active Funnels`;
       const jumpOffers = document.getElementById('jumpOffersCount');
       if (jumpOffers) jumpOffers.textContent = offers.length;
@@ -1157,41 +1289,7 @@
       if (collapsedSummary && offers.length > 0) {
         collapsedSummary.textContent = offers.map(o => `${o.name} (/${o.slug})`).slice(0, 4).join(', ') + (offers.length > 4 ? ` +${offers.length - 4} more` : '');
       }
-
-      const grid = document.getElementById('activeOffersGrid');
-      grid.innerHTML = offers.map(o => {
-        const shortAlias = (o.slug === 'santa-circle' ? 'santa' : o.slug === 'bellver-card' ? 'card' : o.slug === 'yu-sleep' ? 'sleep' : o.slug === 'viral-traffic-matrix' ? 'matrix' : o.slug);
-        const friendlyUrl = `/${shortAlias}`;
-        return `
-          <div class="glass-surface rounded-2xl p-4 flex flex-col justify-between gap-3 border border-white/10 hover:border-emerald-500/30 transition">
-            <div>
-              <div class="flex items-center justify-between gap-2">
-                <span class="font-display font-bold text-sm text-white">${o.name}</span>
-                <span class="text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300">List #${o.brevo?.listId || 80}</span>
-              </div>
-              <div class="flex items-center gap-1.5 mt-1">
-                <span class="text-[9px] font-mono-code uppercase px-1.5 py-0.5 rounded bg-white/10 text-slate-300">${o.landerArchetype || 'matrix'}</span>
-                <span class="text-[9px] font-mono-code uppercase px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300">${o.landerTheme || 'emerald'}</span>
-                <span class="text-[9px] font-mono-code uppercase px-1.5 py-0.5 rounded bg-emerald-400/20 text-emerald-300 font-bold">✨ Friendly: ${friendlyUrl}</span>
-              </div>
-              <div class="text-[11px] font-mono-code text-slate-400 mt-1 truncate">${o.affiliateUrl}</div>
-            </div>
-            <div class="flex flex-col gap-2 pt-2 border-t border-white/10 text-xs">
-              <div class="flex items-center justify-between">
-                <a href="${friendlyUrl}" target="_blank" class="text-emerald-400 hover:underline font-bold">Open traffic.aisimplesystem.com${friendlyUrl} ↗</a>
-                <span class="text-[10px] text-slate-400">Drip Active</span>
-              </div>
-              <button
-                type="button"
-                onclick="scheduleCommercial('${o.slug}')"
-                class="w-full mt-1 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 hover:from-emerald-500/30 hover:to-teal-500/30 border border-emerald-400/40 text-[11px] font-bold text-emerald-200 flex items-center justify-center gap-2 cursor-pointer transition shadow-sm"
-              >
-                <span>🎬 Schedule Remotion Commercial to ContentStudio</span>
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
+      renderOffersGrid();
     }
 
     // Auto-slugify Offer Name
@@ -2254,6 +2352,10 @@ async function broadcastNewLaunch() {
       document.getElementById('polyOppsCount').textContent = opps.length;
       document.getElementById('polyPriorityCount').textContent = eligible.length;
       document.getElementById('polyDraftsCount').textContent = drafts.length;
+      const collapsedPredSummary = document.getElementById('collapsedPredictionSummary');
+      if (collapsedPredSummary) {
+        collapsedPredSummary.textContent = `${opps.length} Optional Signals • ${eligible.length} Eligible • ${drafts.length} Unpublished Drafts`;
+      }
 
       document.getElementById('tabOppsBadge').textContent = opps.length;
       document.getElementById('tabDraftsBadge').textContent = drafts.length;
@@ -2337,13 +2439,21 @@ async function broadcastNewLaunch() {
         const json = await res.json();
         if (json.ok && json.attribution) {
           const a = json.attribution;
-          document.getElementById('attrVisits').textContent = a.totalVisits.toLocaleString();
-          document.getElementById('attrClicks').textContent = `${a.totalAffiliateClicks.toLocaleString()} (${a.clickThroughRate} CTR)`;
-          document.getElementById('attrCommissions').textContent = `$${a.confirmedCommissionsUsd.toFixed(2)}`;
-          document.getElementById('attrEpc').textContent = `$${a.averageEpc.toFixed(2)}`;
+          document.getElementById('attrVisits').textContent = (a.totalVisits || 0).toLocaleString();
+          const optInRate = a.totalVisits > 0 ? a.leadConversionRate : 'No data';
+          document.getElementById('attrOptIns').textContent = `${(a.totalLeads || 0).toLocaleString()} (${optInRate})`;
+          const ctrLabel = a.totalVisits > 0 ? `${a.clickThroughRate} CTR` : 'No data';
+          document.getElementById('attrClicks').textContent = `${(a.totalAffiliateClicks || 0).toLocaleString()} (${ctrLabel})`;
+          document.getElementById('attrCommissions').textContent = `$${(a.confirmedCommissionsUsd || 0).toFixed(2)}`;
+          document.getElementById('attrRefunds').textContent = `${a.totalRefundsCount || 0} ($${(a.refundLossUsd || 0).toFixed(2)})`;
+          document.getElementById('attrEpc').textContent = a.totalAffiliateClicks > 0 ? `$${(a.averageEpc || 0).toFixed(2)}` : 'No data';
 
           const container = document.getElementById('attributionTable');
           if (container && a.campaigns) {
+            if (a.campaigns.length === 0) {
+              container.innerHTML = `<div class="text-slate-400 text-xs p-3">No campaign attribution records yet.</div>`;
+              return;
+            }
             container.innerHTML = `
               <table class="w-full text-left font-mono-code text-[11px] border border-white/10 rounded-xl overflow-hidden">
                 <thead class="bg-white/5 text-slate-400">
@@ -2351,24 +2461,30 @@ async function broadcastNewLaunch() {
                     <th class="p-2.5">Campaign</th>
                     <th class="p-2.5">Merchant</th>
                     <th class="p-2.5">Visits</th>
+                    <th class="p-2.5">Opt-Ins</th>
                     <th class="p-2.5">Clicks (CTR)</th>
-                    <th class="p-2.5">Sales</th>
-                    <th class="p-2.5">Net Comm.</th>
+                    <th class="p-2.5">Confirmed Comm.</th>
+                    <th class="p-2.5">Refunds</th>
                     <th class="p-2.5">EPC</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-white/5">
-                  ${a.campaigns.map(c => `
+                  ${a.campaigns.map(c => {
+                    const ctrText = c.visits > 0 ? `${((c.clicks / c.visits) * 100).toFixed(1)}%` : 'No data';
+                    const epcText = c.clicks > 0 ? `$${(c.epc || 0).toFixed(2)}` : 'No data';
+                    return `
                     <tr class="hover:bg-white/[0.02]">
                       <td class="p-2.5 text-white font-bold">${c.title}</td>
                       <td class="p-2.5 text-slate-300">${c.merchant}</td>
-                      <td class="p-2.5 text-slate-200">${c.visits.toLocaleString()}</td>
-                      <td class="p-2.5 text-purple-300">${c.clicks.toLocaleString()} (${((c.clicks / c.visits) * 100).toFixed(1)}%)</td>
-                      <td class="p-2.5 text-emerald-300 font-bold">${c.confirmedSales}</td>
-                      <td class="p-2.5 text-emerald-400 font-bold">$${c.netRevenueUsd.toFixed(2)}</td>
-                      <td class="p-2.5 text-cyan-300 font-bold">$${c.epc.toFixed(2)}</td>
+                      <td class="p-2.5 text-slate-200">${(c.visits || 0).toLocaleString()}</td>
+                      <td class="p-2.5 text-blue-300">${(c.leads || 0).toLocaleString()}</td>
+                      <td class="p-2.5 text-purple-300">${(c.clicks || 0).toLocaleString()} (${ctrText})</td>
+                      <td class="p-2.5 text-emerald-400 font-bold">$${(c.confirmedCommissionsUsd || 0).toFixed(2)} (${c.confirmedSales || 0})</td>
+                      <td class="p-2.5 text-rose-300">${c.refundsCount || 0} ($${(c.refundsUsd || 0).toFixed(2)})</td>
+                      <td class="p-2.5 text-cyan-300 font-bold">${epcText}</td>
                     </tr>
-                  `).join('')}
+                  `;
+                  }).join('')}
                 </tbody>
               </table>
             `;
@@ -2503,8 +2619,8 @@ async function broadcastNewLaunch() {
                 <!-- Demand Evidence Provenance Block -->
                 ${h.demandEvidence ? `
                   <div class="mt-2 pt-2 border-t border-white/5 space-y-1 text-[10px] text-slate-400">
-                    <div><strong>Provider:</strong> <span class="text-slate-300">${h.demandEvidence.provider || 'vidIQ Keyword API'}</span> (${h.demandEvidence.searchPlatform || 'YouTube Search Index'})</div>
-                    <div><strong>Geography:</strong> <span class="text-slate-300">${h.demandEvidence.geography || 'US'}</span> • <strong>Period:</strong> <span class="text-slate-300">${h.demandEvidence.measurementPeriod || '30-Day Baseline'}</span></div>
+                    <div><strong>Source:</strong> <span class="text-slate-300">${h.demandEvidence.provider || 'vidIQ Keyword API'}</span> (${h.demandEvidence.searchPlatform || 'YouTube Search Index'})</div>
+                    <div><strong>Date:</strong> <span class="text-slate-300">${h.demandEvidence.observationDate ? new Date(h.demandEvidence.observationDate).toLocaleDateString() : 'Unknown'}</span> • <strong>Geo:</strong> <span class="text-slate-300">${h.demandEvidence.geography || 'US'}</span> • <strong>Confidence:</strong> <span class="text-cyan-300 font-bold">${e.signal?.signalConfidence ?? 50}%</span></div>
                     <div><strong>Monthly Searches:</strong> <span class="text-emerald-400 font-bold">${h.demandEvidence.volumeDisplay || '<750'}</span> • <strong>Opportunity Score:</strong> <span class="text-purple-300">${h.demandEvidence.opportunityScore ?? 'N/A'}/100</span></div>
                     ${h.demandEvidence.relatedTopQuery ? `
                       <div><strong>Related High-Volume Query:</strong> "${h.demandEvidence.relatedTopQuery.keyword}" (${h.demandEvidence.relatedTopQuery.monthlySearches} searches/mo)</div>
@@ -2515,7 +2631,7 @@ async function broadcastNewLaunch() {
                   </div>
                 ` : `
                   <div class="mt-2 pt-2 border-t border-white/5 text-[10px] text-orange-400">
-                    ⚡ Search demand unverified: Independent search volume provider was unavailable or unmeasured.
+                    ⚡ Search demand unverified: Independent search volume provider was unavailable or unmeasured. (Signal Confidence: ${e.signal?.signalConfidence ?? 0}%)
                   </div>
                 `}
               </div>
