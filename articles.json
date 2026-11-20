@@ -415,5 +415,64 @@
         "priceEstimate": "~$24 - $36"
       }
     ]
+  },
+  "why-do-knees-pop-morning-synovial-fluid": {
+    "slug": "why-do-knees-pop-morning-synovial-fluid",
+    "category": "Joint Mobility",
+    "categoryBadge": "🦴 JOINT RESTORE",
+    "title": "Why Your Knees Pop Every Morning: The Synovial Fluid Loss Mechanism Explained",
+    "subtitle": "Snapping, grinding knees and stiff hips getting out of bed. Every step down the stairs causes sharp wincing, creating constant anxiety about losing physical mobility or facing costly joint surgery.",
+    "publishedAt": "2026-11-15T04:26:27.618Z",
+    "readTime": "9 min read",
+    "author": {
+      "name": "Smart Home Resilience Engineering Desk",
+      "channel": "@SmartHomeResilience",
+      "channelUrl": "https://www.youtube.com/channel/UCy9DLRRHSPQ42do2q8Ookxw"
+    },
+    "offerSlug": "joint-mobility",
+    "videoUrl": "/videos/power-commercial.mp4",
+    "thumbnailUrl": "/thumbnails/power-thumbnail.jpg",
+    "clickbankUrl": "https://hop.clickbank.net/?affiliate=kmtwarrior&vendor=jgenesis&tid=autopilot_joint-mobility",
+    "amazonTag": "santa101-20",
+    "hardwareComponents": [
+      {
+        "name": "Copper Infused Compression Knee Sleeves (Pair)",
+        "description": "Verified essential tool for joint mobility emergency preparedness.",
+        "searchQuery": "copper knee compression sleeve support pair",
+        "priceEstimate": "~$18 - $28"
+      },
+      {
+        "name": "Organic Castor Oil Joint Compression Wrap Pack",
+        "description": "Verified essential tool for joint mobility emergency preparedness.",
+        "searchQuery": "organic castor oil pack wrap for knee joint",
+        "priceEstimate": "~$16 - $24"
+      },
+      {
+        "name": "Targeted Red Light Therapy Joint Heating Pad",
+        "description": "Verified essential tool for joint mobility emergency preparedness.",
+        "searchQuery": "red light therapy knee joint heating wrap pad",
+        "priceEstimate": "~$49 - $79"
+      }
+    ]
+  },
+  "how-to-do-secret-santa-without-email": {
+    "slug": "how-to-do-secret-santa-without-email",
+    "category": "Holiday & Group Planning",
+    "categoryBadge": "SANTA CIRCLE GUIDE",
+    "title": "How to Do Secret Santa Without Email (4 Fast Methods for Text & Chat)",
+    "subtitle": "Need to draw Secret Santa names without collecting emails? Compare 4 fast methods including private reveal links, SMS hat draws, pair exclusions, and ad-free gift exchanges.",
+    "publishedAt": "2026-11-19T20:30:00Z",
+    "readTime": "6 min read",
+    "author": {
+      "name": "AISimpleSystem Editorial Desk",
+      "channel": "@sEricaStories",
+      "channelUrl": "https://www.youtube.com/@sEricaStories"
+    },
+    "offerSlug": "santa-circle",
+    "videoUrl": "/videos/santa-circle-commercial.mp4",
+    "thumbnailUrl": "/thumbnails/santa-circle-vidiq-thumbnail.png",
+    "clickbankUrl": "https://thesantacircle.com/",
+    "amazonTag": "santa101-20",
+    "hardwareComponents": []
   }
 }

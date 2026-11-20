@@ -264,6 +264,113 @@ function renderArticle(article, options = {}) {
     `;
   }
   // 6. Default / DIY Blackout Power Guide
+  // 7. Secret Santa Without Email Guide
+  else if (article.slug === 'how-to-do-secret-santa-without-email') {
+    quickTakeHtml = `
+      <div id="quick-take" class="my-8 p-5 sm:p-6 rounded-2xl bg-slate-50 border-2 border-slate-200/90 shadow-2xs not-prose">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-black">✓</span>
+            <span class="text-xs font-mono-code font-bold uppercase tracking-wider text-slate-700">TL;DR Quick Answer</span>
+          </div>
+          <span class="text-xs font-mono-code text-slate-500">4 Verified Methods</span>
+        </div>
+        <p class="text-sm sm:text-base text-slate-700 leading-relaxed mb-4">
+          You can run a Secret Santa without collecting email addresses using three simple methods: (1) an individual reveal-link generator shared over SMS or WhatsApp, (2) the "photo-of-a-slip" hat draw for small groups, or (3) a 1-on-1 DM chain managed by a non-playing organizer. If your group also needs couple exclusions, budget caps, and wishlists without messy group-chat guessing, <a href="/o/santa-circle" class="underline font-semibold text-emerald-700">The Santa Circle</a> sets up a 100% free, ad-free exchange in 60 seconds.
+        </p>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-slate-200 text-xs font-mono-code">
+          <div><span class="text-slate-400 block text-[10px] uppercase">Fastest Digital</span><span class="font-bold text-slate-900 text-sm">Unique Reveal Links</span></div>
+          <div><span class="text-slate-400 block text-[10px] uppercase">Spoiler Risk</span><span class="font-bold text-rose-600 text-sm">Avoid Single Links</span></div>
+          <div><span class="text-slate-400 block text-[10px] uppercase">Best With Exclusions</span><span class="font-bold text-emerald-700 text-sm">Smart Pair Rules</span></div>
+          <div><span class="text-slate-400 block text-[10px] uppercase">Setup Time</span><span class="font-bold text-blue-700 text-sm">Under 60 Seconds</span></div>
+        </div>
+      </div>
+    `;
+
+    bodyContent = `
+      <h2>Quick Comparison: 4 Ways to Run Secret Santa Without Email</h2>
+      <div class="overflow-x-auto my-6 not-prose">
+        <table class="w-full text-left border-collapse rounded-xl overflow-hidden border border-slate-200 text-xs sm:text-sm">
+          <thead class="bg-slate-900 text-white font-mono-code">
+            <tr>
+              <th class="p-3">Method</th>
+              <th class="p-3">Best For</th>
+              <th class="p-3">Spoiler Risk</th>
+              <th class="p-3">Exclusions</th>
+              <th class="p-3">Wishlists</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 bg-white">
+            <tr>
+              <td class="p-3 font-bold text-slate-900">1. Unique Reveal Links</td>
+              <td class="p-3 text-slate-600">WhatsApp / iMessage groups</td>
+              <td class="p-3 text-emerald-700 font-semibold">Low (unique URL per person)</td>
+              <td class="p-3 text-slate-600">Basic</td>
+              <td class="p-3 text-slate-500">Limited</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-bold text-slate-900">2. SMS Photo Hat Draw</td>
+              <td class="p-3 text-slate-600">4 to 8 people in person</td>
+              <td class="p-3 text-amber-700 font-semibold">Medium (organizer sees all)</td>
+              <td class="p-3 text-slate-600">Manual redraw</td>
+              <td class="p-3 text-slate-500">None</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-bold text-slate-900">3. Non-Playing DM Chain</td>
+              <td class="p-3 text-slate-600">Small remote teams</td>
+              <td class="p-3 text-emerald-700 font-semibold">Low (if organizer sits out)</td>
+              <td class="p-3 text-slate-600">Manual</td>
+              <td class="p-3 text-slate-500">None</td>
+            </tr>
+            <tr class="bg-emerald-50/70">
+              <td class="p-3 font-bold text-emerald-900">4. Ad-Free Circle (<a href="/o/santa-circle" class="underline">The Santa Circle</a>)</td>
+              <td class="p-3 text-slate-700">Families &amp; larger teams</td>
+              <td class="p-3 text-emerald-700 font-semibold">Zero (private reveals)</td>
+              <td class="p-3 text-emerald-700 font-semibold">Smart Pair Rules</td>
+              <td class="p-3 text-emerald-700 font-semibold">Amazon Wishlists</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Method 1: Individual Reveal Links Over Text or WhatsApp</h2>
+      <p>
+        Link-based name drawers such as <a href="https://www.giftlist.com/" target="_blank" rel="noopener">GiftList</a> and <a href="https://wishes.app/" target="_blank" rel="noopener">Wishes.app</a> let you enter participant names and generate a private URL for each person that you paste directly into SMS, WhatsApp, or Slack.
+      </p>
+      <p>
+        <strong>Watch out for single-link traps:</strong> Some tools create one shared link for the whole group where anyone taps their own name to reveal their match. In casual friend groups, a single shared link makes it easy for curious members to tap someone else's name by mistake (or on purpose). Always prefer tools that issue <strong>one unique URL per participant</strong>.
+      </p>
+
+      <h2>Method 2: The SMS Photo Hat Draw (Best for Small In-Person Groups)</h2>
+      <ol>
+        <li>Write each participant's name on a folded slip of paper and drop them in a bowl.</li>
+        <li>Write each person's name on the outside of a blank envelope or folded sticky note, draw matches one by one (redrawing if anyone gets themselves), and tuck the match inside.</li>
+        <li>For remote family members, snap a quick photo of their slip and text it privately via iMessage or WhatsApp.</li>
+      </ol>
+
+      <h2>Method 3: The Non-Playing Organizer DM Method</h2>
+      <p>
+        If a manager, parent, or host is not participating in the gift swap, they can draw names on paper and send individual direct messages on Instagram, Facebook Messenger, or Slack. To avoid mathematical dead ends where the last person draws themselves, arrange everyone in a single closed loop (Person A gives to Person B, Person B gives to Person C, and the last person gives back to Person A) rather than drawing randomly one at a time.
+      </p>
+
+      <h2>When "No-Email" Text Tricks Break Down (Exclusions &amp; Wishlists)</h2>
+      <p>
+        Simple text-message draws work well for 4 to 6 close friends, but they fall apart quickly once you have 8+ participants, spouses or roommates who should not draw each other, spending limits, and people asking "what does this person even want?" in the group chat.
+      </p>
+      <h3>Setting Up Smart Pair Exclusions &amp; Wishlists in 60 Seconds</h3>
+      <p>
+        Dedicated exchange platforms like <a href="https://www.drawnames.com/" target="_blank" rel="noopener">DrawNames</a>, <a href="https://www.elfster.com/" target="_blank" rel="noopener">Elfster</a>, and <a href="https://thesantacircle.com/" target="_blank" rel="noopener">The Santa Circle</a> automate pair exclusions so spouses never draw each other. If you want a 100% free, ad-free setup with spending limits, smart exclusions, and direct Amazon wishlist integration, you can <a href="/o/santa-circle" class="underline font-bold text-emerald-700">create your free Secret Santa circle in 60 seconds here</a>.
+      </p>
+
+      <h2>Frequently Asked Questions</h2>
+      <h3>Can you do Secret Santa without email addresses?</h3>
+      <p>Yes. You can use a unique reveal-link generator shared over SMS or WhatsApp, an SMS photo hat draw, or a non-playing organizer DM loop.</p>
+      <h3>How do you keep people from peeking if you share one link in a group chat?</h3>
+      <p>Avoid single shared links where every name is clickable on one page. Use a tool that generates a separate private link for each participant and send each link in a 1-on-1 text.</p>
+      <h3>Why do manual Secret Santa draws sometimes end with the last person drawing themselves?</h3>
+      <p>If participants draw randomly without checking remaining pairs, the final two names can leave the last person holding their own slip. Assigning everyone in a single closed loop (A to B to C to A) prevents this.</p>
+    `;
+  }
   else {
     quickTakeHtml = `
       <div id="quick-take" class="my-8 p-5 sm:p-6 rounded-2xl bg-slate-50 border-2 border-slate-200/90 shadow-2xs not-prose">
