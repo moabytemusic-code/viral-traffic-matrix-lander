@@ -1164,6 +1164,28 @@ function renderOfferLander(offer) {
         activityEl.textContent = names[actIdx] + ' just unlocked their free access key (' + (Math.floor(Math.random() * 4) + 1) + ' mins ago)';
       }, 4500);
     }
+    // First-party outbound affiliate click beacon (privacy-safe, non-blocking)
+    (function attachFirstPartyClickBeacon() {
+      const offerSlug = ${JSON.stringify(offer.slug)};
+      const params = new URLSearchParams(window.location.search);
+      const campaignId = params.get('cid') || params.get('tid') || null;
+      document.querySelectorAll('a[href^="http"]').forEach((link) => {
+        if (link.hostname === window.location.hostname) return;
+        link.addEventListener('click', () => {
+          const payload = JSON.stringify({ offerSlug, campaignId });
+          if (navigator.sendBeacon) {
+            navigator.sendBeacon('/api/track/click', new Blob([payload], { type: 'application/json' }));
+          } else {
+            fetch('/api/track/click', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: payload,
+              keepalive: true
+            }).catch(() => {});
+          }
+        });
+      });
+    })();
   </script>
 </body>
 </html>`;

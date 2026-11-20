@@ -28,6 +28,8 @@ const continuousDaemon = require('./continuous-daemon');
 const predictionPipeline = require('./prediction-pipeline');
 const { webinarEngine, WEBINAR_STATES } = require('./webinar-engine');
 const { renderWebinarViewer } = require('./render-webinar');
+const crypto = require('crypto');
+const { attributionStore } = require('./attribution-store');
 const ARTICLES_PATH = path.join(__dirname, 'articles.json');
 const BIOS_PATH = path.join(__dirname, 'bios.json');
 const PREDICTION_STATE_PATH = path.join(__dirname, 'prediction-state.json');
@@ -49,6 +51,20 @@ function escapeHtml(str = '') {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+function getVisitorDiscriminator(req, res = null) {
+  const cookieHeader = String(req.headers?.cookie || '');
+  const match = cookieHeader.match(/(?:^|;\s*)vtm_vid=([^;]+)/);
+  if (match && match[1]) {
+    return decodeURIComponent(match[1]);
+  }
+  const newId = crypto.randomBytes(12).toString('hex');
+  if (res && typeof res.setHeader === 'function') {
+    const secureFlag = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+    res.setHeader('Set-Cookie', `vtm_vid=${newId}; Path=/; Max-Age=86400; HttpOnly; SameSite=Lax${secureFlag}`);
+  }
+  return newId;
 }
 
 function findBioBySlug(biosList, rawSlug) {
@@ -909,6 +925,41 @@ Sitemap: https://${host}/sitemap.xml
     `);
   }
 
+  // GET /go/:slug -> First-party outbound affiliate click tracking + 302 redirect
+  if ((req.method === 'GET' || req.method === 'HEAD') && pathname.startsWith('/go/')) {
+    const rawSlug = pathname.replace(/^\/go\//, '').replace(/\/$/, '').toLowerCase();
+    const offersList = loadOffers();
+    const resolvedGoSlug = VANITY_ALIASES[rawSlug] || rawSlug;
+    const offer = offersList[resolvedGoSlug];
+    if (!offer || !offer.affiliateUrl) {
+      res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
+      return res.end(`<h1>Affiliate Redirect Not Found</h1><p><a href="/launchpad">Open Offer Launchpad</a></p>`);
+    }
+    if (req.method === 'GET') {
+      try {
+        const campaignId = parsedUrl.searchParams.get('cid') || parsedUrl.searchParams.get('tid') || null;
+        const actor = getVisitorDiscriminator(req, res);
+        attributionStore.recordFirstPartyEvent({
+          eventType: 'click',
+          offerSlug: offer.slug,
+          campaignId,
+          actorDiscriminator: actor
+        });
+      } catch (_) {}
+    }
+    let targetUrl = offer.affiliateUrl;
+    const tid = parsedUrl.searchParams.get('tid');
+    if (tid && /^[a-zA-Z0-9_-]{1,64}$/.test(tid)) {
+      try {
+        const u = new URL(targetUrl);
+        if (!u.searchParams.has('tid')) u.searchParams.set('tid', tid);
+        targetUrl = u.toString();
+      } catch (_) {}
+    }
+    res.writeHead(302, { Location: targetUrl, 'Cache-Control': 'no-store' });
+    return res.end();
+  }
+
   // GET /o/:slug or Friendly Short Root (e.g. /santa, /card, /sleep, /matrix) -> Render dynamic lander
   const resolvedSlug = resolveOfferSlug(pathname);
   const offersList = loadOffers();
@@ -923,6 +974,18 @@ Sitemap: https://${host}/sitemap.xml
   ) {
     try {
       const offer = offersList[resolvedSlug];
+      if (req.method === 'GET') {
+        try {
+          const campaignId = parsedUrl.searchParams.get('cid') || parsedUrl.searchParams.get('tid') || null;
+          const actor = getVisitorDiscriminator(req, res);
+          attributionStore.recordFirstPartyEvent({
+            eventType: 'visit',
+            offerSlug: offer.slug,
+            campaignId,
+            actorDiscriminator: actor
+          });
+        } catch (_) {}
+      }
       const html = renderOfferLander(offer);
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       return res.end(html);
@@ -1120,33 +1183,121 @@ Sitemap: https://${host}/sitemap.xml
     }
   }
 
-  // GET /api/prediction/attribution -> Return revenue attribution metrics across prediction campaigns
+  // POST /api/track/click -> First-party deduped outbound affiliate click beacon (no raw PII stored)
+  if (req.method === 'POST' && pathname === '/api/track/click') {
+    try {
+      const body = await readJsonBody(req);
+      const cleanSlug = String(body?.offerSlug || '').trim();
+      const offers = loadOffers();
+      if (!cleanSlug || !offers[cleanSlug]) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ ok: false, error: 'Valid offerSlug is required' }));
+      }
+      const campaignId = body?.campaignId ? String(body.campaignId).slice(0, 80) : null;
+      const actor = getVisitorDiscriminator(req, res);
+      const result = attributionStore.recordFirstPartyEvent({
+        eventType: 'click',
+        offerSlug: cleanSlug,
+        campaignId,
+        actorDiscriminator: actor
+      });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: true, ...result }));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+  }
+
+  // POST /api/attribution/postback -> Authenticated affiliate network callback (never infers sales from clicks)
+  if (req.method === 'POST' && pathname === '/api/attribution/postback') {
+    const postbackSecret = process.env.AFFILIATE_POSTBACK_SECRET || process.env.CLICKBANK_INS_SECRET || '';
+    if (!postbackSecret) {
+      res.writeHead(503, { 'Content-Type': 'application/json' });
+      return res.end(
+        JSON.stringify({
+          ok: false,
+          code: 'POSTBACK_NOT_CONFIGURED',
+          error: 'Provider postback secret is not configured (set AFFILIATE_POSTBACK_SECRET or CLICKBANK_INS_SECRET).'
+        })
+      );
+    }
+    try {
+      const supplied = String(req.headers['x-postback-secret'] || '').trim();
+      const expectedBuf = Buffer.from(postbackSecret);
+      const suppliedBuf = Buffer.from(supplied);
+      if (!supplied || expectedBuf.length !== suppliedBuf.length || !crypto.timingSafeEqual(expectedBuf, suppliedBuf)) {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ ok: false, error: 'Invalid postback authentication' }));
+      }
+      const body = await readJsonBody(req);
+      const result = attributionStore.recordConfirmedReconciliation({
+        transactionId: body?.transactionId,
+        eventKind: body?.eventKind || 'SALE',
+        offerSlug: body?.offerSlug || 'direct',
+        campaignId: body?.campaignId || null,
+        amountUsd: Number(body?.amountUsd || 0),
+        source: 'PROVIDER_POSTBACK'
+      });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: true, ...result }));
+    } catch (err) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+  }
+
+  // POST /api/attribution/reconcile -> Explicit admin-confirmed commission/refund reconciliation
+  if (req.method === 'POST' && pathname === '/api/attribution/reconcile') {
+    try {
+      webinarEngine.requireAdminAuth(req, { requiredPermission: 'webinar:write' });
+      const body = await readJsonBody(req);
+      const result = attributionStore.recordConfirmedReconciliation({
+        transactionId: body?.transactionId,
+        eventKind: body?.eventKind || 'SALE',
+        offerSlug: body?.offerSlug || 'direct',
+        campaignId: body?.campaignId || null,
+        amountUsd: Number(body?.amountUsd || 0),
+        source: 'ADMIN_CONFIRMED_IMPORT'
+      });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: true, ...result }));
+    } catch (err) {
+      res.writeHead(err.statusCode || 400, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+  }
+
+  // GET /api/prediction/attribution -> Return revenue attribution metrics across prediction campaigns & first-party offers
   if (req.method === 'GET' && pathname === '/api/prediction/attribution') {
     try {
       let state = { opportunities: [], campaignDrafts: [] };
       if (fs.existsSync(PREDICTION_STATE_PATH)) {
         state = JSON.parse(fs.readFileSync(PREDICTION_STATE_PATH, 'utf8'));
       }
+      const firstParty = attributionStore.getSnapshot();
+      const postbackConfigured = Boolean(process.env.AFFILIATE_POSTBACK_SECRET || process.env.CLICKBANK_INS_SECRET);
 
-      // Compute aggregate attribution metrics across prediction campaigns
+      // Compute aggregate attribution metrics across prediction campaigns + first-party store
       // Unpublished campaigns strictly have 0 visits, 0 clicks, 0 sales, and $0.00 commissions.
-      // Never synthesize or invent transaction records.
+      // Confirmed commissions and refunds come strictly from authenticated postbacks or explicit admin imports.
       const campaigns = (state.campaignDrafts || []).map((draft) => {
         const isPublished = draft.status === 'PUBLISHED';
-        const visits = isPublished ? (Number(draft.actualVisits) || 0) : 0;
-        const leads = isPublished ? (Number(draft.actualLeads) || 0) : 0;
-        const clicks = isPublished ? (Number(draft.actualClicks) || 0) : 0;
-        const confirmedSales = isPublished ? (Number(draft.actualSales) || 0) : 0;
-        const confirmedCommissionsUsd = isPublished ? (Number(draft.actualCommissionsUsd) || 0.0) : 0.0;
-        const refundsCount = isPublished ? (Number(draft.actualRefundsCount) || 0) : 0;
-        const refundsUsd = isPublished ? (Number(draft.actualRefundsUsd) || 0.0) : 0.0;
+        const fp = firstParty.byCampaign?.[draft.campaignId] || {};
+        const visits = isPublished ? Math.max(Number(draft.actualVisits) || 0, Number(fp.visits) || 0) : 0;
+        const leads = isPublished ? Math.max(Number(draft.actualLeads) || 0, Number(fp.optIns) || 0) : 0;
+        const clicks = isPublished ? Math.max(Number(draft.actualClicks) || 0, Number(fp.affiliateClicks) || 0) : 0;
+        const confirmedSales = isPublished ? Math.max(Number(draft.actualSales) || 0, Number(fp.confirmedSales) || 0) : 0;
+        const confirmedCommissionsUsd = isPublished ? Math.max(Number(draft.actualCommissionsUsd) || 0.0, Number(fp.confirmedCommissionsUsd) || 0.0) : 0.0;
+        const refundsCount = isPublished ? Math.max(Number(draft.actualRefundsCount) || 0, Number(fp.refundsCount) || 0) : 0;
+        const refundsUsd = isPublished ? Math.max(Number(draft.actualRefundsUsd) || 0.0, Number(fp.refundsUsd) || 0.0) : 0.0;
         const netRevenueUsd = isPublished
           ? (draft.actualNetRevenueUsd !== undefined ? Number(draft.actualNetRevenueUsd) || 0.0 : Math.max(0, confirmedCommissionsUsd - refundsUsd))
           : 0.0;
         const ctrDisplay = visits > 0 ? `${((clicks / visits) * 100).toFixed(1)}%` : 'No data';
         const optInRateDisplay = visits > 0 ? `${((leads / visits) * 100).toFixed(1)}%` : 'No data';
         const epc = clicks > 0 ? Number((netRevenueUsd / clicks).toFixed(2)) : 0.0;
-        const epcDisplay = clicks > 0 ? `$${epc.toFixed(2)}` : 'No data';
+        const epcDisplay = clicks > 0 && confirmedSales > 0 ? `$${epc.toFixed(2)}` : 'No data';
 
         return {
           campaignId: draft.campaignId,
@@ -1169,18 +1320,27 @@ Sitemap: https://${host}/sitemap.xml
         };
       });
 
-      const totalVisits = campaigns.reduce((sum, c) => sum + c.visits, 0);
-      const totalLeads = campaigns.reduce((sum, c) => sum + c.leads, 0);
-      const totalAffiliateClicks = campaigns.reduce((sum, c) => sum + c.clicks, 0);
-      const confirmedSalesCount = campaigns.reduce((sum, c) => sum + c.confirmedSales, 0);
-      const confirmedCommissionsUsd = campaigns.reduce((sum, c) => sum + c.confirmedCommissionsUsd, 0.0);
-      const totalRefundsCount = campaigns.reduce((sum, c) => sum + c.refundsCount, 0);
-      const refundLossUsd = campaigns.reduce((sum, c) => sum + c.refundsUsd, 0.0);
-      const netRevenueUsd = campaigns.reduce((sum, c) => sum + c.netRevenueUsd, 0.0);
+      const offerBuckets = Object.values(firstParty.byOffer || {});
+      const offerVisits = offerBuckets.reduce((sum, b) => sum + (Number(b.visits) || 0), 0);
+      const offerLeads = offerBuckets.reduce((sum, b) => sum + (Number(b.optIns) || 0), 0);
+      const offerClicks = offerBuckets.reduce((sum, b) => sum + (Number(b.affiliateClicks) || 0), 0);
+      const offerSales = offerBuckets.reduce((sum, b) => sum + (Number(b.confirmedSales) || 0), 0);
+      const offerCommUsd = offerBuckets.reduce((sum, b) => sum + (Number(b.confirmedCommissionsUsd) || 0), 0);
+      const offerRefundsCount = offerBuckets.reduce((sum, b) => sum + (Number(b.refundsCount) || 0), 0);
+      const offerRefundsUsd = offerBuckets.reduce((sum, b) => sum + (Number(b.refundsUsd) || 0), 0);
+
+      const totalVisits = campaigns.reduce((sum, c) => sum + c.visits, 0) + offerVisits;
+      const totalLeads = campaigns.reduce((sum, c) => sum + c.leads, 0) + offerLeads;
+      const totalAffiliateClicks = campaigns.reduce((sum, c) => sum + c.clicks, 0) + offerClicks;
+      const confirmedSalesCount = campaigns.reduce((sum, c) => sum + c.confirmedSales, 0) + offerSales;
+      const confirmedCommissionsUsd = Number((campaigns.reduce((sum, c) => sum + c.confirmedCommissionsUsd, 0.0) + offerCommUsd).toFixed(2));
+      const totalRefundsCount = campaigns.reduce((sum, c) => sum + c.refundsCount, 0) + offerRefundsCount;
+      const refundLossUsd = Number((campaigns.reduce((sum, c) => sum + c.refundsUsd, 0.0) + offerRefundsUsd).toFixed(2));
+      const netRevenueUsd = Math.max(0, Number((confirmedCommissionsUsd - refundLossUsd).toFixed(2)));
       const leadConversionRate = totalVisits > 0 ? `${((totalLeads / totalVisits) * 100).toFixed(1)}%` : 'No data';
       const clickThroughRate = totalVisits > 0 ? `${((totalAffiliateClicks / totalVisits) * 100).toFixed(1)}%` : 'No data';
-      const averageEpc = totalAffiliateClicks > 0 ? Number((netRevenueUsd / totalAffiliateClicks).toFixed(2)) : 0.0;
-      const averageEpcDisplay = totalAffiliateClicks > 0 ? `$${averageEpc.toFixed(2)}` : 'No data';
+      const averageEpc = totalAffiliateClicks > 0 && confirmedSalesCount > 0 ? Number((netRevenueUsd / totalAffiliateClicks).toFixed(2)) : 0.0;
+      const averageEpcDisplay = totalAffiliateClicks > 0 && confirmedSalesCount > 0 ? `$${averageEpc.toFixed(2)}` : 'No data';
 
       const attribution = {
         totalVisits,
@@ -1195,6 +1355,9 @@ Sitemap: https://${host}/sitemap.xml
         netRevenueUsd,
         averageEpc,
         averageEpcDisplay,
+        reconciliationConfigured: postbackConfigured,
+        reconciliationMode: postbackConfigured ? 'PROVIDER_POSTBACK_READY' : (firstParty.reconciliationMode || 'UNCONFIGURED'),
+        byOffer: firstParty.byOffer || {},
         campaigns
       };
 
@@ -2688,6 +2851,16 @@ Sitemap: https://${host}/sitemap.xml
         res.writeHead(brevoRes.status, { 'Content-Type': 'application/json' });
         return res.end(JSON.stringify({ ok: false, error: brevoData.message || 'Brevo API error' }));
       }
+
+      try {
+        const emailHash = crypto.createHash('sha256').update(cleanEmail).digest('hex');
+        attributionStore.recordFirstPartyEvent({
+          eventType: 'opt_in',
+          offerSlug: offer.slug || offerSlug || 'viral-traffic-matrix',
+          campaignId: null,
+          actorDiscriminator: emailHash
+        });
+      } catch (_) {}
 
       const welcomeResult = await sendOrScheduleBrevoEmail(cleanEmail, welcomeTemplateId);
       const delays = [24, 48, 70];

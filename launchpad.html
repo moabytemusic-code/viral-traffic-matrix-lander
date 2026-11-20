@@ -2444,9 +2444,10 @@ async function broadcastNewLaunch() {
           document.getElementById('attrOptIns').textContent = `${(a.totalLeads || 0).toLocaleString()} (${optInRate})`;
           const ctrLabel = a.totalVisits > 0 ? `${a.clickThroughRate} CTR` : 'No data';
           document.getElementById('attrClicks').textContent = `${(a.totalAffiliateClicks || 0).toLocaleString()} (${ctrLabel})`;
-          document.getElementById('attrCommissions').textContent = `$${(a.confirmedCommissionsUsd || 0).toFixed(2)}`;
-          document.getElementById('attrRefunds').textContent = `${a.totalRefundsCount || 0} ($${(a.refundLossUsd || 0).toFixed(2)})`;
-          document.getElementById('attrEpc').textContent = a.totalAffiliateClicks > 0 ? `$${(a.averageEpc || 0).toFixed(2)}` : 'No data';
+          const hasConfirmed = (a.confirmedSalesCount || 0) > 0 || (a.totalRefundsCount || 0) > 0 || a.reconciliationConfigured;
+          document.getElementById('attrCommissions').textContent = hasConfirmed ? `$${(a.confirmedCommissionsUsd || 0).toFixed(2)}` : 'No data';
+          document.getElementById('attrRefunds').textContent = hasConfirmed ? `${a.totalRefundsCount || 0} ($${(a.refundLossUsd || 0).toFixed(2)})` : 'No data';
+          document.getElementById('attrEpc').textContent = (a.totalAffiliateClicks > 0 && (a.confirmedSalesCount || 0) > 0) ? `$${(a.averageEpc || 0).toFixed(2)}` : 'No data';
 
           const container = document.getElementById('attributionTable');
           if (container && a.campaigns) {
