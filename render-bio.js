@@ -194,6 +194,7 @@ function renderBioPage(bioData = {}, host = 'traffic.aisimplesystem.com', query 
   <meta property="og:description" content="${escapeHtml(bioData.bio || channelName)}"/>
   <meta property="og:type" content="website"/>
   <meta property="og:url" content="https://${host}/bio/${bioData.slug}"/>
+  <link rel="canonical" href="https://${host}/bio/${bioData.slug}"/>
   <meta name="theme-color" content="#020617"/>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">

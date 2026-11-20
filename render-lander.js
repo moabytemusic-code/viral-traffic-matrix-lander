@@ -86,23 +86,32 @@ function renderOfferLander(offer) {
     { title: 'Scale Traffic & Leads Automatically', desc: 'Turn every visitor into compounding viral reach and automated email subscribers.' }
   ];
 
-  // Try to find video: 1) explicit offer.videoUrl, 2) local Remotion commercial, 3) viralForgeJob
+  // Try to find video: 1) explicit offer.videoUrl, 2) exact local commercial for this offer, 3) viralForgeJob
   let videoPreviewUrl = offer.videoUrl || null;
   if (!videoPreviewUrl) {
     const candidateFiles = [
       `/videos/${offer.slug}-commercial.mp4`,
       `/videos/${offer.slug.replace(/-/g, '')}-commercial.mp4`,
       `/videos/${offer.slug}-angle-1.mp4`,
-      offer.slug.includes('ai') ? `/videos/ai-visibility-engine-commercial.mp4` : null,
-      offer.slug.includes('ai') ? `/videos/ai-commercial.mp4` : null,
-      offer.slug.includes('traffic') || offer.slug.includes('matrix') ? `/videos/viral-traffic-matrix-commercial.mp4` : null,
-      offer.slug.includes('water') || offer.slug.includes('power') ? `/videos/power-commercial.mp4` : null,
-      offer.slug.includes('dog') ? `/videos/dog-enrichment-commercial.mp4` : null,
-      offer.slug.includes('card') || offer.slug.includes('bellver') ? `/videos/bellver-commercial.mp4` : null,
-      offer.slug.includes('trade') || offer.slug.includes('prop') ? `/videos/prop-trading-commercial.mp4` : null,
-      offer.slug.includes('sleep') ? `/videos/yusleep-commercial.mp4` : null,
-      `/videos/viral-traffic-matrix-commercial.mp4`
-    ].filter(Boolean);
+      `/videos/${offer.slug}.mp4`
+    ];
+
+    // Explicit legacy mappings for original offers (exact slug match only, no fuzzy cross-contamination)
+    const legacySlugMap = {
+      'viral-traffic-matrix': '/videos/viral-traffic-matrix-commercial.mp4',
+      'matrix': '/videos/matrix-commercial.mp4',
+      'ai-visibility-engine': '/videos/ai-visibility-engine-commercial.mp4',
+      'dog-enrichment': '/videos/dog-enrichment-commercial.mp4',
+      'home-power': '/videos/home-power-commercial.mp4',
+      'prop-trading': '/videos/prop-trading-commercial.mp4',
+      'yusleep': '/videos/yusleep-commercial.mp4',
+      'bellver-card': '/videos/bellver-commercial.mp4',
+      'liver-reset': '/videos/liver-reset-commercial.mp4'
+    };
+    if (legacySlugMap[offer.slug]) {
+      candidateFiles.push(legacySlugMap[offer.slug]);
+    }
+
     for (const c of candidateFiles) {
       if (fs.existsSync(path.join(__dirname, 'public', c))) {
         videoPreviewUrl = c;
@@ -985,6 +994,7 @@ function renderOfferLander(offer) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="canonical" href="https://traffic.aisimplesystem.com/o/${escapeHtml(offer.slug)}" />
   <title>${escapeHtml(offer.name)} — ${escapeHtml(offer.badge || 'Free Instant Access')}</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">

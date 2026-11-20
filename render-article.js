@@ -418,6 +418,7 @@ function renderArticle(article, options = {}) {
   <meta property="og:type" content="article">
   <meta property="og:image" content="https://${reqHost}${article.thumbnailUrl}">
   <meta property="og:url" content="https://${reqHost}/guides/${article.slug}">
+  <link rel="canonical" href="https://${reqHost}/guides/${article.slug}">
   <meta name="twitter:card" content="summary_large_image">
 
   <!-- Schema.org Structured Data for Googlebot Rapid Indexing -->

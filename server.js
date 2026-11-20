@@ -153,6 +153,7 @@ const VANITY_ALIASES = {
   freeze: 'winter-freeze',
   'winter-freeze': 'winter-freeze',
   matrix: 'viral-traffic-matrix',
+  'ai-visibility-engine': 'viral-traffic-matrix',
   viral: 'viral-traffic-matrix',
   traffic: 'viral-traffic-matrix',
   free: 'viral-traffic-matrix',
@@ -544,6 +545,13 @@ const server = http.createServer(async (req, res) => {
     const host = req.headers.host || 'traffic.aisimplesystem.com';
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     return res.end(renderTermsOfService(host));
+  }
+
+  // GET /favicon.ico -> Prevent Googlebot 404 crawl errors on favicon
+  if ((req.method === 'GET' || req.method === 'HEAD') && pathname === '/favicon.ico') {
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#0f172a"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-size="36">⚡</text></svg>';
+    res.writeHead(200, { 'Content-Type': 'image/svg+xml', 'Cache-Control': 'public, max-age=86400' });
+    return res.end(req.method === 'HEAD' ? '' : svg);
   }
 
   // GET /robots.txt -> Standard Search Engine & AI Crawler Directives
